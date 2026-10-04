@@ -1,0 +1,96 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  color: #172033;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 6%;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #172033;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.container {
+  width: 92%;
+  max-width: 1100px;
+  margin: 30px auto;
+}
+
+.hero {
+  min-height: 80vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.hero h1 {
+  font-size: clamp(32px, 8vw, 60px);
+}
+
+.btn {
+  display: inline-block;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: #16803c;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  margin: 15px 0;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px #00000010;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.grid .card {
+  text-decoration: none;
+  color: #172033;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccd4df;
+  border-radius: 8px;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
