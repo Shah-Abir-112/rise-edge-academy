@@ -138,16 +138,33 @@ navItems.forEach((item) => {
         const sectionName =
             item.dataset.section;
 
-
         if (!sectionName) {
             return;
         }
 
 
+        /*
+         * Students is now a separate module.
+         * Open the dedicated Students page.
+         */
+        if (sectionName === "students") {
+
+            window.location.href =
+                "./pages/students.html";
+
+            return;
+        }
+
+
+        /*
+         * Other modules will remain inside
+         * the admin shell until their
+         * dedicated pages are created.
+         */
+
         showSection(sectionName);
 
 
-        // Update URL hash
         window.history.replaceState(
             null,
             "",
@@ -157,6 +174,7 @@ navItems.forEach((item) => {
     });
 
 });
+
 
 
 /* =========================
