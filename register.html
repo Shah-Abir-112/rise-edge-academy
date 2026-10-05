@@ -1,1 +1,176 @@
-<!doctype html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Register</title><link rel="stylesheet" href="css/style.css"></head><body><main class="card"><h1>Rise Edge Academy</h1><h2>Create Account</h2><form id="registerForm"><input placeholder="Full name" required><input type="email" placeholder="Email" required><input type="password" placeholder="Password (6+ characters)" minlength="6" required><select><option>Student</option><option>Teacher</option></select><button class="btn">Register</button></form><p id="msg"></p><a href="login.html">Back to login</a></main><script type="module" src="js/auth.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Register - Rise Edge Academy</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="navbar">
+
+  <a href="index.html" class="brand">
+
+    <span class="brand-icon">R</span>
+
+    <span>Rise Edge Academy</span>
+
+  </a>
+
+  <a href="index.html">Home</a>
+
+</header>
+
+
+
+<main class="container">
+
+
+  <div
+    class="card"
+    style="max-width:480px;margin:70px auto;"
+  >
+
+    <h1>Create Account</h1>
+
+    <p
+      style="color:#64748b;margin:10px 0 25px;"
+    >
+      Join Rise Edge Academy today.
+    </p>
+
+
+    <form id="registerForm">
+
+
+      <input
+        type="email"
+        id="registerEmail"
+        placeholder="Email address"
+        required
+      >
+
+
+      <input
+        type="password"
+        id="registerPassword"
+        placeholder="Password (minimum 6 characters)"
+        minlength="6"
+        required
+      >
+
+
+      <input
+        type="password"
+        id="confirmPassword"
+        placeholder="Confirm password"
+        minlength="6"
+        required
+      >
+
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+      >
+        Create Account
+      </button>
+
+
+    </form>
+
+
+    <p
+      id="registerMessage"
+      style="margin-top:15px;"
+    ></p>
+
+
+    <p
+      style="margin-top:20px;text-align:center;"
+    >
+      Already have an account?
+      <a href="login.html">Login</a>
+    </p>
+
+
+  </div>
+
+
+</main>
+
+
+
+<script type="module">
+
+  import {
+    registerUser
+  } from "./js/auth.js";
+
+
+  const registerForm =
+    document.getElementById("registerForm");
+
+
+  registerForm.addEventListener(
+    "submit",
+    async (event) => {
+
+      event.preventDefault();
+
+
+      const email =
+        document
+          .getElementById("registerEmail")
+          .value
+          .trim();
+
+
+      const password =
+        document
+          .getElementById("registerPassword")
+          .value;
+
+
+      const confirmPassword =
+        document
+          .getElementById("confirmPassword")
+          .value;
+
+
+      const message =
+        document.getElementById("registerMessage");
+
+
+      if (password !== confirmPassword) {
+
+        message.textContent =
+          "Passwords do not match.";
+
+        return;
+      }
+
+
+      await registerUser(email, password);
+
+    }
+  );
+
+</script>
+
+
+</body>
+</html>
