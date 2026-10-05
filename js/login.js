@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
 
@@ -14,7 +14,6 @@ form.addEventListener("submit", async (event) => {
   message.textContent = "Logging in...";
 
   try {
-    // Firebase Authentication
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
@@ -23,57 +22,57 @@ form.addEventListener("submit", async (event) => {
 
     const user = userCredential.user;
 
-    // Get user's profile from Firestore
     const userDocRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
       message.textContent = "User profile not found.";
-      await auth.signOut();
+      await signOut(auth);
       return;
     }
 
     const userData = userDoc.data();
 
-    // Check account status
-    if (userData.status !== "active") {
+    const role = String(userData.role || "").trim().toLowerCase();
+    const status = String(userData.status || "").trim().toLowerCase();
+
+    console.log("UID:", user.uid);
+    console.log("Role:", role);
+    console.log("Status:", status);
+
+    if (status !== "active") {
       message.textContent = "Your account is not active.";
-      await auth.signOut();
+      await signOut(auth);
       return;
     }
 
-    // Save basic user information
     localStorage.setItem(
       "riseEdgeUser",
       JSON.stringify({
         uid: user.uid,
         email: user.email,
-        name: userData.name,
-        role: userData.role
+        name: userData.name || "",
+        role: role
       })
     );
 
     message.textContent = "Login successful!";
 
-    // Role-based redirect
     setTimeout(() => {
-      if (userData.role === "student") {
+      if (role === "student") {
         window.location.href = "student/index.html";
-      } 
-      else if (userData.role === "teacher") {
+      } else if (role === "teacher") {
         window.location.href = "teacher/index.html";
-      } 
-      else if (userData.role === "admin") {
+      } else if (role === "admin") {
         window.location.href = "admin/index.html";
-      } 
-      else {
+      } else {
         message.textContent = "Invalid user role.";
-        auth.signOut();
+        signOut(auth);
       }
     }, 500);
 
   } catch (error) {
-    console.error(error);
+    console.error("LOGIN ERROR:", error);
 
     if (
       error.code === "auth/invalid-credential" ||
@@ -81,11 +80,9 @@ form.addEventListener("submit", async (event) => {
       error.code === "auth/user-not-found"
     ) {
       message.textContent = "Incorrect email or password.";
-    } 
-    else if (error.code === "auth/invalid-email") {
+    } else if (error.code === "auth/invalid-email") {
       message.textContent = "Please enter a valid email.";
-    } 
-    else {
+    } else {
       message.textContent = error.message;
     }
   }
