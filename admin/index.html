@@ -1,1026 +1,776 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0f766e">
-<title>Rise Edge Academy — Admin Portal</title>
-
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --p:#0f766e;
-  --p2:#115e59;
-  --bg:#f5f7f8;
-  --card:#fff;
-  --text:#102a2a;
-  --muted:#6b7c7c;
-  --line:#e3e9e9;
-  --shadow:0 8px 30px rgba(16,42,42,.07);
-}
-
-body{
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-}
-
-button{
-  font:inherit;
-  border:0;
-  cursor:pointer;
-}
-
-.app{
-  display:flex;
-  min-height:100vh;
-}
-
-.sidebar{
-  width:265px;
-  background:#fff;
-  border-right:1px solid var(--line);
-  position:fixed;
-  inset:0 auto 0 0;
-  padding:22px 15px;
-  z-index:20;
-  overflow:auto;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  padding:5px 10px 24px;
-}
-
-.logo{
-  width:43px;
-  height:43px;
-  border-radius:13px;
-  background:linear-gradient(135deg,#0f766e,#14b8a6);
-  display:grid;
-  place-items:center;
-  color:#fff;
-  font-weight:900;
-  font-size:20px;
-}
-
-.brand h1{
-  font-size:17px;
-  line-height:1.1;
-}
-
-.brand small{
-  color:var(--muted);
-  font-size:11px;
-}
-
-.nav{
-  display:grid;
-  gap:5px;
-}
-
-.nav-item{
-  background:transparent;
-  text-align:left;
-  padding:12px 13px;
-  border-radius:11px;
-  color:#607070;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  width:100%;
-}
-
-.nav-item span{
-  flex:1;
-  font-size:13px;
-}
-
-.nav-item b{
-  font-size:15px;
-  font-weight:650;
-}
-
-.nav-item:hover,
-.nav-item.active{
-  background:#e8f5f3;
-  color:var(--p);
-}
-
-.side-bottom{
-  position:absolute;
-  bottom:18px;
-  left:15px;
-  right:15px;
-}
-
-.logout{
-  width:100%;
-  padding:11px;
-  border-radius:10px;
-  background:#fff2f2;
-  color:#c24141;
-  font-weight:700;
-}
-
-.main{
-  margin-left:265px;
-  width:calc(100% - 265px);
-  padding:26px 32px;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  margin-bottom:25px;
-}
-
-.mobile-menu{
-  display:none;
-}
-
-.welcome h2{
-  font-size:25px;
-}
-
-.welcome p{
-  color:var(--muted);
-  margin-top:5px;
-  font-size:13px;
-}
-
-.avatar{
-  width:43px;
-  height:43px;
-  border-radius:50%;
-  background:#d8f1ed;
-  color:var(--p);
-  display:grid;
-  place-items:center;
-  font-weight:800;
-}
-
-.userbox{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.userbox small{
-  display:block;
-  color:var(--muted);
-  font-size:11px;
-}
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.stat,
-.panel,
-.empty-card,
-.request-card{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:15px;
-  box-shadow:var(--shadow);
-}
-
-.stat{
-  padding:17px;
-  display:flex;
-  gap:13px;
-  align-items:center;
-}
-
-.stat-icon{
-  width:40px;
-  height:40px;
-  border-radius:11px;
-  background:#edf8f6;
-  display:grid;
-  place-items:center;
-  font-size:18px;
-}
-
-.stat small{
-  display:block;
-  color:var(--muted);
-  font-size:11px;
-  margin-bottom:3px;
-}
-
-.stat strong{
-  font-size:21px;
-}
-
-.grid-2{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:18px;
-}
-
-.panel{
-  padding:19px;
-}
-
-.panel-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:13px;
-}
-
-.panel-title h3{
-  font-size:15px;
-}
-
-.panel-title span{
-  font-size:11px;
-  color:var(--p);
-  font-weight:700;
-}
-
-.list{
-  display:grid;
-}
-
-.list>div{
-  padding:13px 0;
-  border-top:1px solid var(--line);
-}
-
-.list>div:first-child{
-  border-top:0;
-}
-
-.list b{
-  display:block;
-  font-size:13px;
-}
-
-.list small{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:3px;
-  display:block;
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-.page-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:18px;
-}
-
-.page-head h2{
-  font-size:24px;
-}
-
-.page-head p{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:5px;
-}
-
-.primary{
-  background:var(--p);
-  color:#fff;
-  padding:12px 17px;
-  border-radius:10px;
-  font-weight:700;
-}
-
-.primary.small{
-  font-size:12px;
-  padding:10px 14px;
-}
-
-.outline{
-  border:1px solid #b9cecc;
-  background:#fff;
-  color:var(--p);
-  padding:10px 14px;
-  border-radius:9px;
-  font-weight:700;
-}
-
-.empty-card{
-  padding:60px 20px;
-  text-align:center;
-}
-
-.empty-icon{
-  font-size:34px;
-  margin-bottom:10px;
-}
-
-.empty-card h3{
-  font-size:18px;
-}
-
-.empty-card p{
-  color:var(--muted);
-  max-width:500px;
-  margin:8px auto 18px;
-  font-size:13px;
-}
-
-.requests{
-  display:grid;
-  gap:14px;
-}
-
-.request-card{
-  padding:18px;
-}
-
-.request-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:15px;
-}
-
-.request-name{
-  font-size:16px;
-  font-weight:800;
-}
-
-.request-email{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:4px;
-}
-
-.request-info{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:15px;
-}
-
-.info-box{
-  background:#f7faf9;
-  border-radius:9px;
-  padding:10px;
-}
-
-.info-box small{
-  display:block;
-  color:var(--muted);
-  font-size:10px;
-  margin-bottom:4px;
-}
-
-.info-box b{
-  font-size:12px;
-}
-
-.request-actions{
-  display:flex;
-  gap:8px;
-  margin-top:15px;
-}
-
-.approve{
-  background:#0f766e;
-  color:white;
-  padding:9px 14px;
-  border-radius:8px;
-  font-size:12px;
-  font-weight:700;
-}
-
-.reject{
-  background:#fff1f1;
-  color:#c24141;
-  padding:9px 14px;
-  border-radius:8px;
-  font-size:12px;
-  font-weight:700;
-}
-
-.loading{
-  text-align:center;
-  padding:35px;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.no-request{
-  text-align:center;
-  padding:45px 20px;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:15px;
-  color:var(--muted);
-}
-
-.toast{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  background:#102a2a;
-  color:#fff;
-  padding:12px 15px;
-  border-radius:10px;
-  font-size:12px;
-  opacity:0;
-  transform:translateY(10px);
-  transition:.25s;
-  z-index:50;
-}
-
-.toast.show{
-  opacity:1;
-  transform:none;
-}
-
-@media(max-width:900px){
-
-  .sidebar{
-    transform:translateX(-100%);
-    transition:.25s;
-    box-shadow:10px 0 30px rgba(0,0,0,.08);
-  }
-
-  .sidebar.open{
-    transform:none;
-  }
-
-  .main{
-    margin-left:0;
-    width:100%;
-    padding:18px;
-  }
-
-  .mobile-menu{
-    display:grid;
-    place-items:center;
-    width:40px;
-    height:40px;
-    border:1px solid var(--line);
-    border-radius:10px;
-    background:#fff;
-    font-size:20px;
-  }
-
-  .topbar{
-    margin-bottom:20px;
-  }
-
-  .stats{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .grid-2{
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width:520px){
-
-  .stats{
-    gap:9px;
-  }
-
-  .stat{
-    padding:12px;
-  }
-
-  .stat strong{
-    font-size:18px;
-  }
-
-  .stat-icon{
-    width:34px;
-    height:34px;
-  }
-
-  .welcome h2{
-    font-size:20px;
-  }
-
-  .userbox .u-text{
-    display:none;
-  }
-
-  .page-head{
-    align-items:flex-start;
-    gap:10px;
-  }
-
-  .page-head h2{
-    font-size:20px;
-  }
-
-  .request-info{
-    grid-template-columns:1fr;
-  }
-
-  .request-actions{
-    flex-direction:column;
-  }
-
-  .approve,
-  .reject{
-    width:100%;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Portal - Rise Edge Academy</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 260px;
+      background: #111827;
+      color: white;
+      padding: 25px 15px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      font-size: 21px;
+      font-weight: bold;
+      padding: 10px;
+      margin-bottom: 25px;
+    }
+
+    .sidebar-brand span {
+      color: #60a5fa;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 13px 15px;
+      margin: 5px 0;
+      border-radius: 8px;
+      color: #d1d5db;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: #2563eb;
+      color: white;
+    }
+
+    .logout-btn {
+      margin-top: 25px;
+      width: 100%;
+      border: none;
+      padding: 13px;
+      border-radius: 8px;
+      background: #dc2626;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    /* MAIN */
+
+    .main-content {
+      margin-left: 260px;
+      width: calc(100% - 260px);
+      padding: 30px;
+    }
+
+    .topbar {
+      background: white;
+      padding: 18px 22px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    .admin-email {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    /* SECTIONS */
+
+    .page-section {
+      display: none;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    /* CARDS */
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+
+    .stat-card h3 {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .stat-card .number {
+      font-size: 30px;
+      font-weight: bold;
+      margin-top: 8px;
+      color: #111827;
+    }
+
+    .card-box {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+
+    .card-box h2 {
+      margin-top: 0;
+    }
+
+    /* REQUEST */
+
+    .request-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .request-card h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .request-info {
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .request-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .approve-btn,
+    .reject-btn {
+      border: none;
+      padding: 10px 18px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+    }
+
+    .approve-btn {
+      background: #16a34a;
+    }
+
+    .reject-btn {
+      background: #dc2626;
+    }
+
+    /* TABLE */
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 13px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+    }
+
+    /* PROFILE */
+
+    .profile-row {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .profile-details p {
+      margin: 8px 0;
+    }
+
+    /* EMPTY */
+
+    .empty {
+      padding: 20px;
+      text-align: center;
+      color: #6b7280;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    /* MOBILE */
+
+    .mobile-menu {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+
+      .sidebar {
+        width: 220px;
+      }
+
+      .main-content {
+        margin-left: 220px;
+        width: calc(100% - 220px);
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 650px) {
+
+      .sidebar {
+        display: none;
+      }
+
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 15px;
+      }
+
+      .mobile-menu {
+        display: block;
+        background: #111827;
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        cursor: pointer;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .profile-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="app">
+<div class="admin-layout">
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+  <!-- SIDEBAR -->
 
-  <div class="brand">
-    <div class="logo">RE</div>
-    <div>
-      <h1>Rise Edge Academy</h1>
-      <small>Admin Portal</small>
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+      <span>R</span> Rise Edge Academy
     </div>
-  </div>
 
-  <nav class="nav">
+    <a class="nav-item active" data-section="dashboard">
+      📊 Dashboard
+    </a>
 
-    <button class="nav-item" data-page="dashboard">
-      <span>Dashboard</span>
-      <b>▦</b>
+    <a class="nav-item" data-section="profile">
+      👤 Admin Profile
+    </a>
+
+    <a class="nav-item" data-section="students">
+      🎓 Students
+    </a>
+
+    <a class="nav-item" data-section="teachers">
+      👨‍🏫 Teachers
+    </a>
+
+    <a class="nav-item" data-section="admissions">
+      📝 Admissions / Requests
+    </a>
+
+    <a class="nav-item" data-section="payments">
+      💳 Tuition Management
+    </a>
+
+    <a class="nav-item" data-section="salary">
+      💰 Teacher Salary
+    </a>
+
+    <a class="nav-item" data-section="notices">
+      📢 Notices
+    </a>
+
+    <a class="nav-item" data-section="messages">
+      💬 Messages / Monitoring
+    </a>
+
+    <a class="nav-item" data-section="settings">
+      ⚙️ Settings
+    </a>
+
+    <button class="logout-btn" id="logoutBtn">
+      Logout
     </button>
 
-    <button class="nav-item" data-page="profile">
-      <span>Admin Profile</span>
-      <b>👤</b>
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main-content">
+
+    <button class="mobile-menu" id="mobileMenu">
+      ☰ Menu
     </button>
 
-    <button class="nav-item" data-page="students">
-      <span>Students</span>
-      <b>👥</b>
-    </button>
 
-    <button class="nav-item" data-page="teachers">
-      <span>Teachers</span>
-      <b>👨‍🏫</b>
-    </button>
+    <!-- TOPBAR -->
 
-    <button class="nav-item" data-page="admissions">
-      <span>Admissions / Requests</span>
-      <b>📋</b>
-    </button>
+    <div class="topbar">
 
-    <button class="nav-item" data-page="fees">
-      <span>Tuition Management</span>
-      <b>৳</b>
-    </button>
+      <div>
+        <h1 id="pageTitle">Admin Dashboard</h1>
+      </div>
 
-    <button class="nav-item" data-page="salary">
-      <span>Teacher Salary</span>
-      <b>💰</b>
-    </button>
+      <div class="admin-email" id="adminEmail">
+        Loading...
+      </div>
 
-    <button class="nav-item" data-page="notices">
-      <span>Notices</span>
-      <b>📢</b>
-    </button>
-
-    <button class="nav-item" data-page="messages">
-      <span>Messages / Monitoring</span>
-      <b>💬</b>
-    </button>
-
-    <button class="nav-item" data-page="settings">
-      <span>Settings</span>
-      <b>⚙</b>
-    </button>
-
-  </nav>
-
-  <div class="side-bottom">
-    <button class="logout" id="logoutBtn">
-      ↪ &nbsp; Logout
-    </button>
-  </div>
-
-</aside>
+    </div>
 
 
-<!-- MAIN -->
-<main class="main">
+    <!-- ================= DASHBOARD ================= -->
 
-  <!-- TOP BAR -->
-  <div class="topbar">
+    <section id="dashboard" class="page-section active">
 
-    <div style="display:flex;align-items:center;gap:11px">
+      <div class="stats-grid">
 
-      <button class="mobile-menu" id="menuBtn">
-        ☰
-      </button>
+        <div class="stat-card">
+          <h3>Total Students</h3>
+          <div class="number" id="totalStudents">0</div>
+        </div>
 
-      <div class="welcome">
-        <h2>
-          Good afternoon,
-          <span id="name">Admin</span> 👋
-        </h2>
+        <div class="stat-card">
+          <h3>Total Teachers</h3>
+          <div class="number" id="totalTeachers">0</div>
+        </div>
+
+        <div class="stat-card">
+          <h3>Pending Requests</h3>
+          <div class="number" id="pendingCount">0</div>
+        </div>
+
+        <div class="stat-card">
+          <h3>Monthly Collection</h3>
+          <div class="number" id="monthlyCollection">
+            ৳0
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="card-box">
+
+        <h2>Pending Actions</h2>
+
+        <p id="pendingStudentText">
+          Loading student requests...
+        </p>
+
+        <p id="pendingTeacherText">
+          Loading teacher requests...
+        </p>
+
+      </div>
+
+
+      <div class="card-box">
+
+        <h2>Active Students</h2>
+
+        <div id="overviewStudents" class="empty">
+          Loading students...
+        </div>
+
+      </div>
+
+
+      <div class="card-box">
+
+        <h2>Active Teachers</h2>
+
+        <div id="overviewTeachers" class="empty">
+          Loading teachers...
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= PROFILE ================= -->
+
+    <section id="profile" class="page-section">
+
+      <div class="card-box">
+
+        <h2>Admin Profile</h2>
+
+        <div class="profile-row">
+
+          <div class="profile-avatar" id="profileAvatar">
+            A
+          </div>
+
+          <div class="profile-details">
+
+            <p>
+              <strong>Name:</strong>
+              <span id="profileName">Loading...</span>
+            </p>
+
+            <p>
+              <strong>Email:</strong>
+              <span id="profileEmail">Loading...</span>
+            </p>
+
+            <p>
+              <strong>Admin ID:</strong>
+              <span id="profileAdminId">Loading...</span>
+            </p>
+
+            <p>
+              <strong>Role:</strong>
+              <span id="profileRole">Admin</span>
+            </p>
+
+            <p>
+              <strong>Status:</strong>
+              <span id="profileStatus">Loading...</span>
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= STUDENTS ================= -->
+
+    <section id="students" class="page-section">
+
+      <div class="card-box">
+
+        <h2>Active Students</h2>
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Student ID</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Status</th>
+              </tr>
+
+            </thead>
+
+            <tbody id="studentsTableBody">
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= TEACHERS ================= -->
+
+    <section id="teachers" class="page-section">
+
+      <div class="card-box">
+
+        <h2>Active Teachers</h2>
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Teacher ID</th>
+                <th>Subject</th>
+                <th>Qualification</th>
+                <th>Status</th>
+              </tr>
+
+            </thead>
+
+            <tbody id="teachersTableBody">
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= ADMISSIONS ================= -->
+
+    <section id="admissions" class="page-section">
+
+      <!-- STUDENT REQUESTS -->
+
+      <div class="card-box">
+
+        <h2>Pending Student Registrations</h2>
+
+        <p class="muted">
+          Review and approve or reject student registration requests.
+        </p>
+
+        <div id="requestsList">
+
+          <div class="empty">
+            Loading student requests...
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- TEACHER REQUESTS -->
+
+      <div class="card-box">
+
+        <h2>Pending Teacher Registrations</h2>
+
+        <p class="muted">
+          Review and approve or reject teacher registration requests.
+        </p>
+
+        <div id="teacherRequestsList">
+
+          <div class="empty">
+            Loading teacher requests...
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= PAYMENTS ================= -->
+
+    <section id="payments" class="page-section">
+
+      <div class="card-box">
+
+        <h2>Tuition Management</h2>
 
         <p>
-          Manage. Monitor. Grow.
-          &nbsp;•&nbsp;
-          Strong Basics. Better Results.
+          Manage student tuition payments, pending payments and
+          transaction records.
         </p>
-      </div>
 
-    </div>
-
-    <div class="userbox">
-
-      <div class="u-text">
-        <b id="userName">Admin</b>
-        <small id="userId">Rise Edge Academy</small>
-      </div>
-
-      <div class="avatar" id="avatar">
-        A
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- DASHBOARD -->
-  <section class="page active" id="page-dashboard">
-
-    <div class="stats">
-
-      <div class="stat">
-        <div class="stat-icon">👥</div>
-        <div>
-          <small>Total Students</small>
-          <strong id="totalStudents">0</strong>
-        </div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-icon">👨‍🏫</div>
-        <div>
-          <small>Teachers</small>
-          <strong id="totalTeachers">0</strong>
-        </div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-icon">📋</div>
-        <div>
-          <small>Pending Requests</small>
-          <strong id="pendingCount">0</strong>
-        </div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-icon">৳</div>
-        <div>
-          <small>Monthly Collection</small>
-          <strong id="monthlyCollection">৳0</strong>
-        </div>
-      </div>
-
-    </div>
-
-
-    <div class="grid-2">
-
-      <div class="panel">
-
-        <div class="panel-title">
-          <h3>Pending Actions</h3>
-          <span id="pendingLabel">Live</span>
-        </div>
-
-        <div class="list">
-
-          <div>
-            <b>
-              <span id="pendingTeacherText">0</span>
-              teacher registration requests
-            </b>
-            <small>Needs approval</small>
-          </div>
-
-          <div>
-            <b>
-              <span id="pendingStudentText">0</span>
-              student registration requests
-            </b>
-            <small>Needs review</small>
-          </div>
-
-          <div>
-            <b>Payment management</b>
-            <small>Available in Tuition Management</small>
-          </div>
-
+        <div id="paymentsList" class="empty">
+          Payment management will appear here.
         </div>
 
       </div>
 
-
-      <div class="panel">
-
-        <div class="panel-title">
-          <h3>Academy Overview</h3>
-          <span>Live Firebase</span>
-        </div>
-
-        <div class="list">
-
-          <div>
-            <b>
-              <span id="overviewStudents">0</span>
-              active students
-            </b>
-            <small>Across all classes</small>
-          </div>
-
-          <div>
-            <b>
-              <span id="overviewTeachers">0</span>
-              active teachers
-            </b>
-            <small>Teacher pool</small>
-          </div>
-
-          <div>
-            <b>Firebase Connected</b>
-            <small>Real-time academy data</small>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
+    </section>
 
 
-  <!-- PROFILE -->
-  <section class="page" id="page-profile">
+    <!-- ================= SALARY ================= -->
 
-    <div class="page-head">
+    <section id="salary" class="page-section">
 
-      <div>
-        <h2>Admin Profile</h2>
-        <p>Your account and academic information.</p>
-      </div>
+      <div class="card-box">
 
-    </div>
-
-    <div class="panel">
-
-      <div class="request-info">
-
-        <div class="info-box">
-          <small>Name</small>
-          <b id="profileName">Admin</b>
-        </div>
-
-        <div class="info-box">
-          <small>Email</small>
-          <b id="profileEmail">-</b>
-        </div>
-
-        <div class="info-box">
-          <small>Role</small>
-          <b id="profileRole">Admin</b>
-        </div>
-
-        <div class="info-box">
-          <small>Status</small>
-          <b>Active</b>
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- STUDENTS -->
-  <section class="page" id="page-students">
-
-    <div class="page-head">
-
-      <div>
-        <h2>Students</h2>
-        <p>Active student accounts.</p>
-      </div>
-
-      <button class="primary small" id="refreshStudents">
-        Refresh
-      </button>
-
-    </div>
-
-    <div id="studentsList" class="requests">
-      <div class="loading">
-        Loading students...
-      </div>
-    </div>
-
-  </section>
-
-
-  <!-- TEACHERS -->
-  <section class="page" id="page-teachers">
-
-    <div class="page-head">
-
-      <div>
-        <h2>Teachers</h2>
-        <p>Manage teacher accounts and assignments.</p>
-      </div>
-
-    </div>
-
-    <div id="teachersList" class="requests">
-      <div class="loading">
-        Loading teachers...
-      </div>
-    </div>
-
-  </section>
-
-
-  <!-- ADMISSIONS -->
-  <section class="page" id="page-admissions">
-
-    <div class="page-head">
-
-      <div>
-        <h2>Admissions / Requests</h2>
-        <p>Review pending student registrations.</p>
-      </div>
-
-      <button class="primary small" id="refreshRequests">
-        Refresh
-      </button>
-
-    </div>
-
-    <div id="requestsList" class="requests">
-
-      <div class="loading">
-        Loading pending requests...
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- FEES -->
-  <section class="page" id="page-fees">
-
-    <div class="page-head">
-      <div>
-        <h2>Tuition Management</h2>
-        <p>Monitor student tuition fees and dues.</p>
-      </div>
-    </div>
-
-    <div class="empty-card">
-      <div class="empty-icon">৳</div>
-      <h3>Tuition Management</h3>
-      <p>
-        Payment management will be connected to the
-        Firestore payments collection next.
-      </p>
-    </div>
-
-  </section>
-
-
-  <!-- SALARY -->
-  <section class="page" id="page-salary">
-
-    <div class="page-head">
-      <div>
         <h2>Teacher Salary</h2>
-        <p>Payment and salary information.</p>
+
+        <p>
+          Manage teacher salary and payment records.
+        </p>
+
+        <div class="empty">
+          Teacher salary management will appear here.
+        </div>
+
       </div>
-    </div>
 
-    <div class="empty-card">
-      <div class="empty-icon">💰</div>
-      <h3>Teacher Salary</h3>
-      <p>
-        Teacher salary management will be connected next.
-      </p>
-    </div>
-
-  </section>
+    </section>
 
 
-  <!-- NOTICES -->
-  <section class="page" id="page-notices">
+    <!-- ================= NOTICES ================= -->
 
-    <div class="page-head">
-      <div>
+    <section id="notices" class="page-section">
+
+      <div class="card-box">
+
         <h2>Notices</h2>
-        <p>Important academy announcements.</p>
+
+        <p>
+          Create and manage academy notices for students and teachers.
+        </p>
+
+        <div class="empty">
+          Notice management will appear here.
+        </div>
+
       </div>
-    </div>
 
-    <div class="empty-card">
-      <div class="empty-icon">📢</div>
-      <h3>Notices</h3>
-      <p>
-        Notice creation and publishing will be connected next.
-      </p>
-    </div>
-
-  </section>
+    </section>
 
 
-  <!-- MESSAGES -->
-  <section class="page" id="page-messages">
+    <!-- ================= MESSAGES ================= -->
 
-    <div class="page-head">
-      <div>
+    <section id="messages" class="page-section">
+
+      <div class="card-box">
+
         <h2>Messages / Monitoring</h2>
-        <p>Communication with teachers and academy staff.</p>
+
+        <p>
+          Monitor academy communication and messages.
+        </p>
+
+        <div class="empty">
+          Message monitoring will appear here.
+        </div>
+
       </div>
-    </div>
 
-    <div class="empty-card">
-      <div class="empty-icon">💬</div>
-      <h3>Messages / Monitoring</h3>
-      <p>
-        Real-time messaging will be connected next.
-      </p>
-    </div>
-
-  </section>
+    </section>
 
 
-  <!-- SETTINGS -->
-  <section class="page" id="page-settings">
+    <!-- ================= SETTINGS ================= -->
 
-    <div class="page-head">
-      <div>
+    <section id="settings" class="page-section">
+
+      <div class="card-box">
+
         <h2>Settings</h2>
-        <p>Portal settings and system controls.</p>
+
+        <p>
+          Admin and academy settings.
+        </p>
+
+        <div class="empty">
+          Settings will appear here.
+        </div>
+
       </div>
-    </div>
 
-    <div class="empty-card">
-      <div class="empty-icon">⚙️</div>
-      <h3>Settings</h3>
-      <p>
-        System settings will be connected later.
-      </p>
-    </div>
+    </section>
 
-  </section>
-
-</main>
+  </main>
 
 </div>
 
 
-<div class="toast" id="toast"></div>
+<!-- ================= FIREBASE SCRIPT ================= -->
 
-
-<!-- FIREBASE + ADMIN LOGIC -->
 <script type="module">
 
 import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
 
 import {
   collection,
@@ -1033,117 +783,162 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
+
 import {
   auth,
   db
 } from "../js/firebase-config.js";
 
 
-/* =========================
-   BASIC UI
-========================= */
+
+/* ================= VARIABLES ================= */
+
+let currentAdmin = null;
+
+let pendingStudentTotal = 0;
+let pendingTeacherTotal = 0;
+
+
+
+/* ================= ELEMENTS ================= */
 
 const navItems =
   document.querySelectorAll(".nav-item");
 
-const pages =
-  document.querySelectorAll(".page");
+const sections =
+  document.querySelectorAll(".page-section");
+
+const pageTitle =
+  document.getElementById("pageTitle");
 
 
-function openPage(page){
 
-  navItems.forEach(button => {
+/* ================= NAVIGATION ================= */
 
-    button.classList.toggle(
-      "active",
-      button.dataset.page === page
-    );
+navItems.forEach(item => {
+
+  item.addEventListener("click", () => {
+
+    const target =
+      item.dataset.section;
+
+    navItems.forEach(nav => {
+      nav.classList.remove("active");
+    });
+
+    item.classList.add("active");
+
+    sections.forEach(section => {
+      section.classList.remove("active");
+    });
+
+    document
+      .getElementById(target)
+      .classList.add("active");
+
+
+    const titles = {
+
+      dashboard: "Admin Dashboard",
+
+      profile: "Admin Profile",
+
+      students: "Students",
+
+      teachers: "Teachers",
+
+      admissions: "Admissions / Requests",
+
+      payments: "Tuition Management",
+
+      salary: "Teacher Salary",
+
+      notices: "Notices",
+
+      messages: "Messages / Monitoring",
+
+      settings: "Settings"
+
+    };
+
+
+    pageTitle.textContent =
+      titles[target] || "Admin Portal";
+
+
+    if (window.innerWidth <= 650) {
+      document
+        .getElementById("sidebar")
+        .style.display = "none";
+    }
 
   });
-
-  pages.forEach(section => {
-
-    section.classList.toggle(
-      "active",
-      section.id === "page-" + page
-    );
-
-  });
-
-  document
-    .getElementById("sidebar")
-    .classList.remove("open");
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-
-}
-
-
-navItems.forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => openPage(button.dataset.page)
-  );
 
 });
 
 
-document
-  .querySelector('[data-page="dashboard"]')
-  .classList.add("active");
 
+/* ================= MOBILE MENU ================= */
 
 document
-  .getElementById("menuBtn")
+  .getElementById("mobileMenu")
   .addEventListener("click", () => {
 
-    document
-      .getElementById("sidebar")
-      .classList.toggle("open");
+    const sidebar =
+      document.getElementById("sidebar");
+
+    if (sidebar.style.display === "block") {
+
+      sidebar.style.display = "none";
+
+    } else {
+
+      sidebar.style.display = "block";
+
+    }
 
   });
 
 
-function toast(message){
 
-  const element =
-    document.getElementById("toast");
+/* ================= LOGOUT ================= */
 
-  element.textContent = message;
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async () => {
 
-  element.classList.add("show");
+    try {
 
-  setTimeout(() => {
+      await signOut(auth);
 
-    element.classList.remove("show");
+      window.location.href =
+        "../login.html";
 
-  }, 2500);
+    } catch (error) {
 
-}
+      console.error(error);
+
+    }
+
+  });
 
 
-/* =========================
-   AUTHENTICATION
-========================= */
 
-let currentAdmin = null;
-
+/* ================= AUTH GUARD ================= */
 
 onAuthStateChanged(auth, async (user) => {
 
-  if(!user){
+  if (!user) {
 
-    window.location.href = "../login.html";
+    window.location.href =
+      "../login.html";
 
     return;
+
   }
 
 
-  try{
+  try {
 
     const userRef =
       doc(db, "users", user.uid);
@@ -1152,11 +947,14 @@ onAuthStateChanged(auth, async (user) => {
       await getDoc(userRef);
 
 
-    if(!userSnap.exists()){
+    if (!userSnap.exists()) {
+
+      alert("Admin profile not found.");
 
       await signOut(auth);
 
-      window.location.href = "../login.html";
+      window.location.href =
+        "../login.html";
 
       return;
 
@@ -1167,10 +965,22 @@ onAuthStateChanged(auth, async (user) => {
       userSnap.data();
 
 
-    if(
-      userData.role !== "admin" ||
-      userData.status !== "active"
-    ){
+    const role =
+      String(userData.role || "")
+        .trim()
+        .toLowerCase();
+
+
+    const status =
+      String(userData.status || "")
+        .trim()
+        .toLowerCase();
+
+
+    if (
+      role !== "admin" ||
+      status !== "active"
+    ) {
 
       alert(
         "You are not authorized to access the Admin Portal."
@@ -1178,7 +988,8 @@ onAuthStateChanged(auth, async (user) => {
 
       await signOut(auth);
 
-      window.location.href = "../login.html";
+      window.location.href =
+        "../login.html";
 
       return;
 
@@ -1186,9 +997,13 @@ onAuthStateChanged(auth, async (user) => {
 
 
     currentAdmin = {
-      uid:user.uid,
-      email:user.email,
+
+      uid: user.uid,
+
+      email: user.email,
+
       ...userData
+
     };
 
 
@@ -1198,17 +1013,23 @@ onAuthStateChanged(auth, async (user) => {
 
     listenForPendingStudents();
 
+    listenForPendingTeachers();
+
     listenForActiveStudents();
 
     listenForActiveTeachers();
 
+  }
 
-  }catch(error){
+  catch (error) {
 
-    console.error(error);
+    console.error(
+      "ADMIN AUTH ERROR:",
+      error
+    );
 
     alert(
-      "Unable to load admin profile."
+      "Unable to load admin portal."
     );
 
   }
@@ -1216,118 +1037,146 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 
-/* =========================
-   ADMIN PROFILE
-========================= */
 
-function loadAdminProfile(){
+/* ================= PROFILE ================= */
+
+function loadAdminProfile() {
+
+  if (!currentAdmin) return;
+
+
+  document.getElementById(
+    "adminEmail"
+  ).textContent =
+    currentAdmin.email || "";
+
+
+  document.getElementById(
+    "profileName"
+  ).textContent =
+    currentAdmin.name || "Admin";
+
+
+  document.getElementById(
+    "profileEmail"
+  ).textContent =
+    currentAdmin.email || "";
+
+
+  document.getElementById(
+    "profileAdminId"
+  ).textContent =
+    currentAdmin.adminId || "Not assigned";
+
+
+  document.getElementById(
+    "profileRole"
+  ).textContent =
+    currentAdmin.role || "admin";
+
+
+  document.getElementById(
+    "profileStatus"
+  ).textContent =
+    currentAdmin.status || "active";
+
 
   const name =
-    currentAdmin.name ||
-    currentAdmin.email?.split("@")[0] ||
-    "Admin";
+    currentAdmin.name || "A";
 
 
-  document.getElementById("name")
-    .textContent = name;
-
-  document.getElementById("userName")
-    .textContent = name;
-
-  document.getElementById("userId")
-    .textContent =
-      currentAdmin.adminId ||
-      currentAdmin.email ||
-      "Admin Portal";
-
-  document.getElementById("avatar")
-    .textContent =
-      name.charAt(0).toUpperCase();
-
-
-  document.getElementById("profileName")
-    .textContent = name;
-
-  document.getElementById("profileEmail")
-    .textContent =
-      currentAdmin.email || "-";
-
-  document.getElementById("profileRole")
-    .textContent =
-      currentAdmin.role || "admin";
+  document.getElementById(
+    "profileAvatar"
+  ).textContent =
+    name.charAt(0).toUpperCase();
 
 }
 
 
-/* =========================
-   PENDING STUDENTS
-========================= */
 
-function listenForPendingStudents(){
+/* ================= PENDING TOTAL ================= */
 
-  const usersRef =
-    collection(db, "users");
+function updatePendingTotal() {
+
+  const total =
+    pendingStudentTotal +
+    pendingTeacherTotal;
 
 
-  const pendingQuery =
+  document.getElementById(
+    "pendingCount"
+  ).textContent = total;
+
+
+  document.getElementById(
+    "pendingStudentText"
+  ).textContent =
+    `${pendingStudentTotal} pending student registration(s).`;
+
+
+  document.getElementById(
+    "pendingTeacherText"
+  ).textContent =
+    `${pendingTeacherTotal} pending teacher registration(s).`;
+
+}
+
+
+
+/* ================= PENDING STUDENTS ================= */
+
+function listenForPendingStudents() {
+
+  const q =
     query(
-      usersRef,
+      collection(db, "users"),
       where("role", "==", "student"),
       where("status", "==", "pending")
     );
 
 
   onSnapshot(
-    pendingQuery,
-    (snapshot) => {
+    q,
 
-      const container =
-        document.getElementById("requestsList");
+    snapshot => {
 
-
-      container.innerHTML = "";
-
-
-      const count =
+      pendingStudentTotal =
         snapshot.size;
 
 
-      document.getElementById("pendingCount")
-        .textContent = count;
-
-      document.getElementById("pendingStudentText")
-        .textContent = count;
+      updatePendingTotal();
 
 
-      if(count === 0){
+      const container =
+        document.getElementById(
+          "requestsList"
+        );
 
-        container.innerHTML = `
-          <div class="no-request">
-            <div style="font-size:32px;margin-bottom:10px">
-              ✅
-            </div>
 
-            <b>No pending requests</b>
+      if (snapshot.empty) {
 
-            <p style="margin-top:6px;font-size:12px">
-              All student registration requests have been reviewed.
-            </p>
-          </div>
-        `;
+        container.innerHTML =
+          `<div class="empty">
+            No pending student registrations.
+          </div>`;
 
         return;
 
       }
 
 
-      snapshot.forEach((userDoc) => {
+      container.innerHTML = "";
+
+
+      snapshot.forEach(docSnap => {
 
         const data =
-          userDoc.data();
+          docSnap.data();
 
 
         const card =
           document.createElement("div");
+
 
         card.className =
           "request-card";
@@ -1335,95 +1184,50 @@ function listenForPendingStudents(){
 
         card.innerHTML = `
 
-          <div class="request-top">
-
-            <div>
-
-              <div class="request-name">
-                ${escapeHTML(
-                  data.name || "Unnamed Student"
-                )}
-              </div>
-
-              <div class="request-email">
-                ${escapeHTML(
-                  data.email || "-"
-                )}
-              </div>
-
-            </div>
-
-            <span style="
-              background:#fff7df;
-              color:#a16207;
-              padding:5px 9px;
-              border-radius:20px;
-              font-size:10px;
-              font-weight:700;
-            ">
-              PENDING
-            </span>
-
-          </div>
-
+          <h3>
+            ${escapeHTML(data.name || "Unnamed Student")}
+          </h3>
 
           <div class="request-info">
 
-            <div class="info-box">
-
-              <small>Student ID</small>
-
-              <b>
-                ${escapeHTML(
-                  data.studentId || "Not assigned"
-                )}
-              </b>
-
+            <div>
+              <strong>Email:</strong>
+              ${escapeHTML(data.email || "")}
             </div>
 
-
-            <div class="info-box">
-
-              <small>Class</small>
-
-              <b>
-                ${escapeHTML(
-                  data.className || "Not assigned"
-                )}
-              </b>
-
+            <div>
+              <strong>Student ID:</strong>
+              ${escapeHTML(data.studentId || "N/A")}
             </div>
 
+            <div>
+              <strong>Class:</strong>
+              ${escapeHTML(data.className || "N/A")}
+            </div>
 
-            <div class="info-box">
-
-              <small>Section</small>
-
-              <b>
-                ${escapeHTML(
-                  data.section || "Not assigned"
-                )}
-              </b>
-
+            <div>
+              <strong>Section:</strong>
+              ${escapeHTML(data.section || "N/A")}
             </div>
 
           </div>
-
 
           <div class="request-actions">
 
             <button
-              class="approve"
-              data-approve="${userDoc.id}"
+              class="approve-btn"
+              data-id="${docSnap.id}"
+              data-action="approve-student"
             >
-              ✓ Approve Student
+              Approve
             </button>
 
             <button
-              class="reject"
-              data-reject="${userDoc.id}"
+              class="reject-btn"
+              data-id="${docSnap.id}"
+              data-action="reject-student"
             >
-              ✕ Reject
+              Reject
             </button>
 
           </div>
@@ -1436,60 +1240,46 @@ function listenForPendingStudents(){
       });
 
 
-      /* APPROVE */
-
       container
-        .querySelectorAll("[data-approve]")
+        .querySelectorAll("[data-action]")
         .forEach(button => {
 
           button.addEventListener(
             "click",
-            () => approveStudent(
-              button.dataset.approve,
-              button
-            )
-          );
+            async () => {
 
-        });
+              const id =
+                button.dataset.id;
+
+              const action =
+                button.dataset.action;
 
 
-      /* REJECT */
+              await updateStudentStatus(
+                id,
+                action
+              );
 
-      container
-        .querySelectorAll("[data-reject]")
-        .forEach(button => {
-
-          button.addEventListener(
-            "click",
-            () => rejectStudent(
-              button.dataset.reject,
-              button
-            )
+            }
           );
 
         });
 
     },
 
-    (error) => {
+    error => {
 
-      console.error(error);
+      console.error(
+        "PENDING STUDENTS ERROR:",
+        error
+      );
 
       document.getElementById(
         "requestsList"
-      ).innerHTML = `
-
-        <div class="no-request">
-
-          <b>Unable to load requests.</b>
-
-          <p style="margin-top:6px;font-size:12px">
-            ${escapeHTML(error.message)}
-          </p>
-
-        </div>
-
-      `;
+      ).innerHTML =
+        `<div class="empty">
+          Unable to load student requests.
+        </div>`;
 
     }
 
@@ -1498,272 +1288,364 @@ function listenForPendingStudents(){
 }
 
 
-/* =========================
-   APPROVE STUDENT
-========================= */
 
-async function approveStudent(
+/* ================= STUDENT STATUS ================= */
+
+async function updateStudentStatus(
   userId,
-  button
-){
+  action
+) {
 
-  if(!confirm(
-    "Approve this student registration?"
-  )){
+  try {
 
-    return;
-
-  }
-
-
-  try{
-
-    button.disabled = true;
-
-    button.textContent =
-      "Approving...";
-
-
-    const userRef =
-      doc(db, "users", userId);
+    const newStatus =
+      action === "approve-student"
+        ? "active"
+        : "rejected";
 
 
     await updateDoc(
-      userRef,
+      doc(db, "users", userId),
       {
-        status:"active"
+        status: newStatus
       }
     );
 
 
-    toast(
-      "Student approved successfully!"
+    alert(
+      newStatus === "active"
+        ? "Student approved successfully."
+        : "Student registration rejected."
     );
 
+  }
 
-  }catch(error){
+  catch (error) {
 
-    console.error(error);
-
-    toast(
-      "Approval failed: " +
-      error.message
+    console.error(
+      "STUDENT STATUS ERROR:",
+      error
     );
 
-
-    button.disabled = false;
-
-    button.textContent =
-      "✓ Approve Student";
+    alert(
+      "Could not update student status."
+    );
 
   }
 
 }
 
 
-/* =========================
-   REJECT STUDENT
-========================= */
 
-async function rejectStudent(
-  userId,
-  button
-){
+/* ================= PENDING TEACHERS ================= */
 
-  if(!confirm(
-    "Reject this student registration?"
-  )){
+function listenForPendingTeachers() {
 
-    return;
-
-  }
-
-
-  try{
-
-    button.disabled = true;
-
-    button.textContent =
-      "Rejecting...";
-
-
-    const userRef =
-      doc(db, "users", userId);
-
-
-    await updateDoc(
-      userRef,
-      {
-        status:"rejected"
-      }
-    );
-
-
-    toast(
-      "Student registration rejected."
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-    toast(
-      "Rejection failed: " +
-      error.message
-    );
-
-
-    button.disabled = false;
-
-    button.textContent =
-      "✕ Reject";
-
-  }
-
-}
-
-
-/* =========================
-   ACTIVE STUDENTS
-========================= */
-
-function listenForActiveStudents(){
-
-  const usersRef =
-    collection(db, "users");
-
-
-  const activeStudentsQuery =
+  const q =
     query(
-      usersRef,
+      collection(db, "users"),
+      where("role", "==", "teacher"),
+      where("status", "==", "pending")
+    );
+
+
+  onSnapshot(
+
+    q,
+
+    snapshot => {
+
+      pendingTeacherTotal =
+        snapshot.size;
+
+
+      updatePendingTotal();
+
+
+      const container =
+        document.getElementById(
+          "teacherRequestsList"
+        );
+
+
+      if (snapshot.empty) {
+
+        container.innerHTML =
+          `<div class="empty">
+            No pending teacher registrations.
+          </div>`;
+
+        return;
+
+      }
+
+
+      container.innerHTML = "";
+
+
+      snapshot.forEach(docSnap => {
+
+        const data =
+          docSnap.data();
+
+
+        const card =
+          document.createElement("div");
+
+
+        card.className =
+          "request-card";
+
+
+        card.innerHTML = `
+
+          <h3>
+            ${escapeHTML(data.name || "Unnamed Teacher")}
+          </h3>
+
+          <div class="request-info">
+
+            <div>
+              <strong>Email:</strong>
+              ${escapeHTML(data.email || "")}
+            </div>
+
+            <div>
+              <strong>Subject:</strong>
+              ${escapeHTML(data.subject || "N/A")}
+            </div>
+
+            <div>
+              <strong>Qualification:</strong>
+              ${escapeHTML(data.qualification || "N/A")}
+            </div>
+
+          </div>
+
+          <div class="request-actions">
+
+            <button
+              class="approve-btn"
+              data-id="${docSnap.id}"
+              data-action="approve-teacher"
+            >
+              Approve
+            </button>
+
+            <button
+              class="reject-btn"
+              data-id="${docSnap.id}"
+              data-action="reject-teacher"
+            >
+              Reject
+            </button>
+
+          </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+
+      container
+        .querySelectorAll("[data-action]")
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            async () => {
+
+              const id =
+                button.dataset.id;
+
+              const action =
+                button.dataset.action;
+
+
+              await updateTeacherStatus(
+                id,
+                action
+              );
+
+            }
+          );
+
+        });
+
+    },
+
+    error => {
+
+      console.error(
+        "PENDING TEACHERS ERROR:",
+        error
+      );
+
+
+      document.getElementById(
+        "teacherRequestsList"
+      ).innerHTML =
+        `<div class="empty">
+          Unable to load teacher requests.
+        </div>`;
+
+    }
+
+  );
+
+}
+
+
+
+/* ================= TEACHER STATUS ================= */
+
+async function updateTeacherStatus(
+  userId,
+  action
+) {
+
+  try {
+
+    const newStatus =
+      action === "approve-teacher"
+        ? "active"
+        : "rejected";
+
+
+    await updateDoc(
+      doc(db, "users", userId),
+      {
+        status: newStatus
+      }
+    );
+
+
+    alert(
+      newStatus === "active"
+        ? "Teacher approved successfully."
+        : "Teacher registration rejected."
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "TEACHER STATUS ERROR:",
+      error
+    );
+
+    alert(
+      "Could not update teacher status."
+    );
+
+  }
+
+}
+
+
+
+/* ================= ACTIVE STUDENTS ================= */
+
+function listenForActiveStudents() {
+
+  const q =
+    query(
+      collection(db, "users"),
       where("role", "==", "student"),
       where("status", "==", "active")
     );
 
 
   onSnapshot(
-    activeStudentsQuery,
-    (snapshot) => {
 
-      const count =
-        snapshot.size;
+    q,
 
+    snapshot => {
 
       document.getElementById(
         "totalStudents"
-      ).textContent = count;
+      ).textContent =
+        snapshot.size;
 
 
-      document.getElementById(
-        "overviewStudents"
-      ).textContent = count;
-
-
-      const container =
+      const table =
         document.getElementById(
-          "studentsList"
+          "studentsTableBody"
         );
 
 
-      container.innerHTML = "";
+      const overview =
+        document.getElementById(
+          "overviewStudents"
+        );
 
 
-      if(count === 0){
+      table.innerHTML = "";
 
-        container.innerHTML = `
-          <div class="no-request">
-            No active students found.
-          </div>
-        `;
+
+      if (snapshot.empty) {
+
+        overview.innerHTML =
+          `<div class="empty">
+            No active students.
+          </div>`;
 
         return;
 
       }
 
 
-      snapshot.forEach(userDoc => {
+      overview.innerHTML =
+        `<strong>
+          ${snapshot.size}
+          active student(s)
+        </strong>`;
+
+
+      snapshot.forEach(docSnap => {
 
         const data =
-          userDoc.data();
+          docSnap.data();
 
 
-        const card =
-          document.createElement("div");
-
-        card.className =
-          "request-card";
+        const row =
+          document.createElement("tr");
 
 
-        card.innerHTML = `
+        row.innerHTML = `
 
-          <div class="request-top">
+          <td>
+            ${escapeHTML(data.name || "")}
+          </td>
 
-            <div>
+          <td>
+            ${escapeHTML(data.email || "")}
+          </td>
 
-              <div class="request-name">
-                ${escapeHTML(
-                  data.name || "Unnamed Student"
-                )}
-              </div>
+          <td>
+            ${escapeHTML(data.studentId || "N/A")}
+          </td>
 
-              <div class="request-email">
-                ${escapeHTML(
-                  data.email || "-"
-                )}
-              </div>
+          <td>
+            ${escapeHTML(data.className || "N/A")}
+          </td>
 
-            </div>
+          <td>
+            ${escapeHTML(data.section || "N/A")}
+          </td>
 
-            <span style="
-              background:#e8f5f3;
-              color:#0f766e;
-              padding:5px 9px;
-              border-radius:20px;
-              font-size:10px;
-              font-weight:700;
-            ">
-              ACTIVE
-            </span>
-
-          </div>
-
-
-          <div class="request-info">
-
-            <div class="info-box">
-              <small>Student ID</small>
-              <b>
-                ${escapeHTML(
-                  data.studentId || "Not assigned"
-                )}
-              </b>
-            </div>
-
-            <div class="info-box">
-              <small>Class</small>
-              <b>
-                ${escapeHTML(
-                  data.className || "Not assigned"
-                )}
-              </b>
-            </div>
-
-            <div class="info-box">
-              <small>Section</small>
-              <b>
-                ${escapeHTML(
-                  data.section || "Not assigned"
-                )}
-              </b>
-            </div>
-
-          </div>
+          <td>
+            Active
+          </td>
 
         `;
 
 
-        container.appendChild(card);
+        table.appendChild(row);
 
       });
 
@@ -1771,7 +1653,10 @@ function listenForActiveStudents(){
 
     error => {
 
-      console.error(error);
+      console.error(
+        "ACTIVE STUDENTS ERROR:",
+        error
+      );
 
     }
 
@@ -1780,142 +1665,105 @@ function listenForActiveStudents(){
 }
 
 
-/* =========================
-   ACTIVE TEACHERS
-========================= */
 
-function listenForActiveTeachers(){
+/* ================= ACTIVE TEACHERS ================= */
 
-  const usersRef =
-    collection(db, "users");
+function listenForActiveTeachers() {
 
-
-  const teacherQuery =
+  const q =
     query(
-      usersRef,
+      collection(db, "users"),
       where("role", "==", "teacher"),
       where("status", "==", "active")
     );
 
 
   onSnapshot(
-    teacherQuery,
+
+    q,
+
     snapshot => {
-
-      const count =
-        snapshot.size;
-
 
       document.getElementById(
         "totalTeachers"
-      ).textContent = count;
+      ).textContent =
+        snapshot.size;
 
 
-      document.getElementById(
-        "overviewTeachers"
-      ).textContent = count;
-
-
-      const container =
+      const table =
         document.getElementById(
-          "teachersList"
+          "teachersTableBody"
         );
 
 
-      container.innerHTML = "";
+      const overview =
+        document.getElementById(
+          "overviewTeachers"
+        );
 
 
-      if(count === 0){
+      table.innerHTML = "";
 
-        container.innerHTML = `
-          <div class="no-request">
-            No active teachers found.
-          </div>
-        `;
+
+      if (snapshot.empty) {
+
+        overview.innerHTML =
+          `<div class="empty">
+            No active teachers.
+          </div>`;
 
         return;
 
       }
 
 
-      snapshot.forEach(userDoc => {
+      overview.innerHTML =
+        `<strong>
+          ${snapshot.size}
+          active teacher(s)
+        </strong>`;
+
+
+      snapshot.forEach(docSnap => {
 
         const data =
-          userDoc.data();
+          docSnap.data();
 
 
-        const card =
-          document.createElement("div");
-
-        card.className =
-          "request-card";
+        const row =
+          document.createElement("tr");
 
 
-        card.innerHTML = `
+        row.innerHTML = `
 
-          <div class="request-top">
+          <td>
+            ${escapeHTML(data.name || "")}
+          </td>
 
-            <div>
+          <td>
+            ${escapeHTML(data.email || "")}
+          </td>
 
-              <div class="request-name">
-                ${escapeHTML(
-                  data.name || "Unnamed Teacher"
-                )}
-              </div>
+          <td>
+            ${escapeHTML(data.teacherId || "Not assigned")}
+          </td>
 
-              <div class="request-email">
-                ${escapeHTML(
-                  data.email || "-"
-                )}
-              </div>
+          <td>
+            ${escapeHTML(data.subject || "N/A")}
+          </td>
 
-            </div>
+          <td>
+            ${escapeHTML(data.qualification || "N/A")}
+          </td>
 
-            <span style="
-              background:#e8f5f3;
-              color:#0f766e;
-              padding:5px 9px;
-              border-radius:20px;
-              font-size:10px;
-              font-weight:700;
-            ">
-              ACTIVE
-            </span>
-
-          </div>
-
-
-          <div class="request-info">
-
-            <div class="info-box">
-              <small>Teacher ID</small>
-              <b>
-                ${escapeHTML(
-                  data.teacherId || "Not assigned"
-                )}
-              </b>
-            </div>
-
-            <div class="info-box">
-              <small>Subject</small>
-              <b>
-                ${escapeHTML(
-                  data.subject || "Not assigned"
-                )}
-              </b>
-            </div>
-
-            <div class="info-box">
-              <small>Status</small>
-              <b>Active</b>
-            </div>
-
-          </div>
+          <td>
+            Active
+          </td>
 
         `;
 
 
-        container.appendChild(card);
+        table.appendChild(row);
 
       });
 
@@ -1923,7 +1771,10 @@ function listenForActiveTeachers(){
 
     error => {
 
-      console.error(error);
+      console.error(
+        "ACTIVE TEACHERS ERROR:",
+        error
+      );
 
     }
 
@@ -1932,15 +1783,14 @@ function listenForActiveTeachers(){
 }
 
 
-/* =========================
-   DASHBOARD DATA
-========================= */
 
-async function loadDashboardData(){
+/* ================= DASHBOARD DATA ================= */
 
-  try{
+async function loadDashboardData() {
 
-    const paymentsSnapshot =
+  try {
+
+    const paymentsSnap =
       await getDocs(
         collection(db, "payments")
       );
@@ -1950,13 +1800,13 @@ async function loadDashboardData(){
       0;
 
 
-    paymentsSnapshot.forEach(payment => {
+    paymentsSnap.forEach(docSnap => {
 
       const data =
-        payment.data();
+        docSnap.data();
 
 
-      if(data.status === "paid"){
+      if (data.status === "paid") {
 
         total +=
           Number(data.amount || 0);
@@ -1969,88 +1819,33 @@ async function loadDashboardData(){
     document.getElementById(
       "monthlyCollection"
     ).textContent =
-      "৳" + total.toLocaleString();
+      `৳${total.toLocaleString()}`;
 
+  }
 
-  }catch(error){
+  catch (error) {
 
-    console.error(error);
+    console.error(
+      "DASHBOARD DATA ERROR:",
+      error
+    );
 
   }
 
 }
 
 
-/* =========================
-   REFRESH BUTTONS
-========================= */
 
-document
-  .getElementById("refreshRequests")
-  .addEventListener("click", () => {
+/* ================= SECURITY HELPER ================= */
 
-    toast(
-      "Requests are already updating in real-time."
-    );
+function escapeHTML(value) {
 
-  });
-
-
-document
-  .getElementById("refreshStudents")
-  .addEventListener("click", () => {
-
-    toast(
-      "Student data is already updating in real-time."
-    );
-
-  });
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-document
-  .getElementById("logoutBtn")
-  .addEventListener("click", async () => {
-
-    try{
-
-      await signOut(auth);
-
-      localStorage.removeItem(
-        "riseEdgeUser"
-      );
-
-      window.location.href =
-        "../login.html";
-
-    }catch(error){
-
-      console.error(error);
-
-      toast(
-        "Logout failed."
-      );
-
-    }
-
-  });
-
-
-/* =========================
-   SECURITY HELPER
-========================= */
-
-function escapeHTML(value){
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 }
 
