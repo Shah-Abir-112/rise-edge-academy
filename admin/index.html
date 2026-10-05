@@ -1,32 +1,2060 @@
 <!doctype html>
-<html lang="en"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0f766e"><title>Rise Edge Academy — Admin Portal</title>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f766e">
+<title>Rise Edge Academy — Admin Portal</title>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0} :root{--p:#0f766e;--p2:#115e59;--bg:#f5f7f8;--card:#fff;--text:#102a2a;--muted:#6b7c7c;--line:#e3e9e9;--shadow:0 8px 30px rgba(16,42,42,.07)}
-body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}button{font:inherit;border:0;cursor:pointer}
-.app{display:flex;min-height:100vh}.sidebar{width:265px;background:#fff;border-right:1px solid var(--line);position:fixed;inset:0 auto 0 0;padding:22px 15px;z-index:20;overflow:auto}
-.brand{display:flex;align-items:center;gap:11px;padding:5px 10px 24px}.logo{width:43px;height:43px;border-radius:13px;background:linear-gradient(135deg,#0f766e,#14b8a6);display:grid;place-items:center;color:#fff;font-weight:900;font-size:20px}
-.brand h1{font-size:17px;line-height:1.1}.brand small{color:var(--muted);font-size:11px}.nav{display:grid;gap:5px}.nav-item{background:transparent;text-align:left;padding:12px 13px;border-radius:11px;color:#607070;display:flex;align-items:center;gap:12px;width:100%}.nav-item span{width:24px;text-align:center;font-size:18px}.nav-item b{font-size:13px;font-weight:650}.nav-item:hover,.nav-item.active{background:#e8f5f3;color:var(--p)}
-.side-bottom{position:absolute;bottom:18px;left:15px;right:15px}.logout{width:100%;padding:11px;border-radius:10px;background:#fff2f2;color:#c24141;font-weight:700}
-.main{margin-left:265px;width:calc(100% - 265px);padding:26px 32px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}.mobile-menu{display:none}.welcome h2{font-size:25px}.welcome p{color:var(--muted);margin-top:5px;font-size:13px}.avatar{width:43px;height:43px;border-radius:50%;background:#d8f1ed;color:var(--p);display:grid;place-items:center;font-weight:800}.userbox{display:flex;align-items:center;gap:10px}.userbox small{display:block;color:var(--muted);font-size:11px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}.stat,.panel,.empty-card{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}.stat{padding:17px;display:flex;gap:13px;align-items:center}.stat-icon{width:40px;height:40px;border-radius:11px;background:#edf8f6;display:grid;place-items:center;font-size:18px}.stat small{display:block;color:var(--muted);font-size:11px;margin-bottom:3px}.stat strong{font-size:21px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{padding:19px}.panel-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.panel-title h3{font-size:15px}.panel-title span{font-size:11px;color:var(--p);font-weight:700}.list{display:grid}.list>div{padding:13px 0;border-top:1px solid var(--line)}.list>div:first-child{border-top:0}.list b{display:block;font-size:13px}.list small{color:var(--muted);font-size:11px;margin-top:3px;display:block}
-.page{display:none}.page.active{display:block}.page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.page-head h2{font-size:24px}.page-head p{color:var(--muted);font-size:13px;margin-top:5px}.primary{background:var(--p);color:#fff;padding:12px 17px;border-radius:10px;font-weight:700}.primary.small{font-size:12px;padding:10px 14px}.outline{border:1px solid #b9cecc;background:#fff;color:var(--p);padding:10px 14px;border-radius:9px;font-weight:700}.empty-card{padding:60px 20px;text-align:center}.empty-icon{font-size:34px;margin-bottom:10px}.empty-card h3{font-size:18px}.empty-card p{color:var(--muted);max-width:500px;margin:8px auto 18px;font-size:13px}
-.toast{position:fixed;right:20px;bottom:20px;background:#102a2a;color:#fff;padding:12px 15px;border-radius:10px;font-size:12px;opacity:0;transform:translateY(10px);transition:.25s;z-index:50}.toast.show{opacity:1;transform:none}
-@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:.25s;box-shadow:10px 0 30px rgba(0,0,0,.08)}.sidebar.open{transform:none}.main{margin-left:0;width:100%;padding:18px}.mobile-menu{display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:20px}.topbar{margin-bottom:20px}.stats{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
-@media(max-width:520px){.stats{gap:9px}.stat{padding:12px}.stat strong{font-size:18px}.stat-icon{width:34px;height:34px}.welcome h2{font-size:20px}.userbox .u-text{display:none}.page-head{align-items:flex-start;gap:10px}.page-head h2{font-size:20px}}
-</style></head>
-<body><div class="app">
-<aside class="sidebar" id="sidebar"><div class="brand"><div class="logo">RE</div><div><h1>Rise Edge Academy</h1><small>Admin Portal</small></div></div><nav class="nav"><button class="nav-item" data-page="dashboard"><span>Dashboard</span><b>▦</b></button><button class="nav-item" data-page="profile"><span>Admin Profile</span><b>👤</b></button><button class="nav-item" data-page="students"><span>Students</span><b>👥</b></button><button class="nav-item" data-page="teachers"><span>Teachers</span><b>👨‍🏫</b></button><button class="nav-item" data-page="admissions"><span>Admissions / Requests</span><b>📋</b></button><button class="nav-item" data-page="fees"><span>Tuition Management</span><b>৳</b></button><button class="nav-item" data-page="salary"><span>Teacher Salary</span><b>💰</b></button><button class="nav-item" data-page="notices"><span>Notices</span><b>📢</b></button><button class="nav-item" data-page="messages"><span>Messages / Monitoring</span><b>💬</b></button><button class="nav-item" data-page="settings"><span>Settings</span><b>⚙</b></button></nav><div class="side-bottom"><button class="logout" onclick="logout()">↪ &nbsp; Logout</button></div></aside>
-<main class="main"><div class="topbar"><div style="display:flex;align-items:center;gap:11px"><button class="mobile-menu" onclick="toggleSidebar()">☰</button><div class="welcome"><h2>Good afternoon, <span id="name">Admin</span> 👋</h2><p>Manage. Monitor. Grow. &nbsp;•&nbsp; Strong Basics. Better Results.</p></div></div><div class="userbox"><div class="u-text"><b id="userName">Admin</b><small id="userId">Rise Edge Academy</small></div><div class="avatar" id="avatar">A</div></div></div>
-<section class="page active" id="page-dashboard"><div class="stats"><div class="stat"><div class="stat-icon">Total Students</div><div><small>428</small><strong>👥</strong></div></div><div class="stat"><div class="stat-icon">Teachers</div><div><small>20</small><strong>👨‍🏫</strong></div></div><div class="stat"><div class="stat-icon">Pending Requests</div><div><small>7</small><strong>📋</strong></div></div><div class="stat"><div class="stat-icon">Monthly Collection</div><div><small>৳2.84L</small><strong>৳</strong></div></div></div><div class="grid-2"><div class="panel"><div class="panel-title"><h3>Pending Actions</h3><span>View all</span></div><div class="list"><div><b>7 teacher registration requests</b><small>Needs approval</small></div><div><b>4 student admission requests</b><small>Needs review</small></div><div><b>3 payment issues</b><small>Needs attention</small></div></div></div><div class="panel"><div class="panel-title"><h3>Academy Overview</h3><span>View all</span></div><div class="list"><div><b>428 active students</b><small>Across all classes</small></div><div><b>20 teachers</b><small>Teacher pool</small></div><div><b>12 active batches</b><small>Current academic year</small></div></div></div></div></section><section class="page" id="page-profile"><div class="page-head"><div><h2>Admin Profile</h2><p>Your account and academic information.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Admin Profile</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-students"><div class="page-head"><div><h2>Students</h2><p>Students assigned to your classes.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Students</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-teachers"><div class="page-head"><div><h2>Teachers</h2><p>Manage teacher accounts and assignments.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Teachers</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-admissions"><div class="page-head"><div><h2>Admissions / Requests</h2><p>Review teacher registration and student requests.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Admissions / Requests</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-fees"><div class="page-head"><div><h2>Tuition Management</h2><p>Monitor student tuition fees and dues.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Tuition Management</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-salary"><div class="page-head"><div><h2>Teacher Salary</h2><p>Payment and salary information.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Teacher Salary</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-notices"><div class="page-head"><div><h2>Notices</h2><p>Important academy announcements.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Notices</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-messages"><div class="page-head"><div><h2>Messages / Monitoring</h2><p>Communication with teachers and academy staff.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Messages / Monitoring</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section><section class="page" id="page-settings"><div class="page-head"><div><h2>Settings</h2><p>Portal settings and system controls.</p></div><button class="primary small" onclick="toast('Module ready for Firebase integration.')">+ Add</button></div><div class="empty-card"><div class="empty-icon">✨</div><h3>Settings</h3><p>This section is ready for live Firebase data.</p><button class="outline" onclick="toast('Module opened successfully')">Open Module</button></div></section></main></div><div class="toast" id="toast"></div>
-<script>
-const navItems=document.querySelectorAll(".nav-item"),pages=document.querySelectorAll(".page");
-function openPage(page){navItems.forEach(b=>b.classList.toggle("active",b.dataset.page===page));pages.forEach(p=>p.classList.toggle("active",p.id==="page-"+page));document.getElementById("sidebar").classList.remove("open");window.scrollTo({top:0,behavior:"smooth"});}
-navItems.forEach(b=>b.addEventListener("click",()=>openPage(b.dataset.page)));document.querySelector('[data-page="dashboard"]').classList.add("active");
-function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open")}
-function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
-function logout(){try{localStorage.removeItem("riseEdgeUser")}catch(e){}window.location.href="../login.html"}
-try{const raw=localStorage.getItem("riseEdgeUser");if(raw){const u=JSON.parse(raw);const n=u.name||u.displayName||u.email?.split("@")[0]||"Admin";document.getElementById("name").textContent=n;document.getElementById("userName").textContent=n;document.getElementById("userId").textContent=u.id||u.studentId||u.teacherId||u.email||"Admin Portal";document.getElementById("avatar").textContent=n.charAt(0).toUpperCase()}}catch(e){}
-</script></body></html>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --p:#0f766e;
+  --p2:#115e59;
+  --bg:#f5f7f8;
+  --card:#fff;
+  --text:#102a2a;
+  --muted:#6b7c7c;
+  --line:#e3e9e9;
+  --shadow:0 8px 30px rgba(16,42,42,.07);
+}
+
+body{
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+button{
+  font:inherit;
+  border:0;
+  cursor:pointer;
+}
+
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar{
+  width:265px;
+  background:#fff;
+  border-right:1px solid var(--line);
+  position:fixed;
+  inset:0 auto 0 0;
+  padding:22px 15px;
+  z-index:20;
+  overflow:auto;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:5px 10px 24px;
+}
+
+.logo{
+  width:43px;
+  height:43px;
+  border-radius:13px;
+  background:linear-gradient(135deg,#0f766e,#14b8a6);
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-weight:900;
+  font-size:20px;
+}
+
+.brand h1{
+  font-size:17px;
+  line-height:1.1;
+}
+
+.brand small{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.nav{
+  display:grid;
+  gap:5px;
+}
+
+.nav-item{
+  background:transparent;
+  text-align:left;
+  padding:12px 13px;
+  border-radius:11px;
+  color:#607070;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+}
+
+.nav-item span{
+  flex:1;
+  font-size:13px;
+}
+
+.nav-item b{
+  font-size:15px;
+  font-weight:650;
+}
+
+.nav-item:hover,
+.nav-item.active{
+  background:#e8f5f3;
+  color:var(--p);
+}
+
+.side-bottom{
+  position:absolute;
+  bottom:18px;
+  left:15px;
+  right:15px;
+}
+
+.logout{
+  width:100%;
+  padding:11px;
+  border-radius:10px;
+  background:#fff2f2;
+  color:#c24141;
+  font-weight:700;
+}
+
+.main{
+  margin-left:265px;
+  width:calc(100% - 265px);
+  padding:26px 32px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.mobile-menu{
+  display:none;
+}
+
+.welcome h2{
+  font-size:25px;
+}
+
+.welcome p{
+  color:var(--muted);
+  margin-top:5px;
+  font-size:13px;
+}
+
+.avatar{
+  width:43px;
+  height:43px;
+  border-radius:50%;
+  background:#d8f1ed;
+  color:var(--p);
+  display:grid;
+  place-items:center;
+  font-weight:800;
+}
+
+.userbox{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.userbox small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.stat,
+.panel,
+.empty-card,
+.request-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:15px;
+  box-shadow:var(--shadow);
+}
+
+.stat{
+  padding:17px;
+  display:flex;
+  gap:13px;
+  align-items:center;
+}
+
+.stat-icon{
+  width:40px;
+  height:40px;
+  border-radius:11px;
+  background:#edf8f6;
+  display:grid;
+  place-items:center;
+  font-size:18px;
+}
+
+.stat small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:3px;
+}
+
+.stat strong{
+  font-size:21px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.panel{
+  padding:19px;
+}
+
+.panel-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:13px;
+}
+
+.panel-title h3{
+  font-size:15px;
+}
+
+.panel-title span{
+  font-size:11px;
+  color:var(--p);
+  font-weight:700;
+}
+
+.list{
+  display:grid;
+}
+
+.list>div{
+  padding:13px 0;
+  border-top:1px solid var(--line);
+}
+
+.list>div:first-child{
+  border-top:0;
+}
+
+.list b{
+  display:block;
+  font-size:13px;
+}
+
+.list small{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:3px;
+  display:block;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+.page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.page-head h2{
+  font-size:24px;
+}
+
+.page-head p{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:5px;
+}
+
+.primary{
+  background:var(--p);
+  color:#fff;
+  padding:12px 17px;
+  border-radius:10px;
+  font-weight:700;
+}
+
+.primary.small{
+  font-size:12px;
+  padding:10px 14px;
+}
+
+.outline{
+  border:1px solid #b9cecc;
+  background:#fff;
+  color:var(--p);
+  padding:10px 14px;
+  border-radius:9px;
+  font-weight:700;
+}
+
+.empty-card{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.empty-icon{
+  font-size:34px;
+  margin-bottom:10px;
+}
+
+.empty-card h3{
+  font-size:18px;
+}
+
+.empty-card p{
+  color:var(--muted);
+  max-width:500px;
+  margin:8px auto 18px;
+  font-size:13px;
+}
+
+.requests{
+  display:grid;
+  gap:14px;
+}
+
+.request-card{
+  padding:18px;
+}
+
+.request-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:15px;
+}
+
+.request-name{
+  font-size:16px;
+  font-weight:800;
+}
+
+.request-email{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.request-info{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+
+.info-box{
+  background:#f7faf9;
+  border-radius:9px;
+  padding:10px;
+}
+
+.info-box small{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  margin-bottom:4px;
+}
+
+.info-box b{
+  font-size:12px;
+}
+
+.request-actions{
+  display:flex;
+  gap:8px;
+  margin-top:15px;
+}
+
+.approve{
+  background:#0f766e;
+  color:white;
+  padding:9px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.reject{
+  background:#fff1f1;
+  color:#c24141;
+  padding:9px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.loading{
+  text-align:center;
+  padding:35px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.no-request{
+  text-align:center;
+  padding:45px 20px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  color:var(--muted);
+}
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  background:#102a2a;
+  color:#fff;
+  padding:12px 15px;
+  border-radius:10px;
+  font-size:12px;
+  opacity:0;
+  transform:translateY(10px);
+  transition:.25s;
+  z-index:50;
+}
+
+.toast.show{
+  opacity:1;
+  transform:none;
+}
+
+@media(max-width:900px){
+
+  .sidebar{
+    transform:translateX(-100%);
+    transition:.25s;
+    box-shadow:10px 0 30px rgba(0,0,0,.08);
+  }
+
+  .sidebar.open{
+    transform:none;
+  }
+
+  .main{
+    margin-left:0;
+    width:100%;
+    padding:18px;
+  }
+
+  .mobile-menu{
+    display:grid;
+    place-items:center;
+    width:40px;
+    height:40px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    font-size:20px;
+  }
+
+  .topbar{
+    margin-bottom:20px;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .grid-2{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:520px){
+
+  .stats{
+    gap:9px;
+  }
+
+  .stat{
+    padding:12px;
+  }
+
+  .stat strong{
+    font-size:18px;
+  }
+
+  .stat-icon{
+    width:34px;
+    height:34px;
+  }
+
+  .welcome h2{
+    font-size:20px;
+  }
+
+  .userbox .u-text{
+    display:none;
+  }
+
+  .page-head{
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .page-head h2{
+    font-size:20px;
+  }
+
+  .request-info{
+    grid-template-columns:1fr;
+  }
+
+  .request-actions{
+    flex-direction:column;
+  }
+
+  .approve,
+  .reject{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+  <div class="brand">
+    <div class="logo">RE</div>
+    <div>
+      <h1>Rise Edge Academy</h1>
+      <small>Admin Portal</small>
+    </div>
+  </div>
+
+  <nav class="nav">
+
+    <button class="nav-item" data-page="dashboard">
+      <span>Dashboard</span>
+      <b>▦</b>
+    </button>
+
+    <button class="nav-item" data-page="profile">
+      <span>Admin Profile</span>
+      <b>👤</b>
+    </button>
+
+    <button class="nav-item" data-page="students">
+      <span>Students</span>
+      <b>👥</b>
+    </button>
+
+    <button class="nav-item" data-page="teachers">
+      <span>Teachers</span>
+      <b>👨‍🏫</b>
+    </button>
+
+    <button class="nav-item" data-page="admissions">
+      <span>Admissions / Requests</span>
+      <b>📋</b>
+    </button>
+
+    <button class="nav-item" data-page="fees">
+      <span>Tuition Management</span>
+      <b>৳</b>
+    </button>
+
+    <button class="nav-item" data-page="salary">
+      <span>Teacher Salary</span>
+      <b>💰</b>
+    </button>
+
+    <button class="nav-item" data-page="notices">
+      <span>Notices</span>
+      <b>📢</b>
+    </button>
+
+    <button class="nav-item" data-page="messages">
+      <span>Messages / Monitoring</span>
+      <b>💬</b>
+    </button>
+
+    <button class="nav-item" data-page="settings">
+      <span>Settings</span>
+      <b>⚙</b>
+    </button>
+
+  </nav>
+
+  <div class="side-bottom">
+    <button class="logout" id="logoutBtn">
+      ↪ &nbsp; Logout
+    </button>
+  </div>
+
+</aside>
+
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+
+    <div style="display:flex;align-items:center;gap:11px">
+
+      <button class="mobile-menu" id="menuBtn">
+        ☰
+      </button>
+
+      <div class="welcome">
+        <h2>
+          Good afternoon,
+          <span id="name">Admin</span> 👋
+        </h2>
+
+        <p>
+          Manage. Monitor. Grow.
+          &nbsp;•&nbsp;
+          Strong Basics. Better Results.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="userbox">
+
+      <div class="u-text">
+        <b id="userName">Admin</b>
+        <small id="userId">Rise Edge Academy</small>
+      </div>
+
+      <div class="avatar" id="avatar">
+        A
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+
+    <div class="stats">
+
+      <div class="stat">
+        <div class="stat-icon">👥</div>
+        <div>
+          <small>Total Students</small>
+          <strong id="totalStudents">0</strong>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-icon">👨‍🏫</div>
+        <div>
+          <small>Teachers</small>
+          <strong id="totalTeachers">0</strong>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-icon">📋</div>
+        <div>
+          <small>Pending Requests</small>
+          <strong id="pendingCount">0</strong>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-icon">৳</div>
+        <div>
+          <small>Monthly Collection</small>
+          <strong id="monthlyCollection">৳0</strong>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+      <div class="panel">
+
+        <div class="panel-title">
+          <h3>Pending Actions</h3>
+          <span id="pendingLabel">Live</span>
+        </div>
+
+        <div class="list">
+
+          <div>
+            <b>
+              <span id="pendingTeacherText">0</span>
+              teacher registration requests
+            </b>
+            <small>Needs approval</small>
+          </div>
+
+          <div>
+            <b>
+              <span id="pendingStudentText">0</span>
+              student registration requests
+            </b>
+            <small>Needs review</small>
+          </div>
+
+          <div>
+            <b>Payment management</b>
+            <small>Available in Tuition Management</small>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="panel">
+
+        <div class="panel-title">
+          <h3>Academy Overview</h3>
+          <span>Live Firebase</span>
+        </div>
+
+        <div class="list">
+
+          <div>
+            <b>
+              <span id="overviewStudents">0</span>
+              active students
+            </b>
+            <small>Across all classes</small>
+          </div>
+
+          <div>
+            <b>
+              <span id="overviewTeachers">0</span>
+              active teachers
+            </b>
+            <small>Teacher pool</small>
+          </div>
+
+          <div>
+            <b>Firebase Connected</b>
+            <small>Real-time academy data</small>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PROFILE -->
+  <section class="page" id="page-profile">
+
+    <div class="page-head">
+
+      <div>
+        <h2>Admin Profile</h2>
+        <p>Your account and academic information.</p>
+      </div>
+
+    </div>
+
+    <div class="panel">
+
+      <div class="request-info">
+
+        <div class="info-box">
+          <small>Name</small>
+          <b id="profileName">Admin</b>
+        </div>
+
+        <div class="info-box">
+          <small>Email</small>
+          <b id="profileEmail">-</b>
+        </div>
+
+        <div class="info-box">
+          <small>Role</small>
+          <b id="profileRole">Admin</b>
+        </div>
+
+        <div class="info-box">
+          <small>Status</small>
+          <b>Active</b>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- STUDENTS -->
+  <section class="page" id="page-students">
+
+    <div class="page-head">
+
+      <div>
+        <h2>Students</h2>
+        <p>Active student accounts.</p>
+      </div>
+
+      <button class="primary small" id="refreshStudents">
+        Refresh
+      </button>
+
+    </div>
+
+    <div id="studentsList" class="requests">
+      <div class="loading">
+        Loading students...
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- TEACHERS -->
+  <section class="page" id="page-teachers">
+
+    <div class="page-head">
+
+      <div>
+        <h2>Teachers</h2>
+        <p>Manage teacher accounts and assignments.</p>
+      </div>
+
+    </div>
+
+    <div id="teachersList" class="requests">
+      <div class="loading">
+        Loading teachers...
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ADMISSIONS -->
+  <section class="page" id="page-admissions">
+
+    <div class="page-head">
+
+      <div>
+        <h2>Admissions / Requests</h2>
+        <p>Review pending student registrations.</p>
+      </div>
+
+      <button class="primary small" id="refreshRequests">
+        Refresh
+      </button>
+
+    </div>
+
+    <div id="requestsList" class="requests">
+
+      <div class="loading">
+        Loading pending requests...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FEES -->
+  <section class="page" id="page-fees">
+
+    <div class="page-head">
+      <div>
+        <h2>Tuition Management</h2>
+        <p>Monitor student tuition fees and dues.</p>
+      </div>
+    </div>
+
+    <div class="empty-card">
+      <div class="empty-icon">৳</div>
+      <h3>Tuition Management</h3>
+      <p>
+        Payment management will be connected to the
+        Firestore payments collection next.
+      </p>
+    </div>
+
+  </section>
+
+
+  <!-- SALARY -->
+  <section class="page" id="page-salary">
+
+    <div class="page-head">
+      <div>
+        <h2>Teacher Salary</h2>
+        <p>Payment and salary information.</p>
+      </div>
+    </div>
+
+    <div class="empty-card">
+      <div class="empty-icon">💰</div>
+      <h3>Teacher Salary</h3>
+      <p>
+        Teacher salary management will be connected next.
+      </p>
+    </div>
+
+  </section>
+
+
+  <!-- NOTICES -->
+  <section class="page" id="page-notices">
+
+    <div class="page-head">
+      <div>
+        <h2>Notices</h2>
+        <p>Important academy announcements.</p>
+      </div>
+    </div>
+
+    <div class="empty-card">
+      <div class="empty-icon">📢</div>
+      <h3>Notices</h3>
+      <p>
+        Notice creation and publishing will be connected next.
+      </p>
+    </div>
+
+  </section>
+
+
+  <!-- MESSAGES -->
+  <section class="page" id="page-messages">
+
+    <div class="page-head">
+      <div>
+        <h2>Messages / Monitoring</h2>
+        <p>Communication with teachers and academy staff.</p>
+      </div>
+    </div>
+
+    <div class="empty-card">
+      <div class="empty-icon">💬</div>
+      <h3>Messages / Monitoring</h3>
+      <p>
+        Real-time messaging will be connected next.
+      </p>
+    </div>
+
+  </section>
+
+
+  <!-- SETTINGS -->
+  <section class="page" id="page-settings">
+
+    <div class="page-head">
+      <div>
+        <h2>Settings</h2>
+        <p>Portal settings and system controls.</p>
+      </div>
+    </div>
+
+    <div class="empty-card">
+      <div class="empty-icon">⚙️</div>
+      <h3>Settings</h3>
+      <p>
+        System settings will be connected later.
+      </p>
+    </div>
+
+  </section>
+
+</main>
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<!-- FIREBASE + ADMIN LOGIC -->
+<script type="module">
+
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getDocs,
+  doc,
+  updateDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+import {
+  auth,
+  db
+} from "../js/firebase-config.js";
+
+
+/* =========================
+   BASIC UI
+========================= */
+
+const navItems =
+  document.querySelectorAll(".nav-item");
+
+const pages =
+  document.querySelectorAll(".page");
+
+
+function openPage(page){
+
+  navItems.forEach(button => {
+
+    button.classList.toggle(
+      "active",
+      button.dataset.page === page
+    );
+
+  });
+
+  pages.forEach(section => {
+
+    section.classList.toggle(
+      "active",
+      section.id === "page-" + page
+    );
+
+  });
+
+  document
+    .getElementById("sidebar")
+    .classList.remove("open");
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+}
+
+
+navItems.forEach(button => {
+
+  button.addEventListener(
+    "click",
+    () => openPage(button.dataset.page)
+  );
+
+});
+
+
+document
+  .querySelector('[data-page="dashboard"]')
+  .classList.add("active");
+
+
+document
+  .getElementById("menuBtn")
+  .addEventListener("click", () => {
+
+    document
+      .getElementById("sidebar")
+      .classList.toggle("open");
+
+  });
+
+
+function toast(message){
+
+  const element =
+    document.getElementById("toast");
+
+  element.textContent = message;
+
+  element.classList.add("show");
+
+  setTimeout(() => {
+
+    element.classList.remove("show");
+
+  }, 2500);
+
+}
+
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+let currentAdmin = null;
+
+
+onAuthStateChanged(auth, async (user) => {
+
+  if(!user){
+
+    window.location.href = "../login.html";
+
+    return;
+  }
+
+
+  try{
+
+    const userRef =
+      doc(db, "users", user.uid);
+
+    const userSnap =
+      await getDoc(userRef);
+
+
+    if(!userSnap.exists()){
+
+      await signOut(auth);
+
+      window.location.href = "../login.html";
+
+      return;
+
+    }
+
+
+    const userData =
+      userSnap.data();
+
+
+    if(
+      userData.role !== "admin" ||
+      userData.status !== "active"
+    ){
+
+      alert(
+        "You are not authorized to access the Admin Portal."
+      );
+
+      await signOut(auth);
+
+      window.location.href = "../login.html";
+
+      return;
+
+    }
+
+
+    currentAdmin = {
+      uid:user.uid,
+      email:user.email,
+      ...userData
+    };
+
+
+    loadAdminProfile();
+
+    loadDashboardData();
+
+    listenForPendingStudents();
+
+    listenForActiveStudents();
+
+    listenForActiveTeachers();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Unable to load admin profile."
+    );
+
+  }
+
+});
+
+
+/* =========================
+   ADMIN PROFILE
+========================= */
+
+function loadAdminProfile(){
+
+  const name =
+    currentAdmin.name ||
+    currentAdmin.email?.split("@")[0] ||
+    "Admin";
+
+
+  document.getElementById("name")
+    .textContent = name;
+
+  document.getElementById("userName")
+    .textContent = name;
+
+  document.getElementById("userId")
+    .textContent =
+      currentAdmin.adminId ||
+      currentAdmin.email ||
+      "Admin Portal";
+
+  document.getElementById("avatar")
+    .textContent =
+      name.charAt(0).toUpperCase();
+
+
+  document.getElementById("profileName")
+    .textContent = name;
+
+  document.getElementById("profileEmail")
+    .textContent =
+      currentAdmin.email || "-";
+
+  document.getElementById("profileRole")
+    .textContent =
+      currentAdmin.role || "admin";
+
+}
+
+
+/* =========================
+   PENDING STUDENTS
+========================= */
+
+function listenForPendingStudents(){
+
+  const usersRef =
+    collection(db, "users");
+
+
+  const pendingQuery =
+    query(
+      usersRef,
+      where("role", "==", "student"),
+      where("status", "==", "pending")
+    );
+
+
+  onSnapshot(
+    pendingQuery,
+    (snapshot) => {
+
+      const container =
+        document.getElementById("requestsList");
+
+
+      container.innerHTML = "";
+
+
+      const count =
+        snapshot.size;
+
+
+      document.getElementById("pendingCount")
+        .textContent = count;
+
+      document.getElementById("pendingStudentText")
+        .textContent = count;
+
+
+      if(count === 0){
+
+        container.innerHTML = `
+          <div class="no-request">
+            <div style="font-size:32px;margin-bottom:10px">
+              ✅
+            </div>
+
+            <b>No pending requests</b>
+
+            <p style="margin-top:6px;font-size:12px">
+              All student registration requests have been reviewed.
+            </p>
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      snapshot.forEach((userDoc) => {
+
+        const data =
+          userDoc.data();
+
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "request-card";
+
+
+        card.innerHTML = `
+
+          <div class="request-top">
+
+            <div>
+
+              <div class="request-name">
+                ${escapeHTML(
+                  data.name || "Unnamed Student"
+                )}
+              </div>
+
+              <div class="request-email">
+                ${escapeHTML(
+                  data.email || "-"
+                )}
+              </div>
+
+            </div>
+
+            <span style="
+              background:#fff7df;
+              color:#a16207;
+              padding:5px 9px;
+              border-radius:20px;
+              font-size:10px;
+              font-weight:700;
+            ">
+              PENDING
+            </span>
+
+          </div>
+
+
+          <div class="request-info">
+
+            <div class="info-box">
+
+              <small>Student ID</small>
+
+              <b>
+                ${escapeHTML(
+                  data.studentId || "Not assigned"
+                )}
+              </b>
+
+            </div>
+
+
+            <div class="info-box">
+
+              <small>Class</small>
+
+              <b>
+                ${escapeHTML(
+                  data.className || "Not assigned"
+                )}
+              </b>
+
+            </div>
+
+
+            <div class="info-box">
+
+              <small>Section</small>
+
+              <b>
+                ${escapeHTML(
+                  data.section || "Not assigned"
+                )}
+              </b>
+
+            </div>
+
+          </div>
+
+
+          <div class="request-actions">
+
+            <button
+              class="approve"
+              data-approve="${userDoc.id}"
+            >
+              ✓ Approve Student
+            </button>
+
+            <button
+              class="reject"
+              data-reject="${userDoc.id}"
+            >
+              ✕ Reject
+            </button>
+
+          </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+
+      /* APPROVE */
+
+      container
+        .querySelectorAll("[data-approve]")
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            () => approveStudent(
+              button.dataset.approve,
+              button
+            )
+          );
+
+        });
+
+
+      /* REJECT */
+
+      container
+        .querySelectorAll("[data-reject]")
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            () => rejectStudent(
+              button.dataset.reject,
+              button
+            )
+          );
+
+        });
+
+    },
+
+    (error) => {
+
+      console.error(error);
+
+      document.getElementById(
+        "requestsList"
+      ).innerHTML = `
+
+        <div class="no-request">
+
+          <b>Unable to load requests.</b>
+
+          <p style="margin-top:6px;font-size:12px">
+            ${escapeHTML(error.message)}
+          </p>
+
+        </div>
+
+      `;
+
+    }
+
+  );
+
+}
+
+
+/* =========================
+   APPROVE STUDENT
+========================= */
+
+async function approveStudent(
+  userId,
+  button
+){
+
+  if(!confirm(
+    "Approve this student registration?"
+  )){
+
+    return;
+
+  }
+
+
+  try{
+
+    button.disabled = true;
+
+    button.textContent =
+      "Approving...";
+
+
+    const userRef =
+      doc(db, "users", userId);
+
+
+    await updateDoc(
+      userRef,
+      {
+        status:"active"
+      }
+    );
+
+
+    toast(
+      "Student approved successfully!"
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+    toast(
+      "Approval failed: " +
+      error.message
+    );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "✓ Approve Student";
+
+  }
+
+}
+
+
+/* =========================
+   REJECT STUDENT
+========================= */
+
+async function rejectStudent(
+  userId,
+  button
+){
+
+  if(!confirm(
+    "Reject this student registration?"
+  )){
+
+    return;
+
+  }
+
+
+  try{
+
+    button.disabled = true;
+
+    button.textContent =
+      "Rejecting...";
+
+
+    const userRef =
+      doc(db, "users", userId);
+
+
+    await updateDoc(
+      userRef,
+      {
+        status:"rejected"
+      }
+    );
+
+
+    toast(
+      "Student registration rejected."
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+    toast(
+      "Rejection failed: " +
+      error.message
+    );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "✕ Reject";
+
+  }
+
+}
+
+
+/* =========================
+   ACTIVE STUDENTS
+========================= */
+
+function listenForActiveStudents(){
+
+  const usersRef =
+    collection(db, "users");
+
+
+  const activeStudentsQuery =
+    query(
+      usersRef,
+      where("role", "==", "student"),
+      where("status", "==", "active")
+    );
+
+
+  onSnapshot(
+    activeStudentsQuery,
+    (snapshot) => {
+
+      const count =
+        snapshot.size;
+
+
+      document.getElementById(
+        "totalStudents"
+      ).textContent = count;
+
+
+      document.getElementById(
+        "overviewStudents"
+      ).textContent = count;
+
+
+      const container =
+        document.getElementById(
+          "studentsList"
+        );
+
+
+      container.innerHTML = "";
+
+
+      if(count === 0){
+
+        container.innerHTML = `
+          <div class="no-request">
+            No active students found.
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      snapshot.forEach(userDoc => {
+
+        const data =
+          userDoc.data();
+
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "request-card";
+
+
+        card.innerHTML = `
+
+          <div class="request-top">
+
+            <div>
+
+              <div class="request-name">
+                ${escapeHTML(
+                  data.name || "Unnamed Student"
+                )}
+              </div>
+
+              <div class="request-email">
+                ${escapeHTML(
+                  data.email || "-"
+                )}
+              </div>
+
+            </div>
+
+            <span style="
+              background:#e8f5f3;
+              color:#0f766e;
+              padding:5px 9px;
+              border-radius:20px;
+              font-size:10px;
+              font-weight:700;
+            ">
+              ACTIVE
+            </span>
+
+          </div>
+
+
+          <div class="request-info">
+
+            <div class="info-box">
+              <small>Student ID</small>
+              <b>
+                ${escapeHTML(
+                  data.studentId || "Not assigned"
+                )}
+              </b>
+            </div>
+
+            <div class="info-box">
+              <small>Class</small>
+              <b>
+                ${escapeHTML(
+                  data.className || "Not assigned"
+                )}
+              </b>
+            </div>
+
+            <div class="info-box">
+              <small>Section</small>
+              <b>
+                ${escapeHTML(
+                  data.section || "Not assigned"
+                )}
+              </b>
+            </div>
+
+          </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+    },
+
+    error => {
+
+      console.error(error);
+
+    }
+
+  );
+
+}
+
+
+/* =========================
+   ACTIVE TEACHERS
+========================= */
+
+function listenForActiveTeachers(){
+
+  const usersRef =
+    collection(db, "users");
+
+
+  const teacherQuery =
+    query(
+      usersRef,
+      where("role", "==", "teacher"),
+      where("status", "==", "active")
+    );
+
+
+  onSnapshot(
+    teacherQuery,
+    snapshot => {
+
+      const count =
+        snapshot.size;
+
+
+      document.getElementById(
+        "totalTeachers"
+      ).textContent = count;
+
+
+      document.getElementById(
+        "overviewTeachers"
+      ).textContent = count;
+
+
+      const container =
+        document.getElementById(
+          "teachersList"
+        );
+
+
+      container.innerHTML = "";
+
+
+      if(count === 0){
+
+        container.innerHTML = `
+          <div class="no-request">
+            No active teachers found.
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      snapshot.forEach(userDoc => {
+
+        const data =
+          userDoc.data();
+
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "request-card";
+
+
+        card.innerHTML = `
+
+          <div class="request-top">
+
+            <div>
+
+              <div class="request-name">
+                ${escapeHTML(
+                  data.name || "Unnamed Teacher"
+                )}
+              </div>
+
+              <div class="request-email">
+                ${escapeHTML(
+                  data.email || "-"
+                )}
+              </div>
+
+            </div>
+
+            <span style="
+              background:#e8f5f3;
+              color:#0f766e;
+              padding:5px 9px;
+              border-radius:20px;
+              font-size:10px;
+              font-weight:700;
+            ">
+              ACTIVE
+            </span>
+
+          </div>
+
+
+          <div class="request-info">
+
+            <div class="info-box">
+              <small>Teacher ID</small>
+              <b>
+                ${escapeHTML(
+                  data.teacherId || "Not assigned"
+                )}
+              </b>
+            </div>
+
+            <div class="info-box">
+              <small>Subject</small>
+              <b>
+                ${escapeHTML(
+                  data.subject || "Not assigned"
+                )}
+              </b>
+            </div>
+
+            <div class="info-box">
+              <small>Status</small>
+              <b>Active</b>
+            </div>
+
+          </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+    },
+
+    error => {
+
+      console.error(error);
+
+    }
+
+  );
+
+}
+
+
+/* =========================
+   DASHBOARD DATA
+========================= */
+
+async function loadDashboardData(){
+
+  try{
+
+    const paymentsSnapshot =
+      await getDocs(
+        collection(db, "payments")
+      );
+
+
+    let total =
+      0;
+
+
+    paymentsSnapshot.forEach(payment => {
+
+      const data =
+        payment.data();
+
+
+      if(data.status === "paid"){
+
+        total +=
+          Number(data.amount || 0);
+
+      }
+
+    });
+
+
+    document.getElementById(
+      "monthlyCollection"
+    ).textContent =
+      "৳" + total.toLocaleString();
+
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+
+/* =========================
+   REFRESH BUTTONS
+========================= */
+
+document
+  .getElementById("refreshRequests")
+  .addEventListener("click", () => {
+
+    toast(
+      "Requests are already updating in real-time."
+    );
+
+  });
+
+
+document
+  .getElementById("refreshStudents")
+  .addEventListener("click", () => {
+
+    toast(
+      "Student data is already updating in real-time."
+    );
+
+  });
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async () => {
+
+    try{
+
+      await signOut(auth);
+
+      localStorage.removeItem(
+        "riseEdgeUser"
+      );
+
+      window.location.href =
+        "../login.html";
+
+    }catch(error){
+
+      console.error(error);
+
+      toast(
+        "Logout failed."
+      );
+
+    }
+
+  });
+
+
+/* =========================
+   SECURITY HELPER
+========================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+</script>
+
+</body>
+</html>
