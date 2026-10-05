@@ -1,1897 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Admin Portal - Rise Edge Academy</title>
+    <title>Admin Panel | Rise Edge Academy</title>
 
-  <link rel="stylesheet" href="../css/style.css">
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #1f2937;
-    }
-
-    .admin-layout {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ================= SIDEBAR ================= */
-
-    .sidebar {
-      width: 260px;
-      background: #111827;
-      color: white;
-      padding: 25px 15px;
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      overflow-y: auto;
-    }
-
-    .sidebar-brand {
-      font-size: 21px;
-      font-weight: bold;
-      padding: 10px;
-      margin-bottom: 25px;
-    }
-
-    .sidebar-brand span {
-      color: #60a5fa;
-    }
-
-    .nav-item {
-      display: block;
-      padding: 13px 15px;
-      margin: 5px 0;
-      border-radius: 8px;
-      color: #d1d5db;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .nav-item:hover,
-    .nav-item.active {
-      background: #2563eb;
-      color: white;
-    }
-
-    .logout-btn {
-      margin-top: 25px;
-      width: 100%;
-      border: none;
-      padding: 13px;
-      border-radius: 8px;
-      background: #dc2626;
-      color: white;
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    /* ================= MAIN ================= */
-
-    .main-content {
-      margin-left: 260px;
-      width: calc(100% - 260px);
-      padding: 30px;
-    }
-
-    .topbar {
-      background: white;
-      padding: 18px 22px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,.05);
-    }
-
-    .topbar h1 {
-      margin: 0;
-      font-size: 25px;
-    }
-
-    .admin-email {
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    /* ================= SECTIONS ================= */
-
-    .page-section {
-      display: none;
-    }
-
-    .page-section.active {
-      display: block;
-    }
-
-    /* ================= STATS ================= */
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      margin-bottom: 25px;
-    }
-
-    .stat-card {
-      background: white;
-      padding: 22px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.05);
-    }
-
-    .stat-card h3 {
-      margin: 0;
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    .stat-card .number {
-      font-size: 30px;
-      font-weight: bold;
-      margin-top: 8px;
-      color: #111827;
-    }
-
-    /* ================= CARDS ================= */
-
-    .card-box {
-      background: white;
-      border-radius: 12px;
-      padding: 22px;
-      margin-bottom: 22px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.05);
-    }
-
-    .card-box h2 {
-      margin-top: 0;
-    }
-
-    /* ================= REQUEST ================= */
-
-    .request-card {
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 18px;
-      margin-bottom: 12px;
-      background: #fafafa;
-    }
-
-    .request-card h3 {
-      margin-top: 0;
-      margin-bottom: 8px;
-    }
-
-    .request-info {
-      color: #6b7280;
-      font-size: 14px;
-      line-height: 1.8;
-    }
-
-    .request-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-
-    .approve-btn,
-    .reject-btn {
-      border: none;
-      padding: 10px 18px;
-      border-radius: 7px;
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-    }
-
-    .approve-btn {
-      background: #16a34a;
-    }
-
-    .reject-btn {
-      background: #dc2626;
-    }
-
-    .approve-btn:hover {
-      background: #15803d;
-    }
-
-    .reject-btn:hover {
-      background: #b91c1c;
-    }
-
-    /* ================= TABLE ================= */
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
-      padding: 13px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    th {
-      background: #f9fafb;
-    }
-
-    /* ================= PROFILE ================= */
-
-    .profile-row {
-      display: flex;
-      gap: 25px;
-      align-items: center;
-    }
-
-    .profile-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #2563eb;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: bold;
-    }
-
-    .profile-details p {
-      margin: 8px 0;
-    }
-
-    /* ================= EMPTY ================= */
-
-    .empty {
-      padding: 20px;
-      text-align: center;
-      color: #6b7280;
-      background: #f9fafb;
-      border-radius: 8px;
-    }
-
-    .muted {
-      color: #6b7280;
-    }
-
-    /* ================= MOBILE ================= */
-
-    .mobile-menu {
-      display: none;
-    }
-
-    @media (max-width: 900px) {
-
-      .sidebar {
-        width: 220px;
-      }
-
-      .main-content {
-        margin-left: 220px;
-        width: calc(100% - 220px);
-      }
-
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 650px) {
-
-      .sidebar {
-        display: none;
-        z-index: 1000;
-      }
-
-      .main-content {
-        margin-left: 0;
-        width: 100%;
-        padding: 15px;
-      }
-
-      .mobile-menu {
-        display: block;
-        background: #111827;
-        color: white;
-        border: none;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        cursor: pointer;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-
-      .profile-row {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  </style>
+    <link rel="stylesheet" href="./css/admin.css">
 </head>
 
 <body>
 
 <div class="admin-layout">
 
-  <!-- ================= SIDEBAR ================= -->
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
 
-  <aside class="sidebar" id="sidebar">
-
-    <div class="sidebar-brand">
-      <span>R</span> Rise Edge Academy
-    </div>
-
-    <a class="nav-item active" data-section="dashboard">
-      📊 Dashboard
-    </a>
-
-    <a class="nav-item" data-section="profile">
-      👤 Admin Profile
-    </a>
-
-    <a class="nav-item" data-section="students">
-      🎓 Students
-    </a>
-
-    <a class="nav-item" data-section="teachers">
-      👨‍🏫 Teachers
-    </a>
-
-    <a class="nav-item" data-section="admissions">
-      📝 Admissions / Requests
-    </a>
-
-    <a class="nav-item" data-section="payments">
-      💳 Tuition Management
-    </a>
-
-    <a class="nav-item" data-section="salary">
-      💰 Teacher Salary
-    </a>
-
-    <a class="nav-item" data-section="notices">
-      📢 Notices
-    </a>
-
-    <a class="nav-item" data-section="messages">
-      💬 Messages / Monitoring
-    </a>
-
-    <a class="nav-item" data-section="settings">
-      ⚙️ Settings
-    </a>
-
-    <button class="logout-btn" id="logoutBtn">
-      Logout
-    </button>
-
-  </aside>
-
-
-  <!-- ================= MAIN ================= -->
-
-  <main class="main-content">
-
-    <button class="mobile-menu" id="mobileMenu">
-      ☰ Menu
-    </button>
-
-    <div class="topbar">
-
-      <div>
-        <h1 id="pageTitle">Admin Dashboard</h1>
-      </div>
-
-      <div class="admin-email" id="adminEmail">
-        Loading...
-      </div>
-
-    </div>
-
-
-    <!-- ================= DASHBOARD ================= -->
-
-    <section id="dashboard" class="page-section active">
-
-      <div class="stats-grid">
-
-        <div class="stat-card">
-          <h3>Total Students</h3>
-          <div class="number" id="totalStudents">0</div>
+        <div class="brand">
+            <div class="brand-logo">REA</div>
+            <div>
+                <h2>Rise Edge</h2>
+                <span>Academy</span>
+            </div>
         </div>
 
-        <div class="stat-card">
-          <h3>Total Teachers</h3>
-          <div class="number" id="totalTeachers">0</div>
-        </div>
+        <nav class="sidebar-nav">
+
+            <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                <span>📊</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#profile" class="nav-item" data-section="profile">
+                <span>👤</span>
+                <span>Admin Profile</span>
+            </a>
 
-        <div class="stat-card">
-          <h3>Pending Requests</h3>
-          <div class="number" id="pendingCount">0</div>
-        </div>
+            <a href="#students" class="nav-item" data-section="students">
+                <span>🎓</span>
+                <span>Students</span>
+            </a>
 
-        <div class="stat-card">
-          <h3>Monthly Collection</h3>
-          <div class="number" id="monthlyCollection">
-            ৳0
-          </div>
-        </div>
+            <a href="#teachers" class="nav-item" data-section="teachers">
+                <span>👨‍🏫</span>
+                <span>Teachers</span>
+            </a>
+
+            <a href="#admissions" class="nav-item" data-section="admissions">
+                <span>📝</span>
+                <span>Admissions / Requests</span>
+            </a>
+
+            <a href="#courses" class="nav-item" data-section="courses">
+                <span>📚</span>
+                <span>Courses & Classes</span>
+            </a>
+
+            <a href="#assignments" class="nav-item" data-section="assignments">
+                <span>📋</span>
+                <span>Assignments</span>
+            </a>
+
+            <a href="#results" class="nav-item" data-section="results">
+                <span>🏆</span>
+                <span>Results</span>
+            </a>
+
+            <a href="#attendance" class="nav-item" data-section="attendance">
+                <span>📅</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="#tuition" class="nav-item" data-section="tuition">
+                <span>💳</span>
+                <span>Tuition Management</span>
+            </a>
+
+            <a href="#salary" class="nav-item" data-section="salary">
+                <span>💰</span>
+                <span>Teacher Salary</span>
+            </a>
+
+            <a href="#notices" class="nav-item" data-section="notices">
+                <span>📢</span>
+                <span>Notices</span>
+            </a>
+
+            <a href="#messages" class="nav-item" data-section="messages">
+                <span>💬</span>
+                <span>Messages / Monitoring</span>
+            </a>
+
+            <a href="#settings" class="nav-item" data-section="settings">
+                <span>⚙️</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+        <button id="logoutBtn" class="logout-btn">
+            🚪 Logout
+        </button>
+
+    </aside>
+
+
+    <!-- MAIN AREA -->
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <button id="menuBtn" class="menu-btn">
+                ☰
+            </button>
+
+            <div>
+                <h1 id="pageTitle">Dashboard</h1>
+                <p>Rise Edge Academy Admin Panel</p>
+            </div>
+
+            <div class="admin-mini-profile">
+                <div class="avatar">A</div>
+                <div>
+                    <strong id="topAdminName">Admin</strong>
+                    <small>Administrator</small>
+                </div>
+            </div>
 
-      </div>
+        </header>
+
+
+        <!-- CONTENT -->
+        <section class="content-area">
+
+
+            <!-- DASHBOARD -->
+            <section id="section-dashboard" class="page-section active">
+
+                <div class="welcome-box">
+                    <div>
+                        <span class="small-label">WELCOME BACK</span>
+                        <h2>Hello, <span id="welcomeAdminName">Admin</span> 👋</h2>
+                        <p>
+                            Manage Rise Edge Academy from one place.
+                        </p>
+                    </div>
+                </div>
 
 
-      <div class="card-box">
+                <!-- STAT CARDS -->
+                <div class="stats-grid">
 
-        <h2>Pending Actions</h2>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎓</div>
+                        <div>
+                            <span>Total Students</span>
+                            <h3 id="totalStudents">0</h3>
+                        </div>
+                    </div>
 
-        <p id="pendingStudentText">
-          Loading student requests...
-        </p>
+                    <div class="stat-card">
+                        <div class="stat-icon">👨‍🏫</div>
+                        <div>
+                            <span>Total Teachers</span>
+                            <h3 id="totalTeachers">0</h3>
+                        </div>
+                    </div>
 
-        <p id="pendingTeacherText">
-          Loading teacher requests...
-        </p>
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div>
+                            <span>Pending Requests</span>
+                            <h3 id="pendingRequests">0</h3>
+                        </div>
+                    </div>
 
-      </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💳</div>
+                        <div>
+                            <span>Monthly Collection</span>
+                            <h3 id="monthlyCollection">৳0</h3>
+                        </div>
+                    </div>
 
+                </div>
 
-      <div class="card-box">
 
-        <h2>Active Students</h2>
+                <!-- DASHBOARD PANELS -->
+                <div class="dashboard-grid">
 
-        <div id="overviewStudents" class="empty">
-          Loading students...
-        </div>
+                    <div class="panel-card">
 
-      </div>
+                        <div class="panel-header">
+                            <div>
+                                <h3>Pending Actions</h3>
+                                <p>Requests waiting for admin review</p>
+                            </div>
+                        </div>
 
+                        <div id="pendingActions" class="empty-state">
+                            Loading...
+                        </div>
 
-      <div class="card-box">
+                    </div>
 
-        <h2>Active Teachers</h2>
 
-        <div id="overviewTeachers" class="empty">
-          Loading teachers...
-        </div>
+                    <div class="panel-card">
 
-      </div>
+                        <div class="panel-header">
+                            <div>
+                                <h3>System Overview</h3>
+                                <p>Current academy status</p>
+                            </div>
+                        </div>
 
-    </section>
+                        <div class="overview-list">
 
+                            <div class="overview-row">
+                                <span>Students</span>
+                                <strong id="overviewStudents">0</strong>
+                            </div>
 
-    <!-- ================= PROFILE ================= -->
+                            <div class="overview-row">
+                                <span>Teachers</span>
+                                <strong id="overviewTeachers">0</strong>
+                            </div>
 
-    <section id="profile" class="page-section">
+                            <div class="overview-row">
+                                <span>Pending Requests</span>
+                                <strong id="overviewPending">0</strong>
+                            </div>
 
-      <div class="card-box">
+                            <div class="overview-row">
+                                <span>Current Month Collection</span>
+                                <strong id="overviewCollection">৳0</strong>
+                            </div>
 
-        <h2>Admin Profile</h2>
+                        </div>
 
-        <div class="profile-row">
+                    </div>
 
-          <div class="profile-avatar" id="profileAvatar">
-            A
-          </div>
+                </div>
 
-          <div class="profile-details">
+            </section>
 
-            <p>
-              <strong>Name:</strong>
-              <span id="profileName">Loading...</span>
-            </p>
 
-            <p>
-              <strong>Email:</strong>
-              <span id="profileEmail">Loading...</span>
-            </p>
+            <!-- PROFILE -->
+            <section id="section-profile" class="page-section">
 
-            <p>
-              <strong>Admin ID:</strong>
-              <span id="profileAdminId">Loading...</span>
-            </p>
+                <div class="section-heading">
+                    <span class="small-label">ADMINISTRATION</span>
+                    <h2>Admin Profile</h2>
+                    <p>Your Rise Edge Academy administrator information.</p>
+                </div>
 
-            <p>
-              <strong>Role:</strong>
-              <span id="profileRole">Admin</span>
-            </p>
 
-            <p>
-              <strong>Status:</strong>
-              <span id="profileStatus">Loading...</span>
-            </p>
+                <div class="profile-card">
 
-          </div>
+                    <div class="profile-avatar" id="profileAvatar">
+                        A
+                    </div>
 
-        </div>
+                    <div class="profile-info">
 
-      </div>
+                        <h2 id="profileName">Admin</h2>
 
-    </section>
+                        <div class="profile-row">
+                            <span>Name</span>
+                            <strong id="profileNameValue">—</strong>
+                        </div>
 
+                        <div class="profile-row">
+                            <span>Email</span>
+                            <strong id="profileEmail">—</strong>
+                        </div>
 
-    <!-- ================= STUDENTS ================= -->
+                        <div class="profile-row">
+                            <span>Admin ID</span>
+                            <strong id="profileAdminId">—</strong>
+                        </div>
 
-    <section id="students" class="page-section">
+                        <div class="profile-row">
+                            <span>Role</span>
+                            <strong id="profileRole">Administrator</strong>
+                        </div>
 
-      <div class="card-box">
+                        <div class="profile-row">
+                            <span>Status</span>
+                            <strong id="profileStatus" class="status-active">
+                                Active
+                            </strong>
+                        </div>
 
-        <h2>Active Students</h2>
+                    </div>
 
-        <div class="table-wrapper">
+                </div>
 
-          <table>
+            </section>
 
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Student ID</th>
-                <th>Class</th>
-                <th>Section</th>
-                <th>Status</th>
-              </tr>
-            </thead>
 
-            <tbody id="studentsTableBody"></tbody>
+            <!-- FUTURE MODULE PLACEHOLDERS -->
 
-          </table>
+            <section id="section-students" class="page-section">
+                <div class="section-heading">
+                    <h2>Students</h2>
+                    <p>Student management module will be added in Step 2.</p>
+                </div>
+            </section>
 
-        </div>
 
-      </div>
+            <section id="section-teachers" class="page-section">
+                <div class="section-heading">
+                    <h2>Teachers</h2>
+                    <p>Teacher management module will be added in Step 3.</p>
+                </div>
+            </section>
 
-    </section>
 
+            <section id="section-admissions" class="page-section">
+                <div class="section-heading">
+                    <h2>Admissions / Requests</h2>
+                    <p>Admission approval system will be added in Step 3.</p>
+                </div>
+            </section>
 
-    <!-- ================= TEACHERS ================= -->
 
-    <section id="teachers" class="page-section">
+            <section id="section-courses" class="page-section">
+                <div class="section-heading">
+                    <h2>Courses & Classes</h2>
+                    <p>Course management will be added in Step 4.</p>
+                </div>
+            </section>
 
-      <div class="card-box">
 
-        <h2>Active Teachers</h2>
+            <section id="section-assignments" class="page-section">
+                <div class="section-heading">
+                    <h2>Assignments</h2>
+                    <p>Assignment management will be added in Step 5.</p>
+                </div>
+            </section>
 
-        <div class="table-wrapper">
 
-          <table>
+            <section id="section-results" class="page-section">
+                <div class="section-heading">
+                    <h2>Results</h2>
+                    <p>Results management will be added in Step 6.</p>
+                </div>
+            </section>
 
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Teacher ID</th>
-                <th>Subject</th>
-                <th>Qualification</th>
-                <th>Status</th>
-              </tr>
-            </thead>
 
-            <tbody id="teachersTableBody"></tbody>
+            <section id="section-attendance" class="page-section">
+                <div class="section-heading">
+                    <h2>Attendance</h2>
+                    <p>Attendance management will be added in Step 7.</p>
+                </div>
+            </section>
 
-          </table>
 
-        </div>
+            <section id="section-tuition" class="page-section">
+                <div class="section-heading">
+                    <h2>Tuition Management</h2>
+                    <p>Tuition management will be added in Step 9.</p>
+                </div>
+            </section>
 
-      </div>
 
-    </section>
+            <section id="section-salary" class="page-section">
+                <div class="section-heading">
+                    <h2>Teacher Salary</h2>
+                    <p>Salary management will be added in Step 10.</p>
+                </div>
+            </section>
 
 
-    <!-- ================= ADMISSIONS ================= -->
+            <section id="section-notices" class="page-section">
+                <div class="section-heading">
+                    <h2>Notices</h2>
+                    <p>Notice management will be added in Step 8.</p>
+                </div>
+            </section>
 
-    <section id="admissions" class="page-section">
 
-      <!-- STUDENT -->
+            <section id="section-messages" class="page-section">
+                <div class="section-heading">
+                    <h2>Messages / Monitoring</h2>
+                    <p>Messaging and monitoring will be added in Step 11.</p>
+                </div>
+            </section>
 
-      <div class="card-box">
 
-        <h2>Pending Student Registrations</h2>
+            <section id="section-settings" class="page-section">
+                <div class="section-heading">
+                    <h2>Settings</h2>
+                    <p>System settings will be added later.</p>
+                </div>
+            </section>
 
-        <p class="muted">
-          Review and approve or reject student registration requests.
-        </p>
 
-        <div id="requestsList">
+        </section>
 
-          <div class="empty">
-            Loading student requests...
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- TEACHER -->
-
-      <div class="card-box">
-
-        <h2>Pending Teacher Registrations</h2>
-
-        <p class="muted">
-          Review and approve or reject teacher registration requests.
-        </p>
-
-        <div id="teacherRequestsList">
-
-          <div class="empty">
-            Loading teacher requests...
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================= PAYMENTS ================= -->
-
-    <section id="payments" class="page-section">
-
-      <div class="card-box">
-
-        <h2>Tuition Management</h2>
-
-        <p>
-          Manage student tuition payments, pending payments
-          and transaction records.
-        </p>
-
-        <div id="paymentsList" class="empty">
-          Payment management will appear here.
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================= SALARY ================= -->
-
-    <section id="salary" class="page-section">
-
-      <div class="card-box">
-
-        <h2>Teacher Salary</h2>
-
-        <p>
-          Manage teacher salary and payment records.
-        </p>
-
-        <div class="empty">
-          Teacher salary management will appear here.
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================= NOTICES ================= -->
-
-    <section id="notices" class="page-section">
-
-      <div class="card-box">
-
-        <h2>Notices</h2>
-
-        <p>
-          Create and manage academy notices for students and teachers.
-        </p>
-
-        <div class="empty">
-          Notice management will appear here.
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================= MESSAGES ================= -->
-
-    <section id="messages" class="page-section">
-
-      <div class="card-box">
-
-        <h2>Messages / Monitoring</h2>
-
-        <p>
-          Monitor academy communication and messages.
-        </p>
-
-        <div class="empty">
-          Message monitoring will appear here.
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================= SETTINGS ================= -->
-
-    <section id="settings" class="page-section">
-
-      <div class="card-box">
-
-        <h2>Settings</h2>
-
-        <p>
-          Admin and academy settings.
-        </p>
-
-        <div class="empty">
-          Settings will appear here.
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
+    </main>
 
 </div>
 
 
-<!-- ================= FIREBASE ================= -->
-
-<script type="module">
-
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
-
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  getDocs,
-  doc,
-  updateDoc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-
-
-import {
-  auth,
-  db
-} from "../js/firebase-config.js";
-
-
-/* ================= VARIABLES ================= */
-
-let currentAdmin = null;
-
-let pendingStudentTotal = 0;
-let pendingTeacherTotal = 0;
-
-
-/* ================= NAVIGATION ================= */
-
-const navItems =
-  document.querySelectorAll(".nav-item");
-
-const sections =
-  document.querySelectorAll(".page-section");
-
-const pageTitle =
-  document.getElementById("pageTitle");
-
-
-navItems.forEach(item => {
-
-  item.addEventListener("click", () => {
-
-    const target =
-      item.dataset.section;
-
-    navItems.forEach(nav => {
-      nav.classList.remove("active");
-    });
-
-    item.classList.add("active");
-
-
-    sections.forEach(section => {
-      section.classList.remove("active");
-    });
-
-
-    const targetSection =
-      document.getElementById(target);
-
-    if (targetSection) {
-      targetSection.classList.add("active");
-    }
-
-
-    const titles = {
-
-      dashboard: "Admin Dashboard",
-      profile: "Admin Profile",
-      students: "Students",
-      teachers: "Teachers",
-      admissions: "Admissions / Requests",
-      payments: "Tuition Management",
-      salary: "Teacher Salary",
-      notices: "Notices",
-      messages: "Messages / Monitoring",
-      settings: "Settings"
-
-    };
-
-
-    pageTitle.textContent =
-      titles[target] || "Admin Portal";
-
-
-    if (window.innerWidth <= 650) {
-
-      document.getElementById(
-        "sidebar"
-      ).style.display = "none";
-
-    }
-
-  });
-
-});
-
-
-/* ================= MOBILE MENU ================= */
-
-document
-  .getElementById("mobileMenu")
-  .addEventListener("click", () => {
-
-    const sidebar =
-      document.getElementById("sidebar");
-
-    if (sidebar.style.display === "block") {
-
-      sidebar.style.display = "none";
-
-    } else {
-
-      sidebar.style.display = "block";
-
-    }
-
-  });
-
-
-/* ================= LOGOUT ================= */
-
-document
-  .getElementById("logoutBtn")
-  .addEventListener("click", async () => {
-
-    try {
-
-      await signOut(auth);
-
-      window.location.href =
-        "../login.html";
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
-
-  });
-
-
-/* ================= AUTH GUARD ================= */
-
-onAuthStateChanged(auth, async user => {
-
-  if (!user) {
-
-    window.location.href =
-      "../login.html";
-
-    return;
-
-  }
-
-
-  try {
-
-    const userRef =
-      doc(db, "users", user.uid);
-
-    const userSnap =
-      await getDoc(userRef);
-
-
-    if (!userSnap.exists()) {
-
-      alert("Admin profile not found.");
-
-      await signOut(auth);
-
-      window.location.href =
-        "../login.html";
-
-      return;
-
-    }
-
-
-    const userData =
-      userSnap.data();
-
-
-    const role =
-      String(userData.role || "")
-        .trim()
-        .toLowerCase();
-
-
-    const status =
-      String(userData.status || "")
-        .trim()
-        .toLowerCase();
-
-
-    if (
-      role !== "admin" ||
-      status !== "active"
-    ) {
-
-      alert(
-        "You are not authorized to access the Admin Portal."
-      );
-
-      await signOut(auth);
-
-      window.location.href =
-        "../login.html";
-
-      return;
-
-    }
-
-
-    currentAdmin = {
-      uid: user.uid,
-      email: user.email,
-      ...userData
-    };
-
-
-    loadAdminProfile();
-
-    loadDashboardData();
-
-    listenForPendingStudents();
-
-    listenForPendingTeachers();
-
-    listenForActiveStudents();
-
-    listenForActiveTeachers();
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "ADMIN AUTH ERROR:",
-      error
-    );
-
-    alert(
-      "Unable to load admin portal."
-    );
-
-  }
-
-});
-
-
-/* ================= PROFILE ================= */
-
-function loadAdminProfile() {
-
-  if (!currentAdmin) return;
-
-
-  document.getElementById(
-    "adminEmail"
-  ).textContent =
-    currentAdmin.email || "";
-
-
-  document.getElementById(
-    "profileName"
-  ).textContent =
-    currentAdmin.name || "Admin";
-
-
-  document.getElementById(
-    "profileEmail"
-  ).textContent =
-    currentAdmin.email || "";
-
-
-  document.getElementById(
-    "profileAdminId"
-  ).textContent =
-    currentAdmin.adminId || "Not assigned";
-
-
-  document.getElementById(
-    "profileRole"
-  ).textContent =
-    currentAdmin.role || "admin";
-
-
-  document.getElementById(
-    "profileStatus"
-  ).textContent =
-    currentAdmin.status || "active";
-
-
-  const name =
-    currentAdmin.name || "A";
-
-
-  document.getElementById(
-    "profileAvatar"
-  ).textContent =
-    name.charAt(0).toUpperCase();
-
-}
-
-
-/* ================= PENDING TOTAL ================= */
-
-function updatePendingTotal() {
-
-  const total =
-    pendingStudentTotal +
-    pendingTeacherTotal;
-
-
-  document.getElementById(
-    "pendingCount"
-  ).textContent = total;
-
-
-  document.getElementById(
-    "pendingStudentText"
-  ).textContent =
-    `${pendingStudentTotal} pending student registration(s).`;
-
-
-  document.getElementById(
-    "pendingTeacherText"
-  ).textContent =
-    `${pendingTeacherTotal} pending teacher registration(s).`;
-
-}
-
-
-/* ================= PENDING STUDENTS ================= */
-
-function listenForPendingStudents() {
-
-  const q =
-    query(
-      collection(db, "users"),
-      where("role", "==", "student"),
-      where("status", "==", "pending")
-    );
-
-
-  onSnapshot(
-
-    q,
-
-    snapshot => {
-
-      pendingStudentTotal =
-        snapshot.size;
-
-      updatePendingTotal();
-
-
-      const container =
-        document.getElementById(
-          "requestsList"
-        );
-
-
-      if (snapshot.empty) {
-
-        container.innerHTML = `
-          <div class="empty">
-            No pending student registrations.
-          </div>
-        `;
-
-        return;
-
-      }
-
-
-      container.innerHTML = "";
-
-
-      snapshot.forEach(docSnap => {
-
-        const data =
-          docSnap.data();
-
-
-        const card =
-          document.createElement("div");
-
-
-        card.className =
-          "request-card";
-
-
-        card.innerHTML = `
-
-          <h3>
-            ${escapeHTML(
-              data.name || "Unnamed Student"
-            )}
-          </h3>
-
-          <div class="request-info">
-
-            <div>
-              <strong>Email:</strong>
-              ${escapeHTML(
-                data.email || "N/A"
-              )}
-            </div>
-
-            <div>
-              <strong>Student ID:</strong>
-              ${escapeHTML(
-                data.studentId || "N/A"
-              )}
-            </div>
-
-            <div>
-              <strong>Class:</strong>
-              ${escapeHTML(
-                data.className || "N/A"
-              )}
-            </div>
-
-            <div>
-              <strong>Section:</strong>
-              ${escapeHTML(
-                data.section || "N/A"
-              )}
-            </div>
-
-            <div>
-              <strong>Status:</strong>
-              ${escapeHTML(
-                data.status || "N/A"
-              )}
-            </div>
-
-          </div>
-
-          <div class="request-actions">
-
-            <button
-              class="approve-btn"
-              data-id="${docSnap.id}"
-              data-action="approve-student"
-            >
-              Approve
-            </button>
-
-            <button
-              class="reject-btn"
-              data-id="${docSnap.id}"
-              data-action="reject-student"
-            >
-              Reject
-            </button>
-
-          </div>
-
-        `;
-
-
-        container.appendChild(card);
-
-      });
-
-
-      container
-        .querySelectorAll("[data-action]")
-        .forEach(button => {
-
-          button.addEventListener(
-            "click",
-            async () => {
-
-              await updateStudentStatus(
-                button.dataset.id,
-                button.dataset.action
-              );
-
-            }
-          );
-
-        });
-
-    },
-
-    error => {
-
-      console.error(
-        "PENDING STUDENTS ERROR:",
-        error
-      );
-
-      document.getElementById(
-        "requestsList"
-      ).innerHTML = `
-        <div class="empty">
-          Unable to load student requests.
-        </div>
-      `;
-
-    }
-
-  );
-
-}
-
-
-/* ================= STUDENT STATUS ================= */
-
-async function updateStudentStatus(
-  userId,
-  action
-) {
-
-  try {
-
-    const newStatus =
-      action === "approve-student"
-        ? "active"
-        : "rejected";
-
-
-    await updateDoc(
-      doc(db, "users", userId),
-      {
-        status: newStatus
-      }
-    );
-
-
-    alert(
-      newStatus === "active"
-        ? "Student approved successfully."
-        : "Student registration rejected."
-    );
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "STUDENT STATUS ERROR:",
-      error
-    );
-
-    alert(
-      "Could not update student status."
-    );
-
-  }
-
-}
-
-
-/* ================= PENDING TEACHERS ================= */
-
-function listenForPendingTeachers() {
-
-  const container =
-    document.getElementById(
-      "teacherRequestsList"
-    );
-
-
-  container.innerHTML = `
-    <div class="empty">
-      Loading teacher requests...
-    </div>
-  `;
-
-
-  const q =
-    query(
-      collection(db, "users"),
-      where("role", "==", "teacher"),
-      where("status", "==", "pending")
-    );
-
-
-  onSnapshot(
-
-    q,
-
-    snapshot => {
-
-      console.log(
-        "Pending teacher count:",
-        snapshot.size
-      );
-
-
-      pendingTeacherTotal =
-        snapshot.size;
-
-
-      updatePendingTotal();
-
-
-      if (snapshot.empty) {
-
-        container.innerHTML = `
-          <div class="empty">
-            No pending teacher registrations.
-          </div>
-        `;
-
-        return;
-
-      }
-
-
-      container.innerHTML = "";
-
-
-      snapshot.forEach(docSnap => {
-
-        const data =
-          docSnap.data();
-
-
-        console.log(
-          "Pending teacher:",
-          docSnap.id,
-          data
-        );
-
-
-        const card =
-          document.createElement("div");
-
-
-        card.className =
-          "request-card";
-
-
-        card.innerHTML = `
-
-          <h3>
-            ${escapeHTML(
-              data.name || "Unnamed Teacher"
-            )}
-          </h3>
-
-          <div class="request-info">
-
-            <div>
-              <strong>Email:</strong>
-              ${escapeHTML(
-                data.email || "N/A"
-              )}
-            </div>
-
-            <div>
-              <strong>Subject:</strong>
-              ${escapeHTML(
-                data.subject || "N/A"
-              )}
-            </div>
-
-            <div>
-              <strong>Qualification:</strong>
-              ${escapeHTML(
-                data.qualification || "N/A"
-              )}
-            </div>
-
-            <div>
-              <strong>Teacher ID:</strong>
-              ${escapeHTML(
-                data.teacherId || "Not assigned"
-              )}
-            </div>
-
-            <div>
-              <strong>Status:</strong>
-              ${escapeHTML(
-                data.status || "N/A"
-              )}
-            </div>
-
-          </div>
-
-          <div class="request-actions">
-
-            <button
-              class="approve-btn"
-              data-id="${docSnap.id}"
-              data-action="approve-teacher"
-            >
-              Approve
-            </button>
-
-            <button
-              class="reject-btn"
-              data-id="${docSnap.id}"
-              data-action="reject-teacher"
-            >
-              Reject
-            </button>
-
-          </div>
-
-        `;
-
-
-        container.appendChild(card);
-
-      });
-
-
-      container
-        .querySelectorAll("[data-action]")
-        .forEach(button => {
-
-          button.addEventListener(
-            "click",
-            async () => {
-
-              await updateTeacherStatus(
-                button.dataset.id,
-                button.dataset.action
-              );
-
-            }
-          );
-
-        });
-
-    },
-
-    error => {
-
-      console.error(
-        "PENDING TEACHERS ERROR:",
-        error
-      );
-
-
-      container.innerHTML = `
-        <div class="empty">
-          Unable to load teacher requests.
-        </div>
-      `;
-
-    }
-
-  );
-
-}
-
-
-/* ================= TEACHER STATUS ================= */
-
-async function updateTeacherStatus(
-  userId,
-  action
-) {
-
-  try {
-
-    const newStatus =
-      action === "approve-teacher"
-        ? "active"
-        : "rejected";
-
-
-    await updateDoc(
-      doc(db, "users", userId),
-      {
-        status: newStatus
-      }
-    );
-
-
-    alert(
-      newStatus === "active"
-        ? "Teacher approved successfully."
-        : "Teacher registration rejected."
-    );
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "TEACHER STATUS ERROR:",
-      error
-    );
-
-    alert(
-      "Could not update teacher status."
-    );
-
-  }
-
-}
-
-
-/* ================= ACTIVE STUDENTS ================= */
-
-function listenForActiveStudents() {
-
-  const q =
-    query(
-      collection(db, "users"),
-      where("role", "==", "student"),
-      where("status", "==", "active")
-    );
-
-
-  onSnapshot(
-
-    q,
-
-    snapshot => {
-
-      document.getElementById(
-        "totalStudents"
-      ).textContent =
-        snapshot.size;
-
-
-      const table =
-        document.getElementById(
-          "studentsTableBody"
-        );
-
-
-      const overview =
-        document.getElementById(
-          "overviewStudents"
-        );
-
-
-      table.innerHTML = "";
-
-
-      if (snapshot.empty) {
-
-        overview.innerHTML = `
-          <div class="empty">
-            No active students.
-          </div>
-        `;
-
-        return;
-
-      }
-
-
-      overview.innerHTML = `
-        <strong>
-          ${snapshot.size}
-          active student(s)
-        </strong>
-      `;
-
-
-      snapshot.forEach(docSnap => {
-
-        const data =
-          docSnap.data();
-
-
-        const row =
-          document.createElement("tr");
-
-
-        row.innerHTML = `
-
-          <td>
-            ${escapeHTML(data.name || "")}
-          </td>
-
-          <td>
-            ${escapeHTML(data.email || "")}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              data.studentId || "N/A"
-            )}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              data.className || "N/A"
-            )}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              data.section || "N/A"
-            )}
-          </td>
-
-          <td>
-            Active
-          </td>
-
-        `;
-
-
-        table.appendChild(row);
-
-      });
-
-    },
-
-    error => {
-
-      console.error(
-        "ACTIVE STUDENTS ERROR:",
-        error
-      );
-
-    }
-
-  );
-
-}
-
-
-/* ================= ACTIVE TEACHERS ================= */
-
-function listenForActiveTeachers() {
-
-  const q =
-    query(
-      collection(db, "users"),
-      where("role", "==", "teacher"),
-      where("status", "==", "active")
-    );
-
-
-  onSnapshot(
-
-    q,
-
-    snapshot => {
-
-      document.getElementById(
-        "totalTeachers"
-      ).textContent =
-        snapshot.size;
-
-
-      const table =
-        document.getElementById(
-          "teachersTableBody"
-        );
-
-
-      const overview =
-        document.getElementById(
-          "overviewTeachers"
-        );
-
-
-      table.innerHTML = "";
-
-
-      if (snapshot.empty) {
-
-        overview.innerHTML = `
-          <div class="empty">
-            No active teachers.
-          </div>
-        `;
-
-        return;
-
-      }
-
-
-      overview.innerHTML = `
-        <strong>
-          ${snapshot.size}
-          active teacher(s)
-        </strong>
-      `;
-
-
-      snapshot.forEach(docSnap => {
-
-        const data =
-          docSnap.data();
-
-
-        const row =
-          document.createElement("tr");
-
-
-        row.innerHTML = `
-
-          <td>
-            ${escapeHTML(data.name || "")}
-          </td>
-
-          <td>
-            ${escapeHTML(data.email || "")}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              data.teacherId || "Not assigned"
-            )}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              data.subject || "N/A"
-            )}
-          </td>
-
-          <td>
-            ${escapeHTML(
-              data.qualification || "N/A"
-            )}
-          </td>
-
-          <td>
-            Active
-          </td>
-
-        `;
-
-
-        table.appendChild(row);
-
-      });
-
-    },
-
-    error => {
-
-      console.error(
-        "ACTIVE TEACHERS ERROR:",
-        error
-      );
-
-    }
-
-  );
-
-}
-
-
-/* ================= DASHBOARD ================= */
-
-async function loadDashboardData() {
-
-  try {
-
-    const paymentsSnap =
-      await getDocs(
-        collection(db, "payments")
-      );
-
-
-    let total = 0;
-
-
-    paymentsSnap.forEach(docSnap => {
-
-      const data =
-        docSnap.data();
-
-
-      if (data.status === "paid") {
-
-        total +=
-          Number(data.amount || 0);
-
-      }
-
-    });
-
-
-    document.getElementById(
-      "monthlyCollection"
-    ).textContent =
-      `৳${total.toLocaleString()}`;
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "DASHBOARD DATA ERROR:",
-      error
-    );
-
-  }
-
-}
-
-
-/* ================= HTML SECURITY ================= */
-
-function escapeHTML(value) {
-
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
-
-</script>
+<!-- Firebase/Admin JavaScript -->
+<script type="module" src="./js/admin.js"></script>
 
 </body>
 </html>
