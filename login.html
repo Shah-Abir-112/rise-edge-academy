@@ -1,1 +1,104 @@
-<!doctype html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login</title><link rel="stylesheet" href="css/style.css"></head><body><main class="card"><h1>Rise Edge Academy</h1><h2>Login</h2><form id="loginForm"><input type="email" placeholder="Email" required><input type="password" placeholder="Password" required><button class="btn">Login</button></form><p id="msg"></p><a href="register.html">Create account</a></main><script type="module" src="js/auth.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Login - Rise Edge Academy</title>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <a href="index.html" class="brand">
+    <span class="brand-icon">R</span>
+    <span>Rise Edge Academy</span>
+  </a>
+
+  <a href="index.html">Home</a>
+
+</header>
+
+
+<main class="container">
+
+  <div class="card" style="max-width:480px;margin:70px auto;">
+
+    <h1>Welcome Back 👋</h1>
+
+    <p style="color:#64748b;margin:10px 0 25px;">
+      Login to your Rise Edge Academy account.
+    </p>
+
+
+    <form id="loginForm">
+
+      <input
+        type="email"
+        id="loginEmail"
+        placeholder="Email address"
+        required
+      >
+
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Password"
+        required
+      >
+
+      <button class="btn btn-primary" type="submit">
+        Login
+      </button>
+
+    </form>
+
+
+    <p id="loginMessage" style="margin-top:15px;"></p>
+
+
+    <p style="margin-top:20px;text-align:center;">
+      Don't have an account?
+      <a href="register.html">Create account</a>
+    </p>
+
+  </div>
+
+</main>
+
+
+<script type="module">
+
+  import { loginUser }
+    from "./js/auth.js";
+
+
+  const loginForm =
+    document.getElementById("loginForm");
+
+
+  loginForm.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+
+    const email =
+      document.getElementById("loginEmail").value.trim();
+
+
+    const password =
+      document.getElementById("loginPassword").value;
+
+
+    await loginUser(email, password);
+
+  });
+
+</script>
+
+</body>
+</html>
