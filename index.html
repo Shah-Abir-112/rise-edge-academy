@@ -2,238 +2,145 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Rise Edge Academy</title>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Login - Rise Edge Academy</title>
 
   <link rel="stylesheet" href="css/style.css">
+
 </head>
+
 
 <body>
 
-  <!-- Navigation -->
-  <header class="navbar">
 
-    <a href="index.html" class="brand">
-      <span class="brand-icon">R</span>
-      <span>Rise Edge Academy</span>
+<header class="navbar">
+
+  <a href="index.html" class="brand">
+
+    <span class="brand-icon">R</span>
+
+    <span>Rise Edge Academy</span>
+
+  </a>
+
+  <nav class="nav-links">
+
+    <a href="index.html">Home</a>
+
+    <a href="register.html" class="nav-register">
+      Register
     </a>
 
-    <nav class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="#about">About</a>
-      <a href="#features">Features</a>
-      <a href="login.html" class="nav-login">Login</a>
-      <a href="register.html" class="nav-register">Register</a>
-    </nav>
+  </nav>
 
-  </header>
+</header>
 
 
-  <!-- Hero Section -->
-  <main>
 
-    <section class="hero">
+<main class="container">
 
-      <div class="hero-content">
 
-        <div class="hero-badge">
-          ✦ Learn • Grow • Rise
-        </div>
+  <div
+    class="card"
+    style="
+      max-width:480px;
+      margin:80px auto;
+      padding:35px;
+    "
+  >
 
-        <h1>
-          Learn Today.<br>
-          <span>Rise Tomorrow.</span>
-        </h1>
+    <h1>Welcome Back 👋</h1>
 
-        <p>
-          Welcome to Rise Edge Academy — a modern learning platform
-          connecting students, teachers and academy management in one place.
-        </p>
+    <p
+      style="
+        color:#64748b;
+        margin:10px 0 25px;
+      "
+    >
+      Login to your Rise Edge Academy account.
+    </p>
 
-        <div class="hero-buttons">
-          <a href="register.html" class="btn btn-primary">
-            Get Started →
-          </a>
 
-          <a href="login.html" class="btn btn-secondary">
-            Login
-          </a>
-        </div>
+    <form id="loginForm">
 
-      </div>
 
+      <input
+        type="email"
+        id="loginEmail"
+        placeholder="Email address"
+        autocomplete="email"
+        required
+      >
 
-      <div class="hero-card">
 
-        <div class="floating-icon">🎓</div>
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Password"
+        autocomplete="current-password"
+        required
+      >
 
-        <h3>Rise Edge Academy</h3>
 
-        <p>
-          Your journey to better learning starts here.
-        </p>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        style="width:100%;"
+      >
+        Login
+      </button>
 
-        <div class="mini-stats">
 
-          <div>
-            <strong>Students</strong>
-            <span>Learn</span>
-          </div>
+    </form>
 
-          <div>
-            <strong>Teachers</strong>
-            <span>Guide</span>
-          </div>
 
-          <div>
-            <strong>Academy</strong>
-            <span>Grow</span>
-          </div>
+    <p
+      id="loginMessage"
+      style="
+        margin-top:15px;
+        text-align:center;
+      "
+    ></p>
 
-        </div>
 
-      </div>
+    <p
+      style="
+        margin-top:25px;
+        text-align:center;
+        color:#64748b;
+      "
+    >
+      Don't have an account?
 
-    </section>
-
-
-    <!-- Features -->
-    <section id="features" class="section">
-
-      <div class="section-heading">
-
-        <span>OUR PLATFORM</span>
-
-        <h2>Everything you need to learn better</h2>
-
-        <p>
-          A simple and organized platform for students, teachers and admins.
-        </p>
-
-      </div>
-
-
-      <div class="feature-grid">
-
-        <div class="feature-card">
-
-          <div class="feature-icon">👨‍🎓</div>
-
-          <h3>Student Portal</h3>
-
-          <p>
-            Access classes, attendance, notes, payments and teacher chat
-            from your student dashboard.
-          </p>
-
-        </div>
-
-
-        <div class="feature-card">
-
-          <div class="feature-icon">👨‍🏫</div>
-
-          <h3>Teacher Portal</h3>
-
-          <p>
-            Manage classes, study notes, payments and communicate with
-            students easily.
-          </p>
-
-        </div>
-
-
-        <div class="feature-card">
-
-          <div class="feature-icon">⚙️</div>
-
-          <h3>Admin Management</h3>
-
-          <p>
-            Manage teachers, students, payments and important academy
-            notices from one dashboard.
-          </p>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- About -->
-    <section id="about" class="about-section">
-
-      <div>
-
-        <span class="section-label">ABOUT US</span>
-
-        <h2>
-          Building a better learning experience.
-        </h2>
-
-        <p>
-          Rise Edge Academy is designed to make education management
-          easier, faster and more organized.
-        </p>
-
-        <p>
-          Students can focus on learning while teachers and administrators
-          can manage their work efficiently.
-        </p>
-
-      </div>
-
-
-      <div class="about-box">
-
-        <div class="about-number">01</div>
-
-        <h3>Learn</h3>
-
-        <p>
-          Access your classes and study materials.
-        </p>
-
-      </div>
-
-    </section>
-
-
-    <!-- CTA -->
-    <section class="cta">
-
-      <h2>Ready to start your journey?</h2>
-
-      <p>
-        Create your account and join Rise Edge Academy today.
-      </p>
-
-      <a href="register.html" class="btn btn-light">
-        Create Account →
+      <a href="register.html">
+        Create account
       </a>
 
-    </section>
-
-  </main>
+    </p>
 
 
-  <!-- Footer -->
-  <footer class="footer">
+  </div>
 
-    <div>
-      <strong>Rise Edge Academy</strong>
-      <p>Learn • Grow • Rise</p>
-    </div>
 
-    <div>
-      <p>© 2026 Rise Edge Academy</p>
-    </div>
+</main>
 
-  </footer>
+
+
+<!-- Firebase Login Script -->
+
+<script
+  type="module"
+  src="js/login.js"
+></script>
+
 
 </body>
 
-  </html>
+</html>
