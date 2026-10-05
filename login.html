@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Login - Rise Edge Academy</title>
 
   <link rel="stylesheet" href="css/style.css">
@@ -34,7 +33,6 @@
       Login to your Rise Edge Academy account.
     </p>
 
-
     <form id="loginForm">
 
       <input
@@ -57,9 +55,7 @@
 
     </form>
 
-
     <p id="loginMessage" style="margin-top:15px;"></p>
-
 
     <p style="margin-top:20px;text-align:center;">
       Don't have an account?
@@ -73,30 +69,40 @@
 
 <script type="module">
 
-  import { loginUser }
-    from "./js/auth.js";
+import { loginUser } from "./js/auth.js";
 
 
-  const loginForm =
-    document.getElementById("loginForm");
+const form = document.getElementById("loginForm");
+
+const message = document.getElementById("loginMessage");
 
 
-  loginForm.addEventListener("submit", async (event) => {
+form.addEventListener("submit", async function(event) {
 
-    event.preventDefault();
+  event.preventDefault();
 
+  message.textContent = "Logging in...";
 
-    const email =
-      document.getElementById("loginEmail").value.trim();
+  const email =
+    document.getElementById("loginEmail").value.trim();
 
+  const password =
+    document.getElementById("loginPassword").value;
 
-    const password =
-      document.getElementById("loginPassword").value;
-
+  try {
 
     await loginUser(email, password);
 
-  });
+  } catch (error) {
+
+    console.error(error);
+
+    message.textContent =
+      "Login failed: " + error.message;
+
+  }
+
+});
 
 </script>
 
