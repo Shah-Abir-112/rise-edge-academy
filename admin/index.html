@@ -25,7 +25,7 @@
       min-height: 100vh;
     }
 
-    /* SIDEBAR */
+    /* ================= SIDEBAR ================= */
 
     .sidebar {
       width: 260px;
@@ -78,7 +78,7 @@
       font-size: 15px;
     }
 
-    /* MAIN */
+    /* ================= MAIN ================= */
 
     .main-content {
       margin-left: 260px;
@@ -107,7 +107,7 @@
       font-size: 14px;
     }
 
-    /* SECTIONS */
+    /* ================= SECTIONS ================= */
 
     .page-section {
       display: none;
@@ -117,7 +117,7 @@
       display: block;
     }
 
-    /* CARDS */
+    /* ================= STATS ================= */
 
     .stats-grid {
       display: grid;
@@ -146,6 +146,8 @@
       color: #111827;
     }
 
+    /* ================= CARDS ================= */
+
     .card-box {
       background: white;
       border-radius: 12px;
@@ -158,7 +160,7 @@
       margin-top: 0;
     }
 
-    /* REQUEST */
+    /* ================= REQUEST ================= */
 
     .request-card {
       border: 1px solid #e5e7eb;
@@ -176,7 +178,7 @@
     .request-info {
       color: #6b7280;
       font-size: 14px;
-      line-height: 1.7;
+      line-height: 1.8;
     }
 
     .request-actions {
@@ -204,7 +206,15 @@
       background: #dc2626;
     }
 
-    /* TABLE */
+    .approve-btn:hover {
+      background: #15803d;
+    }
+
+    .reject-btn:hover {
+      background: #b91c1c;
+    }
+
+    /* ================= TABLE ================= */
 
     .table-wrapper {
       overflow-x: auto;
@@ -227,7 +237,7 @@
       background: #f9fafb;
     }
 
-    /* PROFILE */
+    /* ================= PROFILE ================= */
 
     .profile-row {
       display: flex;
@@ -252,7 +262,7 @@
       margin: 8px 0;
     }
 
-    /* EMPTY */
+    /* ================= EMPTY ================= */
 
     .empty {
       padding: 20px;
@@ -262,7 +272,11 @@
       border-radius: 8px;
     }
 
-    /* MOBILE */
+    .muted {
+      color: #6b7280;
+    }
+
+    /* ================= MOBILE ================= */
 
     .mobile-menu {
       display: none;
@@ -288,6 +302,7 @@
 
       .sidebar {
         display: none;
+        z-index: 1000;
       }
 
       .main-content {
@@ -329,7 +344,7 @@
 
 <div class="admin-layout">
 
-  <!-- SIDEBAR -->
+  <!-- ================= SIDEBAR ================= -->
 
   <aside class="sidebar" id="sidebar">
 
@@ -384,16 +399,13 @@
   </aside>
 
 
-  <!-- MAIN -->
+  <!-- ================= MAIN ================= -->
 
   <main class="main-content">
 
     <button class="mobile-menu" id="mobileMenu">
       ☰ Menu
     </button>
-
-
-    <!-- TOPBAR -->
 
     <div class="topbar">
 
@@ -541,7 +553,6 @@
           <table>
 
             <thead>
-
               <tr>
                 <th>Name</th>
                 <th>Email</th>
@@ -550,12 +561,9 @@
                 <th>Section</th>
                 <th>Status</th>
               </tr>
-
             </thead>
 
-            <tbody id="studentsTableBody">
-
-            </tbody>
+            <tbody id="studentsTableBody"></tbody>
 
           </table>
 
@@ -579,7 +587,6 @@
           <table>
 
             <thead>
-
               <tr>
                 <th>Name</th>
                 <th>Email</th>
@@ -588,12 +595,9 @@
                 <th>Qualification</th>
                 <th>Status</th>
               </tr>
-
             </thead>
 
-            <tbody id="teachersTableBody">
-
-            </tbody>
+            <tbody id="teachersTableBody"></tbody>
 
           </table>
 
@@ -608,7 +612,7 @@
 
     <section id="admissions" class="page-section">
 
-      <!-- STUDENT REQUESTS -->
+      <!-- STUDENT -->
 
       <div class="card-box">
 
@@ -629,7 +633,7 @@
       </div>
 
 
-      <!-- TEACHER REQUESTS -->
+      <!-- TEACHER -->
 
       <div class="card-box">
 
@@ -661,8 +665,8 @@
         <h2>Tuition Management</h2>
 
         <p>
-          Manage student tuition payments, pending payments and
-          transaction records.
+          Manage student tuition payments, pending payments
+          and transaction records.
         </p>
 
         <div id="paymentsList" class="empty">
@@ -762,7 +766,7 @@
 </div>
 
 
-<!-- ================= FIREBASE SCRIPT ================= -->
+<!-- ================= FIREBASE ================= -->
 
 <script type="module">
 
@@ -790,7 +794,6 @@ import {
 } from "../js/firebase-config.js";
 
 
-
 /* ================= VARIABLES ================= */
 
 let currentAdmin = null;
@@ -799,8 +802,7 @@ let pendingStudentTotal = 0;
 let pendingTeacherTotal = 0;
 
 
-
-/* ================= ELEMENTS ================= */
+/* ================= NAVIGATION ================= */
 
 const navItems =
   document.querySelectorAll(".nav-item");
@@ -811,9 +813,6 @@ const sections =
 const pageTitle =
   document.getElementById("pageTitle");
 
-
-
-/* ================= NAVIGATION ================= */
 
 navItems.forEach(item => {
 
@@ -828,35 +827,31 @@ navItems.forEach(item => {
 
     item.classList.add("active");
 
+
     sections.forEach(section => {
       section.classList.remove("active");
     });
 
-    document
-      .getElementById(target)
-      .classList.add("active");
+
+    const targetSection =
+      document.getElementById(target);
+
+    if (targetSection) {
+      targetSection.classList.add("active");
+    }
 
 
     const titles = {
 
       dashboard: "Admin Dashboard",
-
       profile: "Admin Profile",
-
       students: "Students",
-
       teachers: "Teachers",
-
       admissions: "Admissions / Requests",
-
       payments: "Tuition Management",
-
       salary: "Teacher Salary",
-
       notices: "Notices",
-
       messages: "Messages / Monitoring",
-
       settings: "Settings"
 
     };
@@ -867,15 +862,16 @@ navItems.forEach(item => {
 
 
     if (window.innerWidth <= 650) {
-      document
-        .getElementById("sidebar")
-        .style.display = "none";
+
+      document.getElementById(
+        "sidebar"
+      ).style.display = "none";
+
     }
 
   });
 
 });
-
 
 
 /* ================= MOBILE MENU ================= */
@@ -900,7 +896,6 @@ document
   });
 
 
-
 /* ================= LOGOUT ================= */
 
 document
@@ -923,10 +918,9 @@ document
   });
 
 
-
 /* ================= AUTH GUARD ================= */
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async user => {
 
   if (!user) {
 
@@ -997,13 +991,9 @@ onAuthStateChanged(auth, async (user) => {
 
 
     currentAdmin = {
-
       uid: user.uid,
-
       email: user.email,
-
       ...userData
-
     };
 
 
@@ -1035,7 +1025,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 
 });
-
 
 
 /* ================= PROFILE ================= */
@@ -1093,7 +1082,6 @@ function loadAdminProfile() {
 }
 
 
-
 /* ================= PENDING TOTAL ================= */
 
 function updatePendingTotal() {
@@ -1122,7 +1110,6 @@ function updatePendingTotal() {
 }
 
 
-
 /* ================= PENDING STUDENTS ================= */
 
 function listenForPendingStudents() {
@@ -1136,13 +1123,13 @@ function listenForPendingStudents() {
 
 
   onSnapshot(
+
     q,
 
     snapshot => {
 
       pendingStudentTotal =
         snapshot.size;
-
 
       updatePendingTotal();
 
@@ -1155,10 +1142,11 @@ function listenForPendingStudents() {
 
       if (snapshot.empty) {
 
-        container.innerHTML =
-          `<div class="empty">
+        container.innerHTML = `
+          <div class="empty">
             No pending student registrations.
-          </div>`;
+          </div>
+        `;
 
         return;
 
@@ -1185,29 +1173,46 @@ function listenForPendingStudents() {
         card.innerHTML = `
 
           <h3>
-            ${escapeHTML(data.name || "Unnamed Student")}
+            ${escapeHTML(
+              data.name || "Unnamed Student"
+            )}
           </h3>
 
           <div class="request-info">
 
             <div>
               <strong>Email:</strong>
-              ${escapeHTML(data.email || "")}
+              ${escapeHTML(
+                data.email || "N/A"
+              )}
             </div>
 
             <div>
               <strong>Student ID:</strong>
-              ${escapeHTML(data.studentId || "N/A")}
+              ${escapeHTML(
+                data.studentId || "N/A"
+              )}
             </div>
 
             <div>
               <strong>Class:</strong>
-              ${escapeHTML(data.className || "N/A")}
+              ${escapeHTML(
+                data.className || "N/A"
+              )}
             </div>
 
             <div>
               <strong>Section:</strong>
-              ${escapeHTML(data.section || "N/A")}
+              ${escapeHTML(
+                data.section || "N/A"
+              )}
+            </div>
+
+            <div>
+              <strong>Status:</strong>
+              ${escapeHTML(
+                data.status || "N/A"
+              )}
             </div>
 
           </div>
@@ -1248,16 +1253,9 @@ function listenForPendingStudents() {
             "click",
             async () => {
 
-              const id =
-                button.dataset.id;
-
-              const action =
-                button.dataset.action;
-
-
               await updateStudentStatus(
-                id,
-                action
+                button.dataset.id,
+                button.dataset.action
               );
 
             }
@@ -1276,17 +1274,17 @@ function listenForPendingStudents() {
 
       document.getElementById(
         "requestsList"
-      ).innerHTML =
-        `<div class="empty">
+      ).innerHTML = `
+        <div class="empty">
           Unable to load student requests.
-        </div>`;
+        </div>
+      `;
 
     }
 
   );
 
 }
-
 
 
 /* ================= STUDENT STATUS ================= */
@@ -1336,10 +1334,22 @@ async function updateStudentStatus(
 }
 
 
-
 /* ================= PENDING TEACHERS ================= */
 
 function listenForPendingTeachers() {
+
+  const container =
+    document.getElementById(
+      "teacherRequestsList"
+    );
+
+
+  container.innerHTML = `
+    <div class="empty">
+      Loading teacher requests...
+    </div>
+  `;
+
 
   const q =
     query(
@@ -1355,6 +1365,12 @@ function listenForPendingTeachers() {
 
     snapshot => {
 
+      console.log(
+        "Pending teacher count:",
+        snapshot.size
+      );
+
+
       pendingTeacherTotal =
         snapshot.size;
 
@@ -1362,18 +1378,13 @@ function listenForPendingTeachers() {
       updatePendingTotal();
 
 
-      const container =
-        document.getElementById(
-          "teacherRequestsList"
-        );
-
-
       if (snapshot.empty) {
 
-        container.innerHTML =
-          `<div class="empty">
+        container.innerHTML = `
+          <div class="empty">
             No pending teacher registrations.
-          </div>`;
+          </div>
+        `;
 
         return;
 
@@ -1389,6 +1400,13 @@ function listenForPendingTeachers() {
           docSnap.data();
 
 
+        console.log(
+          "Pending teacher:",
+          docSnap.id,
+          data
+        );
+
+
         const card =
           document.createElement("div");
 
@@ -1400,24 +1418,46 @@ function listenForPendingTeachers() {
         card.innerHTML = `
 
           <h3>
-            ${escapeHTML(data.name || "Unnamed Teacher")}
+            ${escapeHTML(
+              data.name || "Unnamed Teacher"
+            )}
           </h3>
 
           <div class="request-info">
 
             <div>
               <strong>Email:</strong>
-              ${escapeHTML(data.email || "")}
+              ${escapeHTML(
+                data.email || "N/A"
+              )}
             </div>
 
             <div>
               <strong>Subject:</strong>
-              ${escapeHTML(data.subject || "N/A")}
+              ${escapeHTML(
+                data.subject || "N/A"
+              )}
             </div>
 
             <div>
               <strong>Qualification:</strong>
-              ${escapeHTML(data.qualification || "N/A")}
+              ${escapeHTML(
+                data.qualification || "N/A"
+              )}
+            </div>
+
+            <div>
+              <strong>Teacher ID:</strong>
+              ${escapeHTML(
+                data.teacherId || "Not assigned"
+              )}
+            </div>
+
+            <div>
+              <strong>Status:</strong>
+              ${escapeHTML(
+                data.status || "N/A"
+              )}
             </div>
 
           </div>
@@ -1458,16 +1498,9 @@ function listenForPendingTeachers() {
             "click",
             async () => {
 
-              const id =
-                button.dataset.id;
-
-              const action =
-                button.dataset.action;
-
-
               await updateTeacherStatus(
-                id,
-                action
+                button.dataset.id,
+                button.dataset.action
               );
 
             }
@@ -1485,19 +1518,17 @@ function listenForPendingTeachers() {
       );
 
 
-      document.getElementById(
-        "teacherRequestsList"
-      ).innerHTML =
-        `<div class="empty">
+      container.innerHTML = `
+        <div class="empty">
           Unable to load teacher requests.
-        </div>`;
+        </div>
+      `;
 
     }
 
   );
 
 }
-
 
 
 /* ================= TEACHER STATUS ================= */
@@ -1547,7 +1578,6 @@ async function updateTeacherStatus(
 }
 
 
-
 /* ================= ACTIVE STUDENTS ================= */
 
 function listenForActiveStudents() {
@@ -1589,21 +1619,23 @@ function listenForActiveStudents() {
 
       if (snapshot.empty) {
 
-        overview.innerHTML =
-          `<div class="empty">
+        overview.innerHTML = `
+          <div class="empty">
             No active students.
-          </div>`;
+          </div>
+        `;
 
         return;
 
       }
 
 
-      overview.innerHTML =
-        `<strong>
+      overview.innerHTML = `
+        <strong>
           ${snapshot.size}
           active student(s)
-        </strong>`;
+        </strong>
+      `;
 
 
       snapshot.forEach(docSnap => {
@@ -1627,15 +1659,21 @@ function listenForActiveStudents() {
           </td>
 
           <td>
-            ${escapeHTML(data.studentId || "N/A")}
+            ${escapeHTML(
+              data.studentId || "N/A"
+            )}
           </td>
 
           <td>
-            ${escapeHTML(data.className || "N/A")}
+            ${escapeHTML(
+              data.className || "N/A"
+            )}
           </td>
 
           <td>
-            ${escapeHTML(data.section || "N/A")}
+            ${escapeHTML(
+              data.section || "N/A"
+            )}
           </td>
 
           <td>
@@ -1663,7 +1701,6 @@ function listenForActiveStudents() {
   );
 
 }
-
 
 
 /* ================= ACTIVE TEACHERS ================= */
@@ -1707,21 +1744,23 @@ function listenForActiveTeachers() {
 
       if (snapshot.empty) {
 
-        overview.innerHTML =
-          `<div class="empty">
+        overview.innerHTML = `
+          <div class="empty">
             No active teachers.
-          </div>`;
+          </div>
+        `;
 
         return;
 
       }
 
 
-      overview.innerHTML =
-        `<strong>
+      overview.innerHTML = `
+        <strong>
           ${snapshot.size}
           active teacher(s)
-        </strong>`;
+        </strong>
+      `;
 
 
       snapshot.forEach(docSnap => {
@@ -1745,15 +1784,21 @@ function listenForActiveTeachers() {
           </td>
 
           <td>
-            ${escapeHTML(data.teacherId || "Not assigned")}
+            ${escapeHTML(
+              data.teacherId || "Not assigned"
+            )}
           </td>
 
           <td>
-            ${escapeHTML(data.subject || "N/A")}
+            ${escapeHTML(
+              data.subject || "N/A"
+            )}
           </td>
 
           <td>
-            ${escapeHTML(data.qualification || "N/A")}
+            ${escapeHTML(
+              data.qualification || "N/A"
+            )}
           </td>
 
           <td>
@@ -1783,8 +1828,7 @@ function listenForActiveTeachers() {
 }
 
 
-
-/* ================= DASHBOARD DATA ================= */
+/* ================= DASHBOARD ================= */
 
 async function loadDashboardData() {
 
@@ -1796,8 +1840,7 @@ async function loadDashboardData() {
       );
 
 
-    let total =
-      0;
+    let total = 0;
 
 
     paymentsSnap.forEach(docSnap => {
@@ -1835,8 +1878,7 @@ async function loadDashboardData() {
 }
 
 
-
-/* ================= SECURITY HELPER ================= */
+/* ================= HTML SECURITY ================= */
 
 function escapeHTML(value) {
 
