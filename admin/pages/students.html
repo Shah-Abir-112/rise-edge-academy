@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Students | Rise Edge Academy</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/admin.css"
+    >
+
+    <style>
+        .students-toolbar {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .search-box input,
+        .filter-box select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box input:focus,
+        .filter-box select:focus {
+            border-color: #2563eb;
+        }
+
+        .filter-box {
+            width: 170px;
+        }
+
+        .student-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .student-stat {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .student-stat span {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .student-stat strong {
+            font-size: 24px;
+        }
+
+        .table-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table-header h3 {
+            font-size: 17px;
+            margin-bottom: 5px;
+        }
+
+        .table-header p {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        .students-table th,
+        .students-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .students-table th {
+            background: #f8fafc;
+            color: #4b5563;
+            font-size: 12px;
+        }
+
+        .students-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-active {
+            color: #15803d;
+            background: #dcfce7;
+        }
+
+        .status-released {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .status-pending {
+            color: #b45309;
+            background: #fef3c7;
+        }
+
+        .view-btn {
+            border: none;
+            background: #eef2ff;
+            color: #2563eb;
+            padding: 7px 11px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .view-btn:hover {
+            background: #dbeafe;
+        }
+
+        .empty-table {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 35px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 700px) {
+
+            .student-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-box {
+                width: 100%;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="main-content" style="width:100%; margin-left:0;">
+
+        <header class="topbar">
+
+            <div>
+                <h1>Students</h1>
+                <p>Rise Edge Academy Student Management</p>
+            </div>
+
+            <div class="admin-mini-profile">
+                <div class="avatar">A</div>
+
+                <div>
+                    <strong id="topAdminName">
+                        Admin
+                    </strong>
+
+                    <small>
+                        Administrator
+                    </small>
+                </div>
+            </div>
+
+        </header>
+
+
+        <section class="content-area">
+
+            <!-- HEADING -->
+
+            <div class="section-heading">
+
+                <span class="small-label">
+                    STUDENT MANAGEMENT
+                </span>
+
+                <h2>
+                    Students
+                </h2>
+
+                <p>
+                    View and manage Rise Edge Academy students.
+                </p>
+
+            </div>
+
+
+            <!-- STATISTICS -->
+
+            <div class="student-stats">
+
+                <div class="student-stat">
+                    <span>
+                        Total Students
+                    </span>
+
+                    <strong id="studentTotal">
+                        0
+                    </strong>
+                </div>
+
+
+                <div class="student-stat">
+                    <span>
+                        Active Students
+                    </span>
+
+                    <strong id="studentActive">
+                        0
+                    </strong>
+                </div>
+
+
+                <div class="student-stat">
+                    <span>
+                        Released Students
+                    </span>
+
+                    <strong id="studentReleased">
+                        0
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <!-- SEARCH / FILTER -->
+
+            <div class="students-toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        type="text"
+                        id="studentSearch"
+                        placeholder="Search by name, email or Student ID..."
+                    >
+
+                </div>
+
+
+                <div class="filter-box">
+
+                    <select id="statusFilter">
+
+                        <option value="all">
+                            All Status
+                        </option>
+
+                        <option value="active">
+                            Active
+                        </option>
+
+                        <option value="released">
+                            Released
+                        </option>
+
+                        <option value="pending">
+                            Pending
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- STUDENT TABLE -->
+
+            <div class="table-card">
+
+                <div class="table-header">
+
+                    <h3>
+                        Student List
+                    </h3>
+
+                    <p>
+                        Student information from Firebase.
+                    </p>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="students-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Name
+                                </th>
+
+                                <th>
+                                    Email
+                                </th>
+
+                                <th>
+                                    Student ID
+                                </th>
+
+                                <th>
+                                    Class
+                                </th>
+
+                                <th>
+                                    Section
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="studentsTableBody">
+
+                            <tr>
+                                <td
+                                    colspan="7"
+                                    class="loading"
+                                >
+                                    Loading students...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- STUDENT DETAILS MODAL -->
+
+    <div
+        id="studentModal"
+        style="
+            display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.45);
+            z-index:2000;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+        "
+    >
+
+        <div
+            style="
+                background:#fff;
+                width:100%;
+                max-width:500px;
+                border-radius:18px;
+                padding:25px;
+                max-height:90vh;
+                overflow-y:auto;
+            "
+        >
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:20px;
+                "
+            >
+
+                <h2>
+                    Student Details
+                </h2>
+
+                <button
+                    id="closeStudentModal"
+                    style="
+                        border:none;
+                        background:#f3f4f6;
+                        width:35px;
+                        height:35px;
+                        border-radius:50%;
+                        cursor:pointer;
+                        font-size:18px;
+                    "
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div id="studentDetails">
+                Loading...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Student JavaScript -->
+
+    <script
+        type="module"
+        src="../js/students.js"
+    ></script>
+
+</body>
+</html>
