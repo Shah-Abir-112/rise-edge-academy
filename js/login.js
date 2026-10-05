@@ -14,7 +14,7 @@ form.addEventListener("submit", async (event) => {
   message.textContent = "Logging in...";
 
   try {
-    // 1. Firebase Authentication
+    // Firebase Authentication login
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
@@ -23,10 +23,9 @@ form.addEventListener("submit", async (event) => {
 
     const user = userCredential.user;
 
-    console.log("AUTH UID:", user.uid);
-    console.log("AUTH EMAIL:", user.email);
+    console.log("Firebase UID:", user.uid);
 
-    // 2. Firestore user document
+    // Get user profile from Firestore
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
 
@@ -36,29 +35,29 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
-    const data = userSnap.data();
+    const userData = userSnap.data();
 
-    const role = String(data.role || "").trim().toLowerCase();
-    const status = String(data.status || "").trim().toLowerCase();
+    const role = String(userData.role || "").trim().toLowerCase();
+    const status = String(userData.status || "").trim().toLowerCase();
 
-    console.log("FIRESTORE DATA:", data);
-    console.log("ROLE:", role);
-    console.log("STATUS:", status);
+    console.log("Firestore profile:", userData);
+    console.log("Role:", role);
+    console.log("Status:", status);
 
-    // 3. Check status
+    // Account status check
     if (status !== "active") {
       message.textContent = `Account status: "${status}". Please contact admin.`;
       await signOut(auth);
       return;
     }
 
-    // 4. Save login information
+    // Save login information
     localStorage.setItem(
       "riseEdgeUser",
       JSON.stringify({
         uid: user.uid,
         email: user.email,
-        name: data.name || "",
+        name: userData.name || "",
         role: role,
         status: status
       })
@@ -66,21 +65,27 @@ form.addEventListener("submit", async (event) => {
 
     message.textContent = "Login successful!";
 
-    // 5. Role-based redirect
+    // Role-based portal
     setTimeout(() => {
+
       if (role === "admin") {
         window.location.href = "admin/index.html";
+
       } else if (role === "teacher") {
         window.location.href = "teacher/index.html";
+
       } else if (role === "student") {
         window.location.href = "student/index.html";
+
       } else {
-        message.textContent = `Invalid role: ${role}`;
+        message.textContent = "Invalid user role.";
         signOut(auth);
       }
+
     }, 500);
 
   } catch (error) {
+
     console.error("LOGIN ERROR:", error);
 
     if (
@@ -89,8 +94,10 @@ form.addEventListener("submit", async (event) => {
       error.code === "auth/user-not-found"
     ) {
       message.textContent = "Incorrect email or password.";
+
     } else if (error.code === "auth/invalid-email") {
       message.textContent = "Please enter a valid email.";
+
     } else {
       message.textContent = error.message;
     }
