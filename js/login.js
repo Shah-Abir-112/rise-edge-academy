@@ -14,6 +14,7 @@ form.addEventListener("submit", async (event) => {
   message.textContent = "Logging in...";
 
   try {
+    // 1. Firebase Authentication
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
@@ -22,51 +23,59 @@ form.addEventListener("submit", async (event) => {
 
     const user = userCredential.user;
 
-    const userDocRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
+    console.log("AUTH UID:", user.uid);
+    console.log("AUTH EMAIL:", user.email);
 
-    if (!userDoc.exists()) {
+    // 2. Firestore user document
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
       message.textContent = "User profile not found.";
       await signOut(auth);
       return;
     }
 
-    const userData = userDoc.data();
+    const data = userSnap.data();
 
-    const role = String(userData.role || "").trim().toLowerCase();
-    const status = String(userData.status || "").trim().toLowerCase();
+    const role = String(data.role || "").trim().toLowerCase();
+    const status = String(data.status || "").trim().toLowerCase();
 
-    console.log("UID:", user.uid);
-    console.log("Role:", role);
-    console.log("Status:", status);
+    console.log("FIRESTORE DATA:", data);
+    console.log("ROLE:", role);
+    console.log("STATUS:", status);
 
+    // 3. Check status
     if (status !== "active") {
-      message.textContent = "Your account is not active.";
+      message.textContent = `Account status: "${status}". Please contact admin.`;
       await signOut(auth);
       return;
     }
 
+    // 4. Save login information
     localStorage.setItem(
       "riseEdgeUser",
       JSON.stringify({
         uid: user.uid,
         email: user.email,
-        name: userData.name || "",
-        role: role
+        name: data.name || "",
+        role: role,
+        status: status
       })
     );
 
     message.textContent = "Login successful!";
 
+    // 5. Role-based redirect
     setTimeout(() => {
-      if (role === "student") {
-        window.location.href = "student/index.html";
+      if (role === "admin") {
+        window.location.href = "admin/index.html";
       } else if (role === "teacher") {
         window.location.href = "teacher/index.html";
-      } else if (role === "admin") {
-        window.location.href = "admin/index.html";
+      } else if (role === "student") {
+        window.location.href = "student/index.html";
       } else {
-        message.textContent = "Invalid user role.";
+        message.textContent = `Invalid role: ${role}`;
         signOut(auth);
       }
     }, 500);
