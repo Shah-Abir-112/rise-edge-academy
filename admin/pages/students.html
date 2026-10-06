@@ -178,7 +178,154 @@
             color: #b42318;
         }
 
+
+        /* =====================================================
+           STUDENT MODAL
+        ===================================================== */
+
+        .student-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        .student-modal.active {
+            display: flex;
+        }
+
+        .student-modal-box {
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .student-modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .student-modal-header h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .modal-close-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            background: #f2f2f2;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .student-modal-profile {
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-profile-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .modal-profile-name {
+            margin: 0 0 5px;
+            font-size: 23px;
+        }
+
+        .modal-profile-id {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .student-modal-body {
+            padding: 25px;
+        }
+
+        .student-detail-section {
+            margin-bottom: 25px;
+        }
+
+        .student-detail-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .student-detail-section h3 {
+            margin: 0 0 15px;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .student-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .student-detail-item {
+            padding: 12px 14px;
+            background: #f8f8f8;
+            border-radius: 9px;
+        }
+
+        .student-detail-label {
+            display: block;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .student-detail-value {
+            font-size: 14px;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .student-modal-footer {
+            padding: 18px 25px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .modal-footer-close {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: #222;
+            color: #fff;
+            cursor: pointer;
+        }
+
         @media (max-width: 600px) {
+
             .students-page {
                 padding: 15px;
             }
@@ -186,17 +333,44 @@
             .students-header h1 {
                 font-size: 23px;
             }
+
+            .student-modal {
+                padding: 10px;
+            }
+
+            .student-modal-box {
+                max-height: 94vh;
+                border-radius: 14px;
+            }
+
+            .student-detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .student-modal-profile {
+                padding: 20px;
+            }
+
+            .student-modal-body {
+                padding: 20px;
+            }
         }
     </style>
 </head>
+
 
 <body>
 
     <div class="students-page">
 
         <div class="students-header">
+
             <h1>Students Management</h1>
-            <p>View and manage all registered students.</p>
+
+            <p>
+                View and manage all registered students.
+            </p>
+
         </div>
 
 
@@ -209,22 +383,47 @@
             >
 
             <select id="statusFilter">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="released">Released</option>
-                <option value="inactive">Inactive</option>
+
+                <option value="all">
+                    All Status
+                </option>
+
+                <option value="active">
+                    Active
+                </option>
+
+                <option value="pending">
+                    Pending
+                </option>
+
+                <option value="released">
+                    Released
+                </option>
+
+                <option value="inactive">
+                    Inactive
+                </option>
+
             </select>
 
+
             <select id="classFilter">
-                <option value="all">All Classes</option>
+
+                <option value="all">
+                    All Classes
+                </option>
+
             </select>
 
         </div>
 
 
         <div class="student-count">
-            Showing <strong id="studentCount">0</strong> students
+
+            Showing
+            <strong id="studentCount">0</strong>
+            students
+
         </div>
 
 
@@ -233,7 +432,9 @@
             <table class="students-table">
 
                 <thead>
+
                     <tr>
+
                         <th>Student</th>
                         <th>Class</th>
                         <th>Section</th>
@@ -242,17 +443,24 @@
                         <th>Status</th>
                         <th>Admission Date</th>
                         <th>Action</th>
+
                     </tr>
+
                 </thead>
+
 
                 <tbody id="studentsTableBody">
 
                     <tr>
+
                         <td colspan="8">
+
                             <div class="loading">
                                 Loading students...
                             </div>
+
                         </td>
+
                     </tr>
 
                 </tbody>
@@ -264,8 +472,72 @@
     </div>
 
 
-    <script type="module" src="../js/students.js"></script>
+
+    <!-- =====================================================
+         STUDENT VIEW MODAL
+    ===================================================== -->
+
+    <div
+        class="student-modal"
+        id="studentModal"
+    >
+
+        <div class="student-modal-box">
+
+            <div class="student-modal-header">
+
+                <h2>
+                    Student Details
+                </h2>
+
+                <button
+                    class="modal-close-btn"
+                    id="closeStudentModal"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                class="student-modal-profile"
+                id="studentModalProfile"
+            >
+            </div>
+
+
+            <div
+                class="student-modal-body"
+                id="studentModalBody"
+            >
+            </div>
+
+
+            <div class="student-modal-footer">
+
+                <button
+                    class="modal-footer-close"
+                    id="closeStudentModalFooter"
+                    type="button"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script
+        type="module"
+        src="../js/students.js"
+    ></script>
 
 </body>
 
-</html>
+                </html>
