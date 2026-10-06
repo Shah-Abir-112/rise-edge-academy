@@ -1,21 +1,1021 @@
-import { collection, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {
+    collection,
+    doc,
+    onSnapshot,
+    updateDoc
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
 import { db } from "./firebase-config.js";
 import { protectAdminRoute } from "./auth.js";
 
-let allStudents=[];let currentStudent=null;
-const $=id=>document.getElementById(id);
-const escapeHTML=value=>String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
-const normalize=value=>String(value??"").trim().toLowerCase();
-function statusClass(status){return normalize(status)||"unknown"}
-function formatDate(value){if(!value)return"—";try{if(typeof value.toDate==="function")return value.toDate().toLocaleString();const d=new Date(value);return isNaN(d)?String(value):d.toLocaleString()}catch{return"—"}}
-function refreshStats(){let total=allStudents.length,active=0,pending=0,released=0;allStudents.forEach(s=>{const st=normalize(s.status);if(st==="active")active++;if(st==="pending")pending++;if(st==="released")released++});$("studentTotal").textContent=total;$("studentActive").textContent=active;$("studentPending").textContent=pending;$("studentReleased").textContent=released}
-function populateFilters(){const classes=[...new Set(allStudents.map(s=>String(s.className||"").trim()).filter(Boolean))].sort();const sections=[...new Set(allStudents.map(s=>String(s.section||"").trim()).filter(Boolean))].sort();const classFilter=$("classFilter"),sectionFilter=$("sectionFilter"),cv=classFilter.value,sv=sectionFilter.value;classFilter.innerHTML='<option value="all">All Classes</option>'+classes.map(x=>`<option value="${escapeHTML(x)}">${escapeHTML(x)}</option>`).join("");sectionFilter.innerHTML='<option value="all">All Sections</option>'+sections.map(x=>`<option value="${escapeHTML(x)}">${escapeHTML(x)}</option>`).join("");if(classes.includes(cv))classFilter.value=cv;if(sections.includes(sv))sectionFilter.value=sv}
-function filtered(){const term=normalize($("studentSearch").value),status=$("statusFilter").value,cls=$("classFilter").value,sec=$("sectionFilter").value;return allStudents.filter(s=>{const text=normalize(`${s.name||""} ${s.email||""} ${s.studentId||""}`);return(!term||text.includes(term))&&(status==="all"||normalize(s.status)===status)&&(cls==="all"||String(s.className||"")===cls)&&(sec==="all"||String(s.section||"")===sec)})}
-function render(){const rows=filtered();const body=$("studentsTableBody");if(!rows.length){body.innerHTML='<tr><td colspan="7" class="empty">No students found.</td></tr>';return}body.innerHTML=rows.map(s=>{const st=normalize(s.status);let action='';if(st!=="active")action+=`<button class="btn activate" data-action="activate" data-id="${escapeHTML(s.uid)}">Activate</button>`;if(st!=="released")action+=`<button class="btn release" data-action="release" data-id="${escapeHTML(s.uid)}">Release</button>`;return `<tr><td><strong>${escapeHTML(s.name||"—")}</strong></td><td>${escapeHTML(s.email||"—")}</td><td>${escapeHTML(s.studentId||"—")}</td><td>${escapeHTML(s.className||"—")}</td><td>${escapeHTML(s.section||"—")}</td><td><span class="badge ${escapeHTML(statusClass(s.status))}">${escapeHTML(s.status||"unknown")}</span></td><td><div class="actions"><button class="btn view" data-action="view" data-id="${escapeHTML(s.uid)}">View</button><button class="btn edit" data-action="edit" data-id="${escapeHTML(s.uid)}">Edit</button>${action}</div></td></tr>`}).join("")}
-function openDetails(student,edit=false){currentStudent=student;$("modalTitle").textContent=edit?"Edit Student":"Student Details";const box=$("studentDetails");if(edit){box.innerHTML=`<form id="editStudentForm" class="edit-form"><label>Name<input id="editName" value="${escapeHTML(student.name)}" required></label><label>Student ID<input id="editStudentId" value="${escapeHTML(student.studentId)}"></label><label>Email<input value="${escapeHTML(student.email)}" disabled></label><label>Class<input id="editClass" value="${escapeHTML(student.className)}"></label><label>Section<input id="editSection" value="${escapeHTML(student.section)}"></label><label>Status<select id="editStatus"><option value="pending">Pending</option><option value="active">Active</option><option value="released">Released</option></select></label><div class="form-actions" style="grid-column:1/-1"><button type="button" class="btn cancel" id="cancelEdit">Cancel</button><button class="btn save">Save Changes</button></div></form>`;$("editStatus").value=normalize(student.status);$("editStudentForm").addEventListener("submit",saveStudent);$("cancelEdit").addEventListener("click",()=>openDetails(currentStudent,false));}else{box.innerHTML=`<div class="details-grid"><div><span>Name</span><strong>${escapeHTML(student.name||"—")}</strong></div><div><span>Email</span><strong>${escapeHTML(student.email||"—")}</strong></div><div><span>Student ID</span><strong>${escapeHTML(student.studentId||"—")}</strong></div><div><span>Class</span><strong>${escapeHTML(student.className||"—")}</strong></div><div><span>Section</span><strong>${escapeHTML(student.section||"—")}</strong></div><div><span>Status</span><strong>${escapeHTML(student.status||"—")}</strong></div><div><span>UID</span><strong>${escapeHTML(student.uid||"—")}</strong></div><div><span>Created</span><strong>${escapeHTML(formatDate(student.createdAt))}</strong></div></div>`}$("studentModal").classList.add("show")}
-async function saveStudent(e){e.preventDefault();if(!currentStudent)return;try{await updateDoc(doc(db,"users",currentStudent.uid),{name:$("editName").value.trim(),studentId:$("editStudentId").value.trim(),className:$("editClass").value.trim(),section:$("editSection").value.trim(),status:$("editStatus").value});alert("Student updated successfully.");$("studentModal").classList.remove("show")}catch(err){console.error(err);alert("Update failed: "+err.message)}}
-async function changeStatus(uid,status){const student=allStudents.find(s=>s.uid===uid);if(!student)return;const label=status==="active"?"activate":"release";if(!confirm(`Are you sure you want to ${label} ${student.name||"this student"}?`))return;try{await updateDoc(doc(db,"users",uid),{status});}catch(err){console.error(err);alert("Status update failed: "+err.message)}}
-$("studentsTableBody").addEventListener("click",e=>{const btn=e.target.closest("button[data-action]");if(!btn)return;const student=allStudents.find(s=>s.uid===btn.dataset.id);if(!student)return;const action=btn.dataset.action;if(action==="view")openDetails(student,false);if(action==="edit")openDetails(student,true);if(action==="activate")changeStatus(student.uid,"active");if(action==="release")changeStatus(student.uid,"released")});
-["studentSearch","statusFilter","classFilter","sectionFilter"].forEach(id=>$(id).addEventListener("input",render));
-$("closeStudentModal").addEventListener("click",()=>$("studentModal").classList.remove("show"));$("studentModal").addEventListener("click",e=>{if(e.target.id==="studentModal")$("studentModal").classList.remove("show")});
-protectAdminRoute(()=>{onSnapshot(collection(db,"users"),snap=>{allStudents=[];snap.forEach(d=>{const x=d.data();if(normalize(x.role)==="student")allStudents.push({uid:d.id,...x})});allStudents.sort((a,b)=>normalize(a.name).localeCompare(normalize(b.name)));refreshStats();populateFilters();render()},err=>{console.error("Students listener error",err);$("studentsTableBody").innerHTML='<tr><td colspan="7" class="empty">Unable to load students. Check Firebase permissions.</td></tr>'})});
+
+let allStudents = [];
+let currentStudent = null;
+
+
+// ===============================
+// HELPERS
+// ===============================
+
+const $ = (id) => document.getElementById(id);
+
+
+const escapeHTML = (value) => {
+    return String(value ?? "").replace(
+        /[&<>'"]/g,
+        (char) => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "'": "&#39;",
+            '"': "&quot;"
+        }[char])
+    );
+};
+
+
+const normalize = (value) => {
+    return String(value ?? "")
+        .trim()
+        .toLowerCase();
+};
+
+
+function formatDate(value) {
+
+    if (!value) return "—";
+
+    try {
+
+        if (typeof value.toDate === "function") {
+            return value.toDate().toLocaleString();
+        }
+
+        const date = new Date(value);
+
+        if (isNaN(date.getTime())) {
+            return String(value);
+        }
+
+        return date.toLocaleString();
+
+    } catch {
+
+        return "—";
+    }
+}
+
+
+function statusClass(status) {
+
+    const value = normalize(status);
+
+    if (
+        value === "active" ||
+        value === "pending" ||
+        value === "suspended" ||
+        value === "released"
+    ) {
+        return `status-${value}`;
+    }
+
+    return "status-unknown";
+}
+
+
+// ===============================
+// STATS
+// ===============================
+
+function refreshStats() {
+
+    let total = allStudents.length;
+    let active = 0;
+    let pending = 0;
+    let released = 0;
+
+    allStudents.forEach((student) => {
+
+        const status = normalize(student.status);
+
+        if (status === "active") active++;
+
+        if (status === "pending") pending++;
+
+        if (status === "released") released++;
+
+    });
+
+
+    $("studentTotal").textContent = total;
+
+    $("studentActive").textContent = active;
+
+    $("studentPending").textContent = pending;
+
+    $("studentReleased").textContent = released;
+}
+
+
+// ===============================
+// FILTERS
+// ===============================
+
+function populateFilters() {
+
+    const classes = [
+        ...new Set(
+            allStudents
+                .map((student) => String(student.className || "").trim())
+                .filter(Boolean)
+        )
+    ].sort();
+
+
+    const sections = [
+        ...new Set(
+            allStudents
+                .map((student) => String(student.section || "").trim())
+                .filter(Boolean)
+        )
+    ].sort();
+
+
+    const classFilter = $("classFilter");
+
+    const sectionFilter = $("sectionFilter");
+
+
+    const currentClass = classFilter.value;
+
+    const currentSection = sectionFilter.value;
+
+
+    classFilter.innerHTML =
+        `<option value="all">All Classes</option>` +
+        classes
+            .map(
+                (value) =>
+                    `<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`
+            )
+            .join("");
+
+
+    sectionFilter.innerHTML =
+        `<option value="all">All Sections</option>` +
+        sections
+            .map(
+                (value) =>
+                    `<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`
+            )
+            .join("");
+
+
+    if (classes.includes(currentClass)) {
+        classFilter.value = currentClass;
+    }
+
+
+    if (sections.includes(currentSection)) {
+        sectionFilter.value = currentSection;
+    }
+}
+
+
+// ===============================
+// FILTER STUDENTS
+// ===============================
+
+function filteredStudents() {
+
+    const search = normalize($("studentSearch").value);
+
+    const status = $("statusFilter").value;
+
+    const className = $("classFilter").value;
+
+    const section = $("sectionFilter").value;
+
+
+    return allStudents.filter((student) => {
+
+        const searchableText = normalize(`
+            ${student.name || ""}
+            ${student.email || ""}
+            ${student.studentId || ""}
+            ${student.phone || ""}
+        `);
+
+
+        const matchesSearch =
+            !search ||
+            searchableText.includes(search);
+
+
+        const matchesStatus =
+            status === "all" ||
+            normalize(student.status) === status;
+
+
+        const matchesClass =
+            className === "all" ||
+            String(student.className || "") === className;
+
+
+        const matchesSection =
+            section === "all" ||
+            String(student.section || "") === section;
+
+
+        return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesClass &&
+            matchesSection
+        );
+
+    });
+}
+
+
+// ===============================
+// RENDER STUDENTS
+// ===============================
+
+function renderStudents() {
+
+    const body = $("studentsTableBody");
+
+    const students = filteredStudents();
+
+
+    $("studentCount").textContent = students.length;
+
+
+    if (!students.length) {
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="7">
+
+                    <div class="empty-state">
+
+                        <div style="font-size:40px;margin-bottom:10px;">
+                            👨‍🎓
+                        </div>
+
+                        <strong>No students found</strong>
+
+                        <p>
+                            There are no students matching your search or filters.
+                        </p>
+
+                    </div>
+
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    body.innerHTML = students
+        .map((student) => {
+
+            const status = normalize(student.status);
+
+
+            let actionButtons = `
+                <button
+                    class="btn view"
+                    data-action="view"
+                    data-id="${escapeHTML(student.uid)}"
+                >
+                    View
+                </button>
+
+                <button
+                    class="btn edit"
+                    data-action="edit"
+                    data-id="${escapeHTML(student.uid)}"
+                >
+                    Edit
+                </button>
+            `;
+
+
+            if (status !== "active") {
+
+                actionButtons += `
+                    <button
+                        class="btn activate"
+                        data-action="activate"
+                        data-id="${escapeHTML(student.uid)}"
+                    >
+                        Activate
+                    </button>
+                `;
+            }
+
+
+            if (status !== "released") {
+
+                actionButtons += `
+                    <button
+                        class="btn release"
+                        data-action="release"
+                        data-id="${escapeHTML(student.uid)}"
+                    >
+                        Release
+                    </button>
+                `;
+            }
+
+
+            return `
+                <tr>
+
+                    <td>
+
+                        <div class="student-name">
+                            ${escapeHTML(student.name || "Unnamed Student")}
+                        </div>
+
+                        <div class="student-id">
+                            ${escapeHTML(student.uid || "")}
+                        </div>
+
+                    </td>
+
+
+                    <td>
+                        ${escapeHTML(student.email || "—")}
+                    </td>
+
+
+                    <td>
+                        ${escapeHTML(student.studentId || "—")}
+                    </td>
+
+
+                    <td>
+                        ${escapeHTML(student.className || "—")}
+                    </td>
+
+
+                    <td>
+                        ${escapeHTML(student.section || "—")}
+                    </td>
+
+
+                    <td>
+
+                        <span class="status ${statusClass(student.status)}">
+
+                            ${escapeHTML(student.status || "Unknown")}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="actions">
+
+                            ${actionButtons}
+
+                        </div>
+
+                    </td>
+
+                </tr>
+            `;
+
+        })
+        .join("");
+}
+
+
+// ===============================
+// STUDENT DETAILS
+// ===============================
+
+function openDetails(student, edit = false) {
+
+    currentStudent = student;
+
+
+    $("modalTitle").textContent =
+        edit
+            ? "Edit Student"
+            : "Student Details";
+
+
+    const box = $("studentDetails");
+
+
+    if (edit) {
+
+        box.innerHTML = `
+
+            <form id="editStudentForm" class="edit-form">
+
+                <label>
+
+                    Name
+
+                    <input
+                        id="editName"
+                        value="${escapeHTML(student.name)}"
+                        required
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Student ID
+
+                    <input
+                        id="editStudentId"
+                        value="${escapeHTML(student.studentId)}"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Email
+
+                    <input
+                        value="${escapeHTML(student.email)}"
+                        disabled
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Phone
+
+                    <input
+                        id="editPhone"
+                        value="${escapeHTML(student.phone)}"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Class
+
+                    <input
+                        id="editClass"
+                        value="${escapeHTML(student.className)}"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Section
+
+                    <input
+                        id="editSection"
+                        value="${escapeHTML(student.section)}"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Roll
+
+                    <input
+                        id="editRoll"
+                        value="${escapeHTML(student.roll)}"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Status
+
+                    <select id="editStatus">
+
+                        <option value="pending">
+                            Pending
+                        </option>
+
+                        <option value="active">
+                            Active
+                        </option>
+
+                        <option value="suspended">
+                            Suspended
+                        </option>
+
+                        <option value="released">
+                            Released
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <div
+                    class="form-actions"
+                    style="grid-column:1/-1"
+                >
+
+                    <button
+                        type="button"
+                        class="btn cancel"
+                        id="cancelEdit"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn save"
+                    >
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+        `;
+
+
+        $("editStatus").value =
+            normalize(student.status) || "pending";
+
+
+        $("editStudentForm")
+            .addEventListener("submit", saveStudent);
+
+
+        $("cancelEdit")
+            .addEventListener(
+                "click",
+                () => openDetails(currentStudent, false)
+            );
+
+    } else {
+
+        box.innerHTML = `
+
+            <div class="details-grid">
+
+                <div>
+                    <span>Name</span>
+                    <strong>
+                        ${escapeHTML(student.name || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Email</span>
+                    <strong>
+                        ${escapeHTML(student.email || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Student ID</span>
+                    <strong>
+                        ${escapeHTML(student.studentId || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Phone</span>
+                    <strong>
+                        ${escapeHTML(student.phone || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Class</span>
+                    <strong>
+                        ${escapeHTML(student.className || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Section</span>
+                    <strong>
+                        ${escapeHTML(student.section || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Roll</span>
+                    <strong>
+                        ${escapeHTML(student.roll || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Status</span>
+                    <strong>
+                        ${escapeHTML(student.status || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>UID</span>
+                    <strong>
+                        ${escapeHTML(student.uid || "—")}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Created</span>
+                    <strong>
+                        ${escapeHTML(formatDate(student.createdAt))}
+                    </strong>
+                </div>
+
+            </div>
+        `;
+    }
+
+
+    $("studentModal").classList.add("show");
+}
+
+
+// ===============================
+// SAVE STUDENT
+// ===============================
+
+async function saveStudent(event) {
+
+    event.preventDefault();
+
+
+    if (!currentStudent) return;
+
+
+    try {
+
+        await updateDoc(
+            doc(db, "users", currentStudent.uid),
+            {
+
+                name:
+                    $("editName").value.trim(),
+
+                studentId:
+                    $("editStudentId").value.trim(),
+
+                phone:
+                    $("editPhone").value.trim(),
+
+                className:
+                    $("editClass").value.trim(),
+
+                section:
+                    $("editSection").value.trim(),
+
+                roll:
+                    $("editRoll").value.trim(),
+
+                status:
+                    $("editStatus").value
+
+            }
+        );
+
+
+        alert("Student updated successfully.");
+
+        $("studentModal").classList.remove("show");
+
+    } catch (error) {
+
+        console.error(
+            "Student update error:",
+            error
+        );
+
+        alert(
+            "Update failed: " +
+            error.message
+        );
+    }
+}
+
+
+// ===============================
+// CHANGE STATUS
+// ===============================
+
+async function changeStatus(uid, status) {
+
+    const student =
+        allStudents.find(
+            (item) => item.uid === uid
+        );
+
+
+    if (!student) return;
+
+
+    const action =
+        status === "active"
+            ? "activate"
+            : "release";
+
+
+    const confirmed =
+        confirm(
+            `Are you sure you want to ${action} ${student.name || "this student"}?`
+        );
+
+
+    if (!confirmed) return;
+
+
+    try {
+
+        await updateDoc(
+            doc(db, "users", uid),
+            {
+                status: status
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Status update error:",
+            error
+        );
+
+
+        alert(
+            "Status update failed: " +
+            error.message
+        );
+    }
+}
+
+
+// ===============================
+// TABLE ACTIONS
+// ===============================
+
+$("studentsTableBody")
+    .addEventListener("click", (event) => {
+
+        const button =
+            event.target.closest(
+                "button[data-action]"
+            );
+
+
+        if (!button) return;
+
+
+        const student =
+            allStudents.find(
+                (item) =>
+                    item.uid === button.dataset.id
+            );
+
+
+        if (!student) return;
+
+
+        const action =
+            button.dataset.action;
+
+
+        if (action === "view") {
+
+            openDetails(
+                student,
+                false
+            );
+
+        }
+
+
+        if (action === "edit") {
+
+            openDetails(
+                student,
+                true
+            );
+
+        }
+
+
+        if (action === "activate") {
+
+            changeStatus(
+                student.uid,
+                "active"
+            );
+
+        }
+
+
+        if (action === "release") {
+
+            changeStatus(
+                student.uid,
+                "released"
+            );
+
+        }
+
+    });
+
+
+// ===============================
+// FILTER EVENTS
+// ===============================
+
+[
+    "studentSearch",
+    "statusFilter",
+    "classFilter",
+    "sectionFilter"
+].forEach((id) => {
+
+    $(id).addEventListener(
+        "input",
+        renderStudents
+    );
+
+    $(id).addEventListener(
+        "change",
+        renderStudents
+    );
+
+});
+
+
+// ===============================
+// MODAL CLOSE
+// ===============================
+
+$("closeStudentModal")
+    .addEventListener(
+        "click",
+        () => {
+            $("studentModal")
+                .classList
+                .remove("show");
+        }
+    );
+
+
+$("studentModal")
+    .addEventListener(
+        "click",
+        (event) => {
+
+            if (
+                event.target.id ===
+                "studentModal"
+            ) {
+
+                $("studentModal")
+                    .classList
+                    .remove("show");
+            }
+
+        }
+    );
+
+
+// ===============================
+// FIREBASE STUDENT LISTENER
+// ===============================
+
+protectAdminRoute(() => {
+
+    console.log(
+        "Student management: Firebase listener started."
+    );
+
+
+    onSnapshot(
+        collection(db, "users"),
+
+        (snapshot) => {
+
+            allStudents = [];
+
+
+            snapshot.forEach((document) => {
+
+                const data =
+                    document.data();
+
+
+                // Only STUDENT users
+                if (
+                    normalize(data.role) ===
+                    "student"
+                ) {
+
+                    allStudents.push({
+
+                        uid:
+                            document.id,
+
+                        ...data
+
+                    });
+                }
+
+            });
+
+
+            allStudents.sort(
+                (a, b) =>
+                    normalize(a.name)
+                        .localeCompare(
+                            normalize(b.name)
+                        )
+            );
+
+
+            console.log(
+                "Students loaded:",
+                allStudents.length
+            );
+
+
+            refreshStats();
+
+            populateFilters();
+
+            renderStudents();
+
+        },
+
+        (error) => {
+
+            console.error(
+                "Students listener error:",
+                error
+            );
+
+
+            $("studentsTableBody").innerHTML = `
+
+                <tr>
+
+                    <td colspan="7">
+
+                        <div class="empty-state">
+
+                            <strong>
+                                Unable to load students
+                            </strong>
+
+                            <p>
+                                Firebase permission error:
+                                ${escapeHTML(error.message)}
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `;
+        }
+    );
+
+});
