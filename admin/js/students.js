@@ -15,40 +15,47 @@ import {
 } from "./firebase-config.js";
 
 
-// =====================================================
-// DOM
-// =====================================================
-
-const $ = (id) => document.getElementById(id);
-
-
-// =====================================================
-// GLOBAL
-// =====================================================
+/* =====================================================
+   STATE
+===================================================== */
 
 let allStudents = [];
-let unsubscribeStudents = null;
+
 let loadingTimer = null;
 
+let unsubscribeStudents = null;
 
-// =====================================================
-// HELPERS
-// =====================================================
+
+/* =====================================================
+   DOM HELPER
+===================================================== */
+
+const $ = (id) =>
+    document.getElementById(id);
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
 
 function normalize(value) {
+
     return String(value ?? "")
         .trim()
         .toLowerCase();
+
 }
 
 
 function escapeHTML(value) {
+
     return String(value ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+
 }
 
 
@@ -58,37 +65,64 @@ function formatDate(value) {
         return "—";
     }
 
+
     try {
 
         let date;
 
-        if (typeof value.toDate === "function") {
+
+        if (
+            value &&
+            typeof value.toDate === "function"
+        ) {
+
             date = value.toDate();
+
         } else {
+
             date = new Date(value);
+
         }
 
-        if (isNaN(date.getTime())) {
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
             return "—";
+
         }
 
-        return date.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        });
+
+        return date.toLocaleDateString(
+            "en-GB",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
 
     } catch {
+
         return "—";
+
     }
+
 }
 
+
+/* =====================================================
+   DATA HELPERS
+===================================================== */
 
 function getClass(student) {
 
     return (
-        student.class ||
         student.className ||
+        student.class ||
         student.desiredClass ||
         "—"
     );
@@ -107,6 +141,28 @@ function getSection(student) {
 }
 
 
+function getRoll(student) {
+
+    return (
+        student.roll ||
+        "—"
+    );
+
+}
+
+
+function getPhone(student) {
+
+    return (
+        student.phone ||
+        student.studentPhone ||
+        student.guardianPhone ||
+        "—"
+    );
+
+}
+
+
 function getStatus(student) {
 
     return normalize(
@@ -116,49 +172,55 @@ function getStatus(student) {
 }
 
 
-// =====================================================
-// UI
-// =====================================================
+function getStudentId(student) {
+
+    return (
+        student.studentId ||
+        "Not Assigned"
+    );
+
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
 
 function showLoading() {
 
     const body =
         $("studentsTableBody");
 
-    if (!body) {
-        return;
-    }
-
-    body.innerHTML = `
-        <tr>
-            <td colspan="8">
-                <div class="loading">
-                    Loading students...
-                </div>
-            </td>
-        </tr>
-    `;
-
-}
-
-
-function showError(message) {
-
-    const body =
-        $("studentsTableBody");
 
     if (!body) {
         return;
     }
 
+
     body.innerHTML = `
+
         <tr>
-            <td colspan="8">
-                <div class="error-state">
-                    ${escapeHTML(message)}
+
+            <td colspan="9">
+
+                <div class="loading-state">
+
+                    <div class="loader"></div>
+
+                    <h3>
+                        Loading students...
+                    </h3>
+
+                    <p>
+                        Connecting to Firebase.
+                    </p>
+
                 </div>
+
             </td>
+
         </tr>
+
     `;
 
 }
@@ -173,14 +235,53 @@ function clearLoadingTimer() {
         );
 
         loadingTimer = null;
+
     }
 
 }
 
 
-// =====================================================
-// LOAD STUDENTS
-// =====================================================
+function showError(message) {
+
+    const body =
+        $("studentsTableBody");
+
+
+    if (!body) {
+        return;
+    }
+
+
+    body.innerHTML = `
+
+        <tr>
+
+            <td colspan="9">
+
+                <div class="error-state">
+
+                    <h3>
+                        Unable to load students
+                    </h3>
+
+                    <p>
+                        ${escapeHTML(message)}
+                    </p>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+/* =====================================================
+   LOAD STUDENTS
+===================================================== */
 
 function loadStudents() {
 
@@ -189,15 +290,19 @@ function loadStudents() {
     );
 
     console.log(
-        "RISE EDGE ACADEMY - STUDENTS"
+        "RISE EDGE ACADEMY"
     );
 
     console.log(
-        "Starting Firebase listener..."
+        "STUDENT MANAGEMENT"
     );
 
     console.log(
         "Collection: users"
+    );
+
+    console.log(
+        "Filtering role: student"
     );
 
     console.log(
@@ -208,17 +313,20 @@ function loadStudents() {
     showLoading();
 
 
-    loadingTimer = setTimeout(() => {
+    clearLoadingTimer();
 
-        console.error(
-            "Firebase did not return a snapshot within 10 seconds."
+
+    loadingTimer =
+        setTimeout(
+            () => {
+
+                showError(
+                    "Firebase did not respond within 10 seconds."
+                );
+
+            },
+            10000
         );
-
-        showError(
-            "Firebase is not responding. Check internet connection, Firestore and Firebase configuration."
-        );
-
-    }, 10000);
 
 
     try {
@@ -228,6 +336,13 @@ function loadStudents() {
                 db,
                 "users"
             );
+
+
+        if (unsubscribeStudents) {
+
+            unsubscribeStudents();
+
+        }
 
 
         unsubscribeStudents =
@@ -241,11 +356,7 @@ function loadStudents() {
 
 
                     console.log(
-                        "FIREBASE SNAPSHOT RECEIVED"
-                    );
-
-                    console.log(
-                        "Total users:",
+                        "USERS SNAPSHOT:",
                         snapshot.size
                     );
 
@@ -267,10 +378,14 @@ function loadStudents() {
                             );
 
 
-                            if (
+                            const role =
                                 normalize(
                                     data.role
-                                ) === "student"
+                                );
+
+
+                            if (
+                                role === "student"
                             ) {
 
                                 allStudents.push({
@@ -288,6 +403,31 @@ function loadStudents() {
                     );
 
 
+                    /*
+                     * Sort by Student ID
+                     */
+
+                    allStudents.sort(
+                        (a, b) => {
+
+                            const idA =
+                                parseInt(
+                                    a.studentId
+                                ) || 999999999;
+
+
+                            const idB =
+                                parseInt(
+                                    b.studentId
+                                ) || 999999999;
+
+
+                            return idA - idB;
+
+                        }
+                    );
+
+
                     console.log(
                         "TOTAL STUDENTS:",
                         allStudents.length
@@ -300,22 +440,21 @@ function loadStudents() {
 
                 },
 
+
                 (error) => {
 
                     clearLoadingTimer();
 
 
                     console.error(
-                        "FIREBASE FIRESTORE ERROR:",
+                        "FIRESTORE ERROR:",
                         error
                     );
 
 
                     showError(
-                        `Firebase Error: ${
-                            error.message ||
-                            "Unknown Firestore error"
-                        }`
+                        error.message ||
+                        "Unknown Firebase error."
                     );
 
                 }
@@ -328,16 +467,14 @@ function loadStudents() {
 
 
         console.error(
-            "LOAD STUDENTS EXCEPTION:",
+            "STUDENT LOAD ERROR:",
             error
         );
 
 
         showError(
-            `JavaScript/Firebase Error: ${
-                error.message ||
-                "Unknown error"
-            }`
+            error.message ||
+            "Unable to load students."
         );
 
     }
@@ -345,21 +482,22 @@ function loadStudents() {
 }
 
 
-// =====================================================
-// CLASS FILTER
-// =====================================================
+/* =====================================================
+   CLASS FILTER
+===================================================== */
 
 function populateClassFilter() {
 
     const filter =
         $("classFilter");
 
+
     if (!filter) {
         return;
     }
 
 
-    const currentValue =
+    const previousValue =
         filter.value;
 
 
@@ -390,9 +528,11 @@ function populateClassFilter() {
 
 
     filter.innerHTML = `
+
         <option value="all">
             All Classes
         </option>
+
     `;
 
 
@@ -415,11 +555,14 @@ function populateClassFilter() {
                         "option"
                     );
 
+
                 option.value =
                     className;
 
+
                 option.textContent =
                     `Class ${className}`;
+
 
                 filter.appendChild(
                     option
@@ -435,21 +578,21 @@ function populateClassFilter() {
         ).some(
             option =>
                 option.value ===
-                currentValue
+                previousValue
         )
     ) {
 
         filter.value =
-            currentValue;
+            previousValue;
 
     }
 
 }
 
 
-// =====================================================
-// FILTER
-// =====================================================
+/* =====================================================
+   FILTER
+===================================================== */
 
 function getFilteredStudents() {
 
@@ -474,66 +617,57 @@ function getFilteredStudents() {
     return allStudents.filter(
         (student) => {
 
-            if (search) {
-
-                const text =
-                    normalize([
+            const searchableText =
+                normalize(
+                    [
                         student.name,
-                        student.uid,
-                        student.studentId,
-                        student.phone,
                         student.email,
+                        student.studentId,
+                        student.uid,
+                        student.phone,
+                        student.studentPhone,
+                        student.guardianPhone,
                         student.fatherName,
                         student.motherName,
                         student.guardianName,
                         getClass(student),
-                        getSection(student)
-                    ].join(" "));
+                        getSection(student),
+                        getRoll(student)
+                    ].join(" ")
+                );
 
 
-                if (
-                    !text.includes(search)
-                ) {
-
-                    return false;
-
-                }
-
-            }
+            const matchesSearch =
+                !search ||
+                searchableText.includes(
+                    search
+                );
 
 
             const studentStatus =
                 getStatus(student);
 
 
-            if (
-                status !== "all" &&
-                studentStatus !== status
-            ) {
-
-                return false;
-
-            }
+            const matchesStatus =
+                status === "all" ||
+                studentStatus === status;
 
 
-            const studentClass =
+            const matchesClass =
+                selectedClass === "all" ||
                 String(
                     getClass(student)
-                );
+                ) ===
+                    String(
+                        selectedClass
+                    );
 
 
-            if (
-                selectedClass !== "all" &&
-                studentClass !==
-                    selectedClass
-            ) {
-
-                return false;
-
-            }
-
-
-            return true;
+            return (
+                matchesSearch &&
+                matchesStatus &&
+                matchesClass
+            );
 
         }
     );
@@ -541,9 +675,47 @@ function getFilteredStudents() {
 }
 
 
-// =====================================================
-// RENDER STUDENTS
-// =====================================================
+/* =====================================================
+   STATUS CLASS
+===================================================== */
+
+function statusClass(status) {
+
+    if (
+        status === "active"
+    ) {
+
+        return "active";
+
+    }
+
+
+    if (
+        status === "pending"
+    ) {
+
+        return "pending";
+
+    }
+
+
+    if (
+        status === "released"
+    ) {
+
+        return "released";
+
+    }
+
+
+    return "inactive";
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
 
 function renderStudents() {
 
@@ -577,17 +749,35 @@ function renderStudents() {
     ) {
 
         body.innerHTML = `
+
             <tr>
-                <td colspan="8">
+
+                <td colspan="9">
+
                     <div class="empty-state">
-                        ${
-                            allStudents.length === 0
-                                ? "No student users found."
-                                : "No students match your search."
-                        }
+
+                        <h3>
+                            ${
+                                allStudents.length === 0
+                                    ? "No students found"
+                                    : "No matching students"
+                            }
+                        </h3>
+
+                        <p>
+                            ${
+                                allStudents.length === 0
+                                    ? "There are no student users in the users collection."
+                                    : "Try changing your search or filters."
+                            }
+                        </p>
+
                     </div>
+
                 </td>
+
             </tr>
+
         `;
 
         return;
@@ -598,204 +788,294 @@ function renderStudents() {
     body.innerHTML =
         students
             .map(
-                (student) => {
-
-                    const name =
-                        student.name ||
-                        "Unnamed Student";
-
-
-                    const uid =
-                        student.uid ||
-                        "—";
-
-
-                    const studentId =
-                        student.studentId ||
-                        uid;
-
-
-                    const className =
-                        getClass(student);
-
-
-                    const section =
-                        getSection(student);
-
-
-                    const roll =
-                        student.roll ||
-                        "—";
-
-
-                    const phone =
-                        student.phone ||
-                        student.guardianPhone ||
-                        "—";
-
-
-                    const status =
-                        getStatus(student);
-
-
-                    const admissionDate =
-                        formatDate(
-                            student.admissionDate ||
-                            student.createdAt
-                        );
-
-
-                    const firstLetter =
-                        name
-                            .charAt(0)
-                            .toUpperCase();
-
-
-                    const avatar =
-                        student.profilePicture
-
-                            ? `
-                                <img
-                                    class="student-avatar"
-                                    src="${escapeHTML(
-                                        student.profilePicture
-                                    )}"
-                                    alt="Student"
-                                >
-                            `
-
-                            : `
-                                <div class="student-avatar">
-                                    ${escapeHTML(
-                                        firstLetter
-                                    )}
-                                </div>
-                            `;
-
-
-                    return `
-                        <tr>
-
-                            <td>
-
-                                <div class="student-info">
-
-                                    ${avatar}
-
-                                    <div>
-
-                                        <div class="student-name">
-                                            ${escapeHTML(
-                                                name
-                                            )}
-                                        </div>
-
-                                        <div class="student-id">
-                                            ${escapeHTML(
-                                                studentId
-                                            )}
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-                                ${escapeHTML(
-                                    className
-                                )}
-                            </td>
-
-
-                            <td>
-                                ${escapeHTML(
-                                    section
-                                )}
-                            </td>
-
-
-                            <td>
-                                ${escapeHTML(
-                                    roll
-                                )}
-                            </td>
-
-
-                            <td>
-                                ${escapeHTML(
-                                    phone
-                                )}
-                            </td>
-
-
-                            <td>
-
-                                <span class="
-                                    status-badge
-                                    status-${escapeHTML(
-                                        status
-                                    )}
-                                ">
-                                    ${escapeHTML(
-                                        status
-                                    )}
-                                </span>
-
-                            </td>
-
-
-                            <td>
-                                ${escapeHTML(
-                                    admissionDate
-                                )}
-                            </td>
-
-
-                            <td>
-
-                                <button
-                                    class="action-btn view-btn"
-                                    data-action="view"
-                                    data-uid="${escapeHTML(
-                                        uid
-                                    )}"
-                                >
-                                    View
-                                </button>
-
-
-                                <button
-                                    class="action-btn status-btn"
-                                    data-action="toggle"
-                                    data-uid="${escapeHTML(
-                                        uid
-                                    )}"
-                                >
-                                    ${
-                                        status === "active"
-                                            ? "Release"
-                                            : "Activate"
-                                    }
-                                </button>
-
-                            </td>
-
-                        </tr>
-                    `;
-
-                }
+                (student) =>
+                    createStudentRow(
+                        student
+                    )
             )
             .join("");
 
 }
 
 
-// =====================================================
-// VIEW STUDENT MODAL
-// =====================================================
+/* =====================================================
+   STUDENT ROW
+===================================================== */
+
+function createStudentRow(student) {
+
+    const name =
+        student.name ||
+        "Unnamed Student";
+
+
+    const email =
+        student.email ||
+        "No email";
+
+
+    const uid =
+        student.uid ||
+        "";
+
+
+    const studentId =
+        getStudentId(student);
+
+
+    const className =
+        getClass(student);
+
+
+    const section =
+        getSection(student);
+
+
+    const roll =
+        getRoll(student);
+
+
+    const phone =
+        getPhone(student);
+
+
+    const status =
+        getStatus(student);
+
+
+    const statusText =
+        status || "active";
+
+
+    const admissionDate =
+        formatDate(
+            student.admissionDate ||
+            student.createdAt
+        );
+
+
+    const firstLetter =
+        name
+            .trim()
+            .charAt(0)
+            .toUpperCase() ||
+        "S";
+
+
+    let avatar;
+
+
+    if (
+        student.profilePicture
+    ) {
+
+        avatar = `
+
+            <img
+                src="${escapeHTML(
+                    student.profilePicture
+                )}"
+                alt="Student"
+                class="student-avatar"
+            >
+
+        `;
+
+    } else {
+
+        avatar = `
+
+            <div class="student-avatar">
+
+                ${escapeHTML(
+                    firstLetter
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+
+    return `
+
+        <tr>
+
+            <!-- STUDENT -->
+
+            <td>
+
+                <div class="student-cell">
+
+                    ${avatar}
+
+                    <div>
+
+                        <div class="student-name">
+                            ${escapeHTML(name)}
+                        </div>
+
+                        <div class="student-email">
+                            ${escapeHTML(email)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </td>
+
+
+            <!-- STUDENT ID -->
+
+            <td>
+
+                <span class="student-id">
+
+                    ${escapeHTML(
+                        studentId
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <!-- CLASS -->
+
+            <td>
+
+                <span class="class-badge">
+
+                    ${escapeHTML(
+                        className
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <!-- SECTION -->
+
+            <td>
+
+                ${escapeHTML(
+                    section
+                )}
+
+            </td>
+
+
+            <!-- ROLL -->
+
+            <td>
+
+                ${escapeHTML(
+                    roll
+                )}
+
+            </td>
+
+
+            <!-- PHONE -->
+
+            <td>
+
+                ${escapeHTML(
+                    phone
+                )}
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+                <span
+                    class="
+                        student-status
+                        ${statusClass(status)}
+                    "
+                >
+
+                    ${escapeHTML(
+                        statusText
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <!-- ADMISSION DATE -->
+
+            <td>
+
+                ${escapeHTML(
+                    admissionDate
+                )}
+
+            </td>
+
+
+            <!-- ACTION -->
+
+            <td>
+
+                <div class="student-actions">
+
+                    <button
+                        type="button"
+                        class="
+                            student-action-btn
+                            view
+                        "
+                        data-action="view"
+                        data-uid="${escapeHTML(uid)}"
+                    >
+                        View
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="
+                            student-action-btn
+                            ${
+                                status === "active"
+                                    ? "release"
+                                    : "activate"
+                            }
+                        "
+                        data-action="toggle"
+                        data-uid="${escapeHTML(uid)}"
+                    >
+
+                        ${
+                            status === "active"
+                                ? "Release"
+                                : "Activate"
+                        }
+
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+/* =====================================================
+   VIEW STUDENT
+===================================================== */
 
 function viewStudent(uid) {
 
@@ -836,7 +1116,7 @@ function viewStudent(uid) {
     ) {
 
         console.error(
-            "Student modal elements not found."
+            "Student modal elements missing."
         );
 
         return;
@@ -850,41 +1130,51 @@ function viewStudent(uid) {
 
 
     const studentId =
-        student.studentId ||
-        "—";
-
-
-    const firstLetter =
-        name
-            .charAt(0)
-            .toUpperCase();
+        getStudentId(student);
 
 
     const status =
         getStatus(student);
 
 
+    const firstLetter =
+        name
+            .charAt(0)
+            .toUpperCase() ||
+        "S";
+
+
     const avatar =
         student.profilePicture
 
             ? `
+
                 <img
-                    class="modal-profile-image"
                     src="${escapeHTML(
                         student.profilePicture
                     )}"
                     alt="Student"
+                    class="modal-profile-image"
                 >
+
             `
 
             : `
+
                 <div class="modal-profile-image">
+
                     ${escapeHTML(
                         firstLetter
                     )}
+
                 </div>
+
             `;
 
+
+    /* =================================================
+       PROFILE
+    ================================================= */
 
     profile.innerHTML = `
 
@@ -892,4 +1182,610 @@ function viewStudent(uid) {
 
         <div>
 
-            <h2 class="modal-profile-name
+            <h2 class="modal-profile-name">
+
+                ${escapeHTML(name)}
+
+            </h2>
+
+
+            <div class="modal-profile-id">
+
+                Student ID:
+                <strong>
+                    ${escapeHTML(studentId)}
+                </strong>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /* =================================================
+       BODY
+    ================================================= */
+
+    body.innerHTML = `
+
+        <!-- ACADEMIC -->
+
+        <section class="student-detail-section">
+
+            <h3>
+                Academic Information
+            </h3>
+
+
+            <div class="student-detail-grid">
+
+                ${detailItem(
+                    "Student ID",
+                    studentId
+                )}
+
+                ${detailItem(
+                    "Class",
+                    getClass(student)
+                )}
+
+                ${detailItem(
+                    "Section",
+                    getSection(student)
+                )}
+
+                ${detailItem(
+                    "Roll",
+                    getRoll(student)
+                )}
+
+                ${detailItem(
+                    "Academic Session",
+                    student.academicSession ||
+                    "—"
+                )}
+
+                ${detailItem(
+                    "Status",
+                    status || "active",
+                    false,
+                    true
+                )}
+
+            </div>
+
+        </section>
+
+
+        <!-- PERSONAL -->
+
+        <section class="student-detail-section">
+
+            <h3>
+                Personal Information
+            </h3>
+
+
+            <div class="student-detail-grid">
+
+                ${detailItem(
+                    "Full Name",
+                    name
+                )}
+
+                ${detailItem(
+                    "Date of Birth",
+                    student.dateOfBirth ||
+                    student.dob ||
+                    "—"
+                )}
+
+                ${detailItem(
+                    "Email",
+                    student.email ||
+                    "—"
+                )}
+
+                ${detailItem(
+                    "Phone",
+                    getPhone(student)
+                )}
+
+            </div>
+
+        </section>
+
+
+        <!-- FAMILY -->
+
+        <section class="student-detail-section">
+
+            <h3>
+                Family / Guardian
+            </h3>
+
+
+            <div class="student-detail-grid">
+
+                ${detailItem(
+                    "Father",
+                    student.fatherName ||
+                    "—"
+                )}
+
+                ${detailItem(
+                    "Mother",
+                    student.motherName ||
+                    "—"
+                )}
+
+                ${detailItem(
+                    "Guardian",
+                    student.guardianName ||
+                    "—"
+                )}
+
+                ${detailItem(
+                    "Guardian Phone",
+                    student.guardianPhone ||
+                    "—"
+                )}
+
+            </div>
+
+        </section>
+
+
+        <!-- ADDRESS -->
+
+        <section class="student-detail-section">
+
+            <h3>
+                Address
+            </h3>
+
+
+            <div class="student-detail-grid">
+
+                ${detailItem(
+                    "Address",
+                    student.address ||
+                    "—",
+                    true
+                )}
+
+            </div>
+
+        </section>
+
+
+        <!-- ACCOUNT -->
+
+        <section class="student-detail-section">
+
+            <h3>
+                Account Information
+            </h3>
+
+
+            <div class="student-detail-grid">
+
+                ${detailItem(
+                    "Firebase UID",
+                    student.uid ||
+                    "—",
+                    true
+                )}
+
+                ${detailItem(
+                    "Fee Status",
+                    student.feeStatus ||
+                    "—"
+                )}
+
+                ${detailItem(
+                    "Admission Date",
+                    formatDate(
+                        student.admissionDate
+                    )
+                )}
+
+                ${detailItem(
+                    "Created",
+                    formatDate(
+                        student.createdAt
+                    )
+                )}
+
+            </div>
+
+        </section>
+
+    `;
+
+
+    modal.classList.add(
+        "active"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* =====================================================
+   DETAIL ITEM
+===================================================== */
+
+function detailItem(
+    label,
+    value,
+    full = false,
+    isStatus = false
+) {
+
+    const safeValue =
+        escapeHTML(
+            String(
+                value ?? "—"
+            )
+        );
+
+
+    if (isStatus) {
+
+        const status =
+            normalize(value);
+
+
+        return `
+
+            <div
+                class="
+                    student-detail-item
+                    ${full ? "full" : ""}
+                "
+            >
+
+                <span class="student-detail-label">
+
+                    ${escapeHTML(label)}
+
+                </span>
+
+
+                <div>
+
+                    <span
+                        class="
+                            modal-status
+                            ${statusClass(status)}
+                        "
+                    >
+
+                        ${safeValue}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    return `
+
+        <div
+            class="
+                student-detail-item
+                ${full ? "full" : ""}
+            "
+        >
+
+            <span class="student-detail-label">
+
+                ${escapeHTML(label)}
+
+            </span>
+
+
+            <div class="student-detail-value">
+
+                ${safeValue}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   CLOSE MODAL
+===================================================== */
+
+function closeStudentModal() {
+
+    const modal =
+        $("studentModal");
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.remove(
+        "active"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =====================================================
+   TOGGLE STATUS
+===================================================== */
+
+async function toggleStatus(uid) {
+
+    const student =
+        allStudents.find(
+            item =>
+                item.uid === uid
+        );
+
+
+    if (!student) {
+
+        alert(
+            "Student not found."
+        );
+
+        return;
+
+    }
+
+
+    const currentStatus =
+        getStatus(student);
+
+
+    const newStatus =
+        currentStatus === "active"
+            ? "released"
+            : "active";
+
+
+    const name =
+        student.name ||
+        "this student";
+
+
+    const confirmed =
+        confirm(
+            `Change ${name}'s status to ${newStatus}?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                uid
+            ),
+            {
+
+                status:
+                    newStatus,
+
+                updatedAt:
+                    new Date()
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "STATUS UPDATE ERROR:",
+            error
+        );
+
+
+        alert(
+            `Failed to update status.\n\n${
+                error.message
+            }`
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+function setupEvents() {
+
+    $("studentSearch")
+        ?.addEventListener(
+            "input",
+            renderStudents
+        );
+
+
+    $("statusFilter")
+        ?.addEventListener(
+            "change",
+            renderStudents
+        );
+
+
+    $("classFilter")
+        ?.addEventListener(
+            "change",
+            renderStudents
+        );
+
+
+    $("studentsTableBody")
+        ?.addEventListener(
+            "click",
+            (event) => {
+
+                const button =
+                    event.target.closest(
+                        "button[data-action]"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const action =
+                    button.dataset.action;
+
+
+                const uid =
+                    button.dataset.uid;
+
+
+                if (!uid) {
+                    return;
+                }
+
+
+                if (
+                    action === "view"
+                ) {
+
+                    viewStudent(uid);
+
+                }
+
+
+                if (
+                    action === "toggle"
+                ) {
+
+                    toggleStatus(uid);
+
+                }
+
+            }
+        );
+
+
+    $("closeStudentModal")
+        ?.addEventListener(
+            "click",
+            closeStudentModal
+        );
+
+
+    $("closeStudentModalFooter")
+        ?.addEventListener(
+            "click",
+            closeStudentModal
+        );
+
+
+    $("studentModal")
+        ?.addEventListener(
+            "click",
+            (event) => {
+
+                if (
+                    event.target.id ===
+                    "studentModal"
+                ) {
+
+                    closeStudentModal();
+
+                }
+
+            }
+        );
+
+
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeStudentModal();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+console.log(
+    "Rise Edge Academy Student Management loaded."
+);
+
+
+setupEvents();
+
+
+onAuthStateChanged(
+    auth,
+    (user) => {
+
+        console.log(
+            "AUTH:",
+            user
+                ? user.uid
+                : "NO USER"
+        );
+
+
+        if (!user) {
+
+            showError(
+                "You are not logged in."
+            );
+
+            return;
+
+        }
+
+
+        loadStudents();
+
+    }
+);
