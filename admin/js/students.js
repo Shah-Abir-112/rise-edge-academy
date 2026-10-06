@@ -1,8 +1,5 @@
 import {
-    console.log("🔥 STUDENTS.JS STARTED");
-
-console.log("🔥 DB:", db);
-console.log("🔥 AUTH:", auth);
+    
     collection,
     onSnapshot,
     doc,
