@@ -1,3 +1,308 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Students — Rise Edge Academy</title><link rel="stylesheet" href="../css/admin.css"><style>
-body{background:#f5f7fb}.students-wrap{max-width:1400px;margin:auto}.back{display:inline-block;margin-bottom:16px;color:#334155;text-decoration:none}.head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.head h1{margin:0}.head p{color:#64748b;margin:5px 0}.student-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.box,.toolbar,.table-card{background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(15,23,42,.06)}.box{padding:18px}.box span{font-size:13px;color:#64748b}.box strong{display:block;font-size:25px;margin-top:6px}.toolbar{padding:16px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:18px}.toolbar input,.toolbar select,.modal input,.modal select{width:100%;padding:11px 12px;border:1px solid #dbe2ea;border-radius:10px;font:inherit;background:#fff}.table-card{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:900px}.table th,.table td{text-align:left;padding:13px;border-bottom:1px solid #edf1f5;font-size:13px}.table th{color:#64748b;background:#f8fafc}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;text-transform:capitalize}.active{background:#dcfce7;color:#166534}.pending{background:#fef3c7;color:#92400e}.released{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:6px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:8px 10px;cursor:pointer;font-weight:700;font-size:12px}.view{background:#e0e7ff;color:#3730a3}.activate{background:#dcfce7;color:#166534}.release{background:#fee2e2;color:#991b1b}.edit{background:#e0f2fe;color:#075985}.empty{text-align:center;padding:35px;color:#64748b}.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;padding:20px;overflow:auto}.modal-backdrop.show{display:flex;align-items:center;justify-content:center}.modal{width:min(680px,100%);background:#fff;border-radius:18px;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-head h2{margin:0}.close{border:0;background:#eef2f7;border-radius:9px;padding:8px 11px;cursor:pointer}.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.details-grid div{background:#f8fafc;padding:12px;border-radius:10px}.details-grid span{font-size:11px;color:#64748b;display:block}.details-grid strong{display:block;margin-top:5px;word-break:break-word}.edit-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.edit-form label{font-size:12px;color:#475569}.edit-form input,.edit-form select{margin-top:5px}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.save{background:#111827;color:#fff}.cancel{background:#e2e8f0;color:#1e293b}@media(max-width:900px){.student-stats{grid-template-columns:repeat(2,1fr)}.toolbar{grid-template-columns:1fr 1fr}}@media(max-width:560px){.student-stats,.toolbar,.details-grid,.edit-form{grid-template-columns:1fr}.head{display:block}}
-</style></head><body><main class="main" style="margin-left:0"><div class="students-wrap"><a class="back" href="../index.html">← Back to Admin Dashboard</a><div class="head"><div><h1>Students Management</h1><p>Manage student accounts, status and academic identity.</p></div></div><div class="student-stats"><div class="box"><span>Total Students</span><strong id="studentTotal">0</strong></div><div class="box"><span>Active</span><strong id="studentActive">0</strong></div><div class="box"><span>Pending</span><strong id="studentPending">0</strong></div><div class="box"><span>Released</span><strong id="studentReleased">0</strong></div></div><div class="toolbar"><input id="studentSearch" placeholder="Search name, email or student ID"><select id="statusFilter"><option value="all">All Status</option><option value="active">Active</option><option value="pending">Pending</option><option value="released">Released</option></select><select id="classFilter"><option value="all">All Classes</option></select><select id="sectionFilter"><option value="all">All Sections</option></select></div><div class="table-card"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Class</th><th>Section</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsTableBody"><tr><td colspan="7" class="empty">Loading students...</td></tr></tbody></table></div></div></main><div id="studentModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h2 id="modalTitle">Student Details</h2><button class="close" id="closeStudentModal">✕</button></div><div id="studentDetails"></div></div></div><script type="module" src="../js/students.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Students | Rise Edge Academy</title>
+
+    <link rel="stylesheet" href="../css/admin.css">
+
+    <style>
+        .students-page {
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .students-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .students-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .students-header p {
+            margin: 6px 0 0;
+            color: #64748b;
+        }
+
+        .back-btn {
+            border: 0;
+            background: #111827;
+            color: white;
+            padding: 11px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .student-toolbar {
+            background: white;
+            padding: 18px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(15,23,42,.06);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .student-toolbar input,
+        .student-toolbar select {
+            flex: 1;
+            min-width: 180px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 13px;
+            outline: none;
+            background: white;
+        }
+
+        .student-toolbar input:focus,
+        .student-toolbar select:focus {
+            border-color: #2563eb;
+        }
+
+        .student-count {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .students-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(15,23,42,.06);
+            overflow: hidden;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th,
+        td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eef2f7;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .student-name {
+            font-weight: 700;
+            color: #172033;
+        }
+
+        .student-id {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-suspended {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-released {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-pending {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .action-btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .view-btn {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .edit-btn {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .empty-state {
+            padding: 55px 20px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .loading {
+            padding: 40px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            .students-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .students-header h1 {
+                font-size: 23px;
+            }
+
+            .back-btn {
+                width: 100%;
+            }
+
+            .student-toolbar {
+                padding: 14px;
+            }
+
+            .student-toolbar input,
+            .student-toolbar select {
+                width: 100%;
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="main-content students-page">
+
+    <!-- HEADER -->
+    <div class="students-header">
+
+        <div>
+            <h1>👨‍🎓 Student Management</h1>
+            <p>Manage Rise Edge Academy students.</p>
+        </div>
+
+        <button
+            class="back-btn"
+            onclick="window.location.href='../index.html'"
+        >
+            ← Back to Dashboard
+        </button>
+
+    </div>
+
+
+    <!-- TOOLBAR -->
+    <div class="student-toolbar">
+
+        <input
+            type="search"
+            id="studentSearch"
+            placeholder="Search by name, ID, email or phone..."
+        >
+
+        <select id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+            <option value="released">Released</option>
+        </select>
+
+        <select id="classFilter">
+            <option value="all">All Classes</option>
+        </select>
+
+        <div class="student-count">
+            Students: <span id="studentCount">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- STUDENTS -->
+    <div class="students-card">
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Roll</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Admission Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentsTableBody">
+
+                    <tr>
+                        <td colspan="8">
+                            <div class="loading">
+                                Loading students...
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="module" src="./js/students.js"></script>
+
+</body>
+</html>
