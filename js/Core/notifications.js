@@ -1,0 +1,1 @@
+export function notify(title,message){console.log(title,message)}
