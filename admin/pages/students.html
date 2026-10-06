@@ -114,25 +114,50 @@
 
 
     <!-- =========================
-         SUMMARY
+         QUICK STATS
     ========================== -->
 
-    <div class="students-summary">
+    <section class="student-stats">
 
-        <div>
-
-            <h2>
-                All Students
-            </h2>
-
+        <div class="stat-card">
+            <div class="stat-icon blue">👨‍🎓</div>
+            <div>
+                <span>Total Students</span>
+                <strong id="totalStudentCount">0</strong>
+            </div>
         </div>
 
-        <span>
-            Showing
-            <strong id="studentCount">0</strong>
-            students
-        </span>
+        <div class="stat-card">
+            <div class="stat-icon green">✓</div>
+            <div>
+                <span>Active</span>
+                <strong id="activeStudentCount">0</strong>
+            </div>
+        </div>
 
+        <div class="stat-card">
+            <div class="stat-icon orange">◷</div>
+            <div>
+                <span>Pending</span>
+                <strong id="pendingStudentCount">0</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon purple">ID</div>
+            <div>
+                <span>Latest Student ID</span>
+                <strong id="latestStudentId">—</strong>
+            </div>
+        </div>
+
+    </section>
+
+    <div class="students-summary">
+        <div>
+            <h2>All Students</h2>
+        </div>
+        <span>Showing <strong id="studentCount">0</strong> students</span>
     </div>
 
 
