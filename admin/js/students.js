@@ -2,7 +2,9 @@ import {
     collection,
     onSnapshot,
     doc,
-    updateDoc
+    updateDoc,
+    runTransaction,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 import {
@@ -24,6 +26,8 @@ let allStudents = [];
 let loadingTimer = null;
 
 let unsubscribeStudents = null;
+
+let repairingStudentIds = false;
 
 
 /* =====================================================
@@ -172,11 +176,40 @@ function getStatus(student) {
 }
 
 
+function extractStudentIdNumber(value) {
+
+    const match =
+        String(value ?? "")
+            .trim()
+            .match(/(?:REA[-\s]*)?(\d+)/i);
+
+    if (!match) {
+        return null;
+    }
+
+    const number = Number(match[1]);
+
+    return Number.isInteger(number) && number >= 1001
+        ? number
+        : null;
+}
+
+
+function canonicalStudentId(value) {
+
+    const number = extractStudentIdNumber(value);
+
+    return number
+        ? `REA-${number}`
+        : "Not Assigned";
+
+}
+
+
 function getStudentId(student) {
 
-    return (
-        student.studentId ||
-        "Not Assigned"
+    return canonicalStudentId(
+        student.studentId
     );
 
 }
@@ -276,6 +309,160 @@ function showError(message) {
 
     `;
 
+}
+
+
+/* =====================================================
+   STUDENT ID SYSTEM
+===================================================== */
+
+async function generateNextStudentId(usedIds = new Set()) {
+
+    const counterRef =
+        doc(
+            db,
+            "counters",
+            "studentId"
+        );
+
+    const observedMax =
+        Math.max(
+            1000,
+            ...Array.from(usedIds)
+                .map(id => extractStudentIdNumber(id) || 1000)
+        );
+
+    return runTransaction(
+        db,
+        async transaction => {
+
+            const counterSnapshot =
+                await transaction.get(counterRef);
+
+            const storedLastId =
+                counterSnapshot.exists()
+                    ? Number(
+                        counterSnapshot.data().lastId
+                    )
+                    : 1000;
+
+            const lastId =
+                Math.max(
+                    1000,
+                    Number.isInteger(storedLastId)
+                        ? storedLastId
+                        : 1000,
+                    observedMax
+                );
+
+            const nextId =
+                lastId + 1;
+
+            transaction.set(
+                counterRef,
+                {
+                    lastId: nextId,
+                    updatedAt: serverTimestamp()
+                },
+                { merge: true }
+            );
+
+            return `REA-${nextId}`;
+
+        }
+    );
+}
+
+
+async function repairStudentIds(students) {
+
+    if (repairingStudentIds || !students.length) {
+        return;
+    }
+
+    const used = new Set();
+    const updates = [];
+
+    // Keep the oldest/first valid owner of an ID.
+    const ordered = [...students].sort((a, b) => {
+        const aTime =
+            a.createdAt?.toMillis?.() ||
+            new Date(a.createdAt || 0).getTime() || 0;
+        const bTime =
+            b.createdAt?.toMillis?.() ||
+            new Date(b.createdAt || 0).getTime() || 0;
+        return aTime - bTime || String(a.uid).localeCompare(String(b.uid));
+    });
+
+    for (const student of ordered) {
+
+        const rawId =
+            String(student.studentId || "").trim();
+
+        const canonical =
+            canonicalStudentId(rawId);
+
+        if (canonical !== "Not Assigned" && !used.has(canonical)) {
+
+            used.add(canonical);
+
+            if (rawId !== canonical) {
+                updates.push({
+                    uid: student.uid,
+                    studentId: canonical
+                });
+            }
+
+            continue;
+        }
+
+        const nextId =
+            await generateNextStudentId(used);
+
+        used.add(nextId);
+
+        updates.push({
+            uid: student.uid,
+            studentId: nextId
+        });
+
+    }
+
+    if (!updates.length) {
+        return;
+    }
+
+    repairingStudentIds = true;
+
+    try {
+
+        for (const item of updates) {
+
+            await updateDoc(
+                doc(db, "users", item.uid),
+                {
+                    studentId: item.studentId,
+                    studentIdUpdatedAt: serverTimestamp()
+                }
+            );
+
+        }
+
+        console.log(
+            "Student ID repair complete:",
+            updates
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Student ID repair failed:",
+            error
+        );
+
+    } finally {
+        repairingStudentIds = false;
+    }
 }
 
 
@@ -433,6 +620,13 @@ function loadStudents() {
                         allStudents.length
                     );
 
+                    // Repair missing, numeric, or duplicate IDs once.
+                    repairStudentIds(allStudents).catch(
+                        error => console.error(
+                            "Student ID repair error:",
+                            error
+                        )
+                    );
 
                     populateClassFilter();
 
@@ -815,7 +1009,7 @@ function updateStudentStats() {
     ).length;
 
     const ids = allStudents
-        .map(student => parseInt(student.studentId, 10))
+        .map(student => extractStudentIdNumber(student.studentId))
         .filter(Number.isFinite);
 
     const latestId = ids.length ? Math.max(...ids) : null;
@@ -828,7 +1022,7 @@ function updateStudentStats() {
     if (totalEl) totalEl.textContent = total;
     if (activeEl) activeEl.textContent = active;
     if (pendingEl) pendingEl.textContent = pending;
-    if (latestEl) latestEl.textContent = latestId ?? "—";
+    if (latestEl) latestEl.textContent = latestId ? `REA-${latestId}` : "—";
 }
 
 /* =====================================================

@@ -1202,6 +1202,39 @@ if (confirmActionBtn) {
 
 
 /* =========================================================
+   STUDENT ID HELPERS
+========================================================= */
+
+function extractStudentIdNumber(value) {
+
+    const match =
+        String(value ?? "")
+            .trim()
+            .match(/(?:REA[-\s]*)?(\d+)/i);
+
+    if (!match) {
+        return null;
+    }
+
+    const number = Number(match[1]);
+
+    return Number.isInteger(number) && number >= 1001
+        ? number
+        : null;
+}
+
+
+function canonicalStudentId(value) {
+
+    const number = extractStudentIdNumber(value);
+
+    return number
+        ? `REA-${number}`
+        : "";
+}
+
+
+/* =========================================================
    APPROVE ADMISSION
 ========================================================= */
 
@@ -1276,10 +1309,41 @@ async function approveAdmission(
      */
 
     let studentId =
-        String(
-            studentUserData.studentId ||
-            ""
-        ).trim();
+        canonicalStudentId(
+            studentUserData.studentId
+        );
+
+    // Never reuse an ID already owned by another user.
+    // Compare canonical IDs so old values like 1001 and REA-1001
+    // are treated as the same ID.
+    if (studentId) {
+
+        const existingUsersSnapshot =
+            await getDocs(
+                collection(db, "users")
+            );
+
+        const usedByAnotherUser =
+            existingUsersSnapshot.docs.some(item => {
+
+                if (item.id === studentUser.uid) {
+                    return false;
+                }
+
+                const otherId =
+                    canonicalStudentId(
+                        item.data().studentId
+                    );
+
+                return otherId === studentId;
+
+            });
+
+        if (usedByAnotherUser) {
+            studentId = "";
+        }
+
+    }
 
 
     /*
@@ -1787,17 +1851,6 @@ async function findStudentUser(
 
 async function generateStudentId() {
 
-    /*
-     * Firestore:
-     *
-     * counters
-     *    └── studentId
-     *          └── lastId: 1000
-     *
-     * First generated ID = 1001
-     */
-
-
     const counterRef =
         doc(
             db,
@@ -1805,6 +1858,24 @@ async function generateStudentId() {
             "studentId"
         );
 
+    // Read existing users so an old/stale counter can never create a duplicate.
+    const usersSnapshot =
+        await getDocs(
+            collection(db, "users")
+        );
+
+    let observedMax = 1000;
+
+    usersSnapshot.forEach(userDoc => {
+
+        const data = userDoc.data();
+        const number = extractStudentIdNumber(data.studentId);
+
+        if (number && number > observedMax) {
+            observedMax = number;
+        }
+
+    });
 
     const nextStudentId =
         await runTransaction(
@@ -1812,78 +1883,39 @@ async function generateStudentId() {
             async transaction => {
 
                 const counterSnapshot =
-                    await transaction.get(
-                        counterRef
+                    await transaction.get(counterRef);
+
+                const storedLastId =
+                    counterSnapshot.exists()
+                        ? Number(counterSnapshot.data().lastId)
+                        : 1000;
+
+                const lastId =
+                    Math.max(
+                        1000,
+                        Number.isInteger(storedLastId)
+                            ? storedLastId
+                            : 1000,
+                        observedMax
                     );
 
-
-                let lastId =
-                    1000;
-
-
-                if (
-                    counterSnapshot.exists()
-                ) {
-
-                    const data =
-                        counterSnapshot.data();
-
-
-                    const storedLastId =
-                        Number(
-                            data.lastId
-                        );
-
-
-                    if (
-                        Number.isInteger(
-                            storedLastId
-                        ) &&
-                        storedLastId >= 1000
-                    ) {
-
-                        lastId =
-                            storedLastId;
-
-                    }
-
-                }
-
-
-                const nextId =
-                    lastId + 1;
-
+                const nextId = lastId + 1;
 
                 transaction.set(
                     counterRef,
                     {
-
-                        lastId:
-                            nextId,
-
-                        updatedAt:
-                            serverTimestamp()
-
+                        lastId: nextId,
+                        updatedAt: serverTimestamp()
                     },
-                    {
-
-                        merge:
-                            true
-
-                    }
+                    { merge: true }
                 );
 
-
-                return nextId;
+                return `REA-${nextId}`;
 
             }
         );
 
-
-    return String(
-        nextStudentId
-    );
-
+    return nextStudentId;
 }
 
 
