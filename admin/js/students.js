@@ -8,7 +8,6 @@ import {
 import { db } from "./firebase-config.js";
 import { protectAdminRoute } from "./auth.js";
 
-
 let allStudents = [];
 let currentStudent = null;
 
@@ -18,7 +17,6 @@ let currentStudent = null;
 // ===============================
 
 const $ = (id) => document.getElementById(id);
-
 
 const escapeHTML = (value) => {
     return String(value ?? "").replace(
@@ -32,7 +30,6 @@ const escapeHTML = (value) => {
         }[char])
     );
 };
-
 
 const normalize = (value) => {
     return String(value ?? "")
@@ -84,127 +81,31 @@ function statusClass(status) {
 
 
 // ===============================
-// STATS
-// ===============================
-
-function refreshStats() {
-
-    let total = allStudents.length;
-    let active = 0;
-    let pending = 0;
-    let released = 0;
-
-    allStudents.forEach((student) => {
-
-        const status = normalize(student.status);
-
-        if (status === "active") active++;
-
-        if (status === "pending") pending++;
-
-        if (status === "released") released++;
-
-    });
-
-
-    $("studentTotal").textContent = total;
-
-    $("studentActive").textContent = active;
-
-    $("studentPending").textContent = pending;
-
-    $("studentReleased").textContent = released;
-}
-
-
-// ===============================
-// FILTERS
-// ===============================
-
-function populateFilters() {
-
-    const classes = [
-        ...new Set(
-            allStudents
-                .map((student) => String(student.className || "").trim())
-                .filter(Boolean)
-        )
-    ].sort();
-
-
-    const sections = [
-        ...new Set(
-            allStudents
-                .map((student) => String(student.section || "").trim())
-                .filter(Boolean)
-        )
-    ].sort();
-
-
-    const classFilter = $("classFilter");
-
-    const sectionFilter = $("sectionFilter");
-
-
-    const currentClass = classFilter.value;
-
-    const currentSection = sectionFilter.value;
-
-
-    classFilter.innerHTML =
-        `<option value="all">All Classes</option>` +
-        classes
-            .map(
-                (value) =>
-                    `<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`
-            )
-            .join("");
-
-
-    sectionFilter.innerHTML =
-        `<option value="all">All Sections</option>` +
-        sections
-            .map(
-                (value) =>
-                    `<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`
-            )
-            .join("");
-
-
-    if (classes.includes(currentClass)) {
-        classFilter.value = currentClass;
-    }
-
-
-    if (sections.includes(currentSection)) {
-        sectionFilter.value = currentSection;
-    }
-}
-
-
-// ===============================
 // FILTER STUDENTS
 // ===============================
 
 function filteredStudents() {
 
-    const search = normalize($("studentSearch").value);
+    const search =
+        normalize($("studentSearch")?.value);
 
-    const status = $("statusFilter").value;
+    const status =
+        $("statusFilter")?.value || "all";
 
-    const className = $("classFilter").value;
-
-    const section = $("sectionFilter").value;
+    const className =
+        $("classFilter")?.value || "all";
 
 
     return allStudents.filter((student) => {
 
-        const searchableText = normalize(`
-            ${student.name || ""}
-            ${student.email || ""}
-            ${student.studentId || ""}
-            ${student.phone || ""}
-        `);
+        const searchableText =
+            normalize(`
+                ${student.name || ""}
+                ${student.email || ""}
+                ${student.studentId || ""}
+                ${student.phone || ""}
+                ${student.guardianPhone || ""}
+            `);
 
 
         const matchesSearch =
@@ -219,22 +120,64 @@ function filteredStudents() {
 
         const matchesClass =
             className === "all" ||
-            String(student.className || "") === className;
-
-
-        const matchesSection =
-            section === "all" ||
-            String(student.section || "") === section;
+            String(student.class || "") === className;
 
 
         return (
             matchesSearch &&
             matchesStatus &&
-            matchesClass &&
-            matchesSection
+            matchesClass
         );
 
     });
+}
+
+
+// ===============================
+// POPULATE CLASS FILTER
+// ===============================
+
+function populateClassFilter() {
+
+    const classFilter =
+        $("classFilter");
+
+    if (!classFilter) return;
+
+
+    const currentValue =
+        classFilter.value;
+
+
+    const classes = [
+        ...new Set(
+            allStudents
+                .map(student =>
+                    String(student.class || "").trim()
+                )
+                .filter(Boolean)
+        )
+    ].sort();
+
+
+    classFilter.innerHTML =
+        `<option value="all">All Classes</option>` +
+        classes
+            .map(
+                value =>
+                    `<option value="${escapeHTML(value)}">
+                        ${escapeHTML(value)}
+                    </option>`
+            )
+            .join("");
+
+
+    if (
+        classes.includes(currentValue)
+    ) {
+        classFilter.value =
+            currentValue;
+    }
 }
 
 
@@ -244,19 +187,30 @@ function filteredStudents() {
 
 function renderStudents() {
 
-    const body = $("studentsTableBody");
+    const body =
+        $("studentsTableBody");
 
-    const students = filteredStudents();
+    if (!body) return;
 
 
-    $("studentCount").textContent = students.length;
+    const students =
+        filteredStudents();
+
+
+    const count =
+        $("studentCount");
+
+    if (count) {
+        count.textContent =
+            students.length;
+    }
 
 
     if (!students.length) {
 
         body.innerHTML = `
             <tr>
-                <td colspan="7">
+                <td colspan="8">
 
                     <div class="empty-state">
 
@@ -280,15 +234,16 @@ function renderStudents() {
     }
 
 
-    body.innerHTML = students
-        .map((student) => {
+    body.innerHTML =
+        students.map(student => {
 
-            const status = normalize(student.status);
+            const status =
+                normalize(student.status);
 
 
             let actionButtons = `
                 <button
-                    class="btn view"
+                    class="action-btn view-btn"
                     data-action="view"
                     data-id="${escapeHTML(student.uid)}"
                 >
@@ -296,7 +251,7 @@ function renderStudents() {
                 </button>
 
                 <button
-                    class="btn edit"
+                    class="action-btn edit-btn"
                     data-action="edit"
                     data-id="${escapeHTML(student.uid)}"
                 >
@@ -309,7 +264,7 @@ function renderStudents() {
 
                 actionButtons += `
                     <button
-                        class="btn activate"
+                        class="action-btn"
                         data-action="activate"
                         data-id="${escapeHTML(student.uid)}"
                     >
@@ -323,7 +278,7 @@ function renderStudents() {
 
                 actionButtons += `
                     <button
-                        class="btn release"
+                        class="action-btn"
                         data-action="release"
                         data-id="${escapeHTML(student.uid)}"
                     >
@@ -339,33 +294,49 @@ function renderStudents() {
                     <td>
 
                         <div class="student-name">
-                            ${escapeHTML(student.name || "Unnamed Student")}
+                            ${escapeHTML(
+                                student.name ||
+                                "Unnamed Student"
+                            )}
                         </div>
 
                         <div class="student-id">
-                            ${escapeHTML(student.uid || "")}
+                            ${escapeHTML(
+                                student.studentId ||
+                                student.uid
+                            )}
                         </div>
 
                     </td>
 
 
                     <td>
-                        ${escapeHTML(student.email || "—")}
+                        ${escapeHTML(
+                            student.class || "—"
+                        )}
                     </td>
 
 
                     <td>
-                        ${escapeHTML(student.studentId || "—")}
+                        ${escapeHTML(
+                            student.section || "—"
+                        )}
                     </td>
 
 
                     <td>
-                        ${escapeHTML(student.className || "—")}
+                        ${escapeHTML(
+                            student.roll || "—"
+                        )}
                     </td>
 
 
                     <td>
-                        ${escapeHTML(student.section || "—")}
+                        ${escapeHTML(
+                            student.phone ||
+                            student.guardianPhone ||
+                            "—"
+                        )}
                     </td>
 
 
@@ -373,7 +344,10 @@ function renderStudents() {
 
                         <span class="status ${statusClass(student.status)}">
 
-                            ${escapeHTML(student.status || "Unknown")}
+                            ${escapeHTML(
+                                student.status ||
+                                "Unknown"
+                            )}
 
                         </span>
 
@@ -381,11 +355,18 @@ function renderStudents() {
 
 
                     <td>
+                        ${escapeHTML(
+                            formatDate(
+                                student.admissionDate
+                            )
+                        )}
+                    </td>
+
+
+                    <td>
 
                         <div class="actions">
-
                             ${actionButtons}
-
                         </div>
 
                     </td>
@@ -393,8 +374,7 @@ function renderStudents() {
                 </tr>
             `;
 
-        })
-        .join("");
+        }).join("");
 }
 
 
@@ -404,118 +384,105 @@ function renderStudents() {
 
 function openDetails(student, edit = false) {
 
-    currentStudent = student;
+    currentStudent =
+        student;
 
 
-    $("modalTitle").textContent =
+    const modalTitle =
+        $("modalTitle");
+
+    const box =
+        $("studentDetails");
+
+
+    if (!modalTitle || !box) {
+        console.error(
+            "Student modal elements missing from HTML."
+        );
+        return;
+    }
+
+
+    modalTitle.textContent =
         edit
             ? "Edit Student"
             : "Student Details";
-
-
-    const box = $("studentDetails");
 
 
     if (edit) {
 
         box.innerHTML = `
 
-            <form id="editStudentForm" class="edit-form">
+            <form id="editStudentForm">
 
                 <label>
-
                     Name
-
                     <input
                         id="editName"
                         value="${escapeHTML(student.name)}"
                         required
                     >
-
                 </label>
 
 
                 <label>
-
                     Student ID
-
                     <input
                         id="editStudentId"
                         value="${escapeHTML(student.studentId)}"
                     >
-
                 </label>
 
 
                 <label>
-
                     Email
-
                     <input
                         value="${escapeHTML(student.email)}"
                         disabled
                     >
-
                 </label>
 
 
                 <label>
-
                     Phone
-
                     <input
                         id="editPhone"
                         value="${escapeHTML(student.phone)}"
                     >
-
                 </label>
 
 
                 <label>
-
                     Class
-
                     <input
                         id="editClass"
-                        value="${escapeHTML(student.className)}"
+                        value="${escapeHTML(student.class)}"
                     >
-
                 </label>
 
 
                 <label>
-
                     Section
-
                     <input
                         id="editSection"
                         value="${escapeHTML(student.section)}"
                     >
-
                 </label>
 
 
                 <label>
-
                     Roll
-
                     <input
                         id="editRoll"
                         value="${escapeHTML(student.roll)}"
                     >
-
                 </label>
 
 
                 <label>
-
                     Status
 
                     <select id="editStatus">
-
-                        <option value="pending">
-                            Pending
-                        </option>
 
                         <option value="active">
                             Active
@@ -541,16 +508,15 @@ function openDetails(student, edit = false) {
 
                     <button
                         type="button"
-                        class="btn cancel"
+                        class="action-btn"
                         id="cancelEdit"
                     >
                         Cancel
                     </button>
 
-
                     <button
                         type="submit"
-                        class="btn save"
+                        class="action-btn edit-btn"
                     >
                         Save Changes
                     </button>
@@ -562,17 +528,24 @@ function openDetails(student, edit = false) {
 
 
         $("editStatus").value =
-            normalize(student.status) || "pending";
+            normalize(student.status) ||
+            "active";
 
 
         $("editStudentForm")
-            .addEventListener("submit", saveStudent);
+            .addEventListener(
+                "submit",
+                saveStudent
+            );
 
 
         $("cancelEdit")
             .addEventListener(
                 "click",
-                () => openDetails(currentStudent, false)
+                () => openDetails(
+                    currentStudent,
+                    false
+                )
             );
 
     } else {
@@ -584,7 +557,9 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Name</span>
                     <strong>
-                        ${escapeHTML(student.name || "—")}
+                        ${escapeHTML(
+                            student.name || "—"
+                        )}
                     </strong>
                 </div>
 
@@ -592,7 +567,9 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Email</span>
                     <strong>
-                        ${escapeHTML(student.email || "—")}
+                        ${escapeHTML(
+                            student.email || "—"
+                        )}
                     </strong>
                 </div>
 
@@ -600,7 +577,10 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Student ID</span>
                     <strong>
-                        ${escapeHTML(student.studentId || "—")}
+                        ${escapeHTML(
+                            student.studentId ||
+                            "—"
+                        )}
                     </strong>
                 </div>
 
@@ -608,7 +588,9 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Phone</span>
                     <strong>
-                        ${escapeHTML(student.phone || "—")}
+                        ${escapeHTML(
+                            student.phone || "—"
+                        )}
                     </strong>
                 </div>
 
@@ -616,7 +598,9 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Class</span>
                     <strong>
-                        ${escapeHTML(student.className || "—")}
+                        ${escapeHTML(
+                            student.class || "—"
+                        )}
                     </strong>
                 </div>
 
@@ -624,7 +608,9 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Section</span>
                     <strong>
-                        ${escapeHTML(student.section || "—")}
+                        ${escapeHTML(
+                            student.section || "—"
+                        )}
                     </strong>
                 </div>
 
@@ -632,7 +618,9 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Roll</span>
                     <strong>
-                        ${escapeHTML(student.roll || "—")}
+                        ${escapeHTML(
+                            student.roll || "—"
+                        )}
                     </strong>
                 </div>
 
@@ -640,23 +628,32 @@ function openDetails(student, edit = false) {
                 <div>
                     <span>Status</span>
                     <strong>
-                        ${escapeHTML(student.status || "—")}
+                        ${escapeHTML(
+                            student.status || "—"
+                        )}
                     </strong>
                 </div>
 
 
                 <div>
-                    <span>UID</span>
+                    <span>Admission Date</span>
                     <strong>
-                        ${escapeHTML(student.uid || "—")}
+                        ${escapeHTML(
+                            formatDate(
+                                student.admissionDate
+                            )
+                        )}
                     </strong>
                 </div>
 
 
                 <div>
-                    <span>Created</span>
+                    <span>Academic Session</span>
                     <strong>
-                        ${escapeHTML(formatDate(student.createdAt))}
+                        ${escapeHTML(
+                            student.academicSession ||
+                            "—"
+                        )}
                     </strong>
                 </div>
 
@@ -665,7 +662,9 @@ function openDetails(student, edit = false) {
     }
 
 
-    $("studentModal").classList.add("show");
+    $("studentModal")
+        ?.classList
+        .add("show");
 }
 
 
@@ -684,37 +683,59 @@ async function saveStudent(event) {
     try {
 
         await updateDoc(
-            doc(db, "users", currentStudent.uid),
+            doc(
+                db,
+                "students",
+                currentStudent.uid
+            ),
             {
 
                 name:
-                    $("editName").value.trim(),
+                    $("editName")
+                        .value
+                        .trim(),
 
                 studentId:
-                    $("editStudentId").value.trim(),
+                    $("editStudentId")
+                        .value
+                        .trim(),
 
                 phone:
-                    $("editPhone").value.trim(),
+                    $("editPhone")
+                        .value
+                        .trim(),
 
-                className:
-                    $("editClass").value.trim(),
+                class:
+                    $("editClass")
+                        .value
+                        .trim(),
 
                 section:
-                    $("editSection").value.trim(),
+                    $("editSection")
+                        .value
+                        .trim(),
 
                 roll:
-                    $("editRoll").value.trim(),
+                    $("editRoll")
+                        .value
+                        .trim(),
 
                 status:
-                    $("editStatus").value
+                    $("editStatus")
+                        .value
 
             }
         );
 
 
-        alert("Student updated successfully.");
+        alert(
+            "Student updated successfully."
+        );
 
-        $("studentModal").classList.remove("show");
+
+        $("studentModal")
+            ?.classList
+            .remove("show");
 
     } catch (error) {
 
@@ -735,11 +756,14 @@ async function saveStudent(event) {
 // CHANGE STATUS
 // ===============================
 
-async function changeStatus(uid, status) {
+async function changeStatus(
+    uid,
+    status
+) {
 
     const student =
         allStudents.find(
-            (item) => item.uid === uid
+            item => item.uid === uid
         );
 
 
@@ -752,21 +776,28 @@ async function changeStatus(uid, status) {
             : "release";
 
 
-    const confirmed =
-        confirm(
-            `Are you sure you want to ${action} ${student.name || "this student"}?`
-        );
-
-
-    if (!confirmed) return;
+    if (
+        !confirm(
+            `Are you sure you want to ${action} ${
+                student.name ||
+                "this student"
+            }?`
+        )
+    ) {
+        return;
+    }
 
 
     try {
 
         await updateDoc(
-            doc(db, "users", uid),
+            doc(
+                db,
+                "students",
+                uid
+            ),
             {
-                status: status
+                status
             }
         );
 
@@ -791,71 +822,67 @@ async function changeStatus(uid, status) {
 // ===============================
 
 $("studentsTableBody")
-    .addEventListener("click", (event) => {
+    ?.addEventListener(
+        "click",
+        event => {
 
-        const button =
-            event.target.closest(
-                "button[data-action]"
-            );
-
-
-        if (!button) return;
-
-
-        const student =
-            allStudents.find(
-                (item) =>
-                    item.uid === button.dataset.id
-            );
+            const button =
+                event.target.closest(
+                    "button[data-action]"
+                );
 
 
-        if (!student) return;
+            if (!button) return;
 
 
-        const action =
-            button.dataset.action;
+            const student =
+                allStudents.find(
+                    item =>
+                        item.uid ===
+                        button.dataset.id
+                );
 
 
-        if (action === "view") {
-
-            openDetails(
-                student,
-                false
-            );
-
-        }
+            if (!student) return;
 
 
-        if (action === "edit") {
-
-            openDetails(
-                student,
-                true
-            );
-
-        }
+            const action =
+                button.dataset.action;
 
 
-        if (action === "activate") {
-
-            changeStatus(
-                student.uid,
-                "active"
-            );
-
-        }
+            if (action === "view") {
+                openDetails(
+                    student,
+                    false
+                );
+            }
 
 
-        if (action === "release") {
+            if (action === "edit") {
+                openDetails(
+                    student,
+                    true
+                );
+            }
 
-            changeStatus(
-                student.uid,
-                "released"
-            );
+
+            if (action === "activate") {
+                changeStatus(
+                    student.uid,
+                    "active"
+                );
+            }
+
+
+            if (action === "release") {
+                changeStatus(
+                    student.uid,
+                    "released"
+                );
+            }
 
         }
-
-    });
+    );
 
 
 // ===============================
@@ -865,16 +892,15 @@ $("studentsTableBody")
 [
     "studentSearch",
     "statusFilter",
-    "classFilter",
-    "sectionFilter"
-].forEach((id) => {
+    "classFilter"
+].forEach(id => {
 
-    $(id).addEventListener(
+    $(id)?.addEventListener(
         "input",
         renderStudents
     );
 
-    $(id).addEventListener(
+    $(id)?.addEventListener(
         "change",
         renderStudents
     );
@@ -887,20 +913,22 @@ $("studentsTableBody")
 // ===============================
 
 $("closeStudentModal")
-    .addEventListener(
+    ?.addEventListener(
         "click",
         () => {
+
             $("studentModal")
-                .classList
+                ?.classList
                 .remove("show");
+
         }
     );
 
 
 $("studentModal")
-    .addEventListener(
+    ?.addEventListener(
         "click",
-        (event) => {
+        event => {
 
             if (
                 event.target.id ===
@@ -910,6 +938,7 @@ $("studentModal")
                 $("studentModal")
                     .classList
                     .remove("show");
+
             }
 
         }
@@ -927,37 +956,35 @@ protectAdminRoute(() => {
     );
 
 
+    // IMPORTANT:
+    // Approved students are stored
+    // inside "students" collection.
     onSnapshot(
-        collection(db, "users"),
+        collection(db, "students"),
 
-        (snapshot) => {
+        snapshot => {
 
             allStudents = [];
 
 
-            snapshot.forEach((document) => {
+            snapshot.forEach(
+                documentSnapshot => {
 
-                const data =
-                    document.data();
+                    const data =
+                        documentSnapshot.data();
 
-
-                // Only STUDENT users
-                if (
-                    normalize(data.role) ===
-                    "student"
-                ) {
 
                     allStudents.push({
 
                         uid:
-                            document.id,
+                            documentSnapshot.id,
 
                         ...data
 
                     });
-                }
 
-            });
+                }
+            );
 
 
             allStudents.sort(
@@ -971,19 +998,19 @@ protectAdminRoute(() => {
 
             console.log(
                 "Students loaded:",
-                allStudents.length
+                allStudents.length,
+                allStudents
             );
 
 
-            refreshStats();
-
-            populateFilters();
+            populateClassFilter();
 
             renderStudents();
 
         },
 
-        (error) => {
+
+        error => {
 
             console.error(
                 "Students listener error:",
@@ -995,7 +1022,7 @@ protectAdminRoute(() => {
 
                 <tr>
 
-                    <td colspan="7">
+                    <td colspan="8">
 
                         <div class="empty-state">
 
@@ -1004,8 +1031,9 @@ protectAdminRoute(() => {
                             </strong>
 
                             <p>
-                                Firebase permission error:
-                                ${escapeHTML(error.message)}
+                                ${escapeHTML(
+                                    error.message
+                                )}
                             </p>
 
                         </div>
@@ -1015,6 +1043,7 @@ protectAdminRoute(() => {
                 </tr>
 
             `;
+
         }
     );
 
