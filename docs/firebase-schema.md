@@ -1,0 +1,13 @@
+# Suggested Firestore Schema
+- users/{uid}: name, email, role, status, studentId, class, section, roll
+- admissions/{id}: applicantName, email, desiredClass, guardianName, status, createdAt
+- classes/{id}: name, subject, teacherUid, schedule
+- attendance/{id}: studentUid, classId, date, status
+- assignments/{id}: teacherUid, classId, title, dueDate
+- submissions/{id}: assignmentId, studentUid, fileUrl, status
+- results/{id}: studentUid, subject, exam, marks
+- fees/{id}: studentUid, amount, status, dueDate
+- salaries/{id}: teacherUid, amount, month, status
+- notices/{id}: title, body, audience, createdAt
+- messages/{id}: senderUid, receiverUid, text, createdAt
+- activity/{id}: actorUid, action, target, createdAt
