@@ -1,5 +1,19 @@
-import {Store} from "../../js/firebase/firestore.js"; import {getSession,logout} from "../../js/firebase/auth.js";
-const s=getSession(); if(!s){location.href="../login.html"} document.getElementById("userName")?.replaceChildren(document.createTextNode(s?.name||"Admin")); document.getElementById("logoutLink")?.addEventListener("click",logout);
-const seed={students:[{name:"Demo Student",class:"10",status:"active"}],teachers:[{name:"Demo Teacher",subject:"Mathematics",status:"active"}],admissions:[{name:"Demo Applicant",applicationId:"ADM-1001",class:"10",guardian:"Demo Guardian",status:"pending"}]};
-const d=Store.read(); for(const [k,v] of Object.entries(seed)) if(!d[k]) Store.set(k,v);
-for(const id of ["totalStudents","teachers","pendingAdmissions","monthlyCollection"]){const el=document.getElementById(id);if(el) el.textContent=id==="totalStudents"?Store.list("students").length:id==="teachers"?Store.list("teachers").length:id==="pendingAdmissions"?Store.list("admissions").filter(x=>x.status==="pending").length:"৳ 0"}
+import { getSession, logout } from "../../js/firebase/auth.js";
+import { Store } from "../../js/firebase/firestore.js";
+
+const s = getSession();
+if (!s || s.role !== "admin") location.href = "../login.html";
+
+document.getElementById("userName")?.replaceChildren(document.createTextNode(s?.name || "Admin"));
+document.getElementById("logoutLink")?.addEventListener("click", async (e) => { e.preventDefault(); await logout(); });
+
+const students = Store.list("students").filter(x => String(x.status || "active").toLowerCase() === "active");
+const teachers = Store.list("teachers").filter(x => String(x.status || "active").toLowerCase() === "active");
+const admissions = Store.list("admissions");
+const payments = Store.list("fees").filter(x => String(x.status || "").toLowerCase() === "paid");
+
+const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+set("totalStudents", students.length);
+set("teachers", teachers.length);
+set("pendingAdmissions", admissions.filter(x => String(x.status || "").toLowerCase() === "pending").length);
+set("monthlyCollection", `৳ ${payments.reduce((sum, x) => sum + Number(x.amount || 0), 0).toLocaleString()}`);
