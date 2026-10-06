@@ -1,6 +1,5 @@
 import {
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
@@ -14,66 +13,58 @@ import {
 } from "./firebase-config.js";
 
 
-let authChecked = false;
-
-
 export function protectAdminRoute(onAuthorized) {
 
   onAuthStateChanged(auth, async (user) => {
 
-    // Firebase initial session check
+    console.log("AUTH STATE:", user);
+
+    // No Firebase user
     if (!user) {
 
-      if (!authChecked) {
-        authChecked = true;
+      showAuthMessage(
+        "No Firebase login session found. Please login again."
+      );
 
-        // Give Firebase a moment to restore the existing session
-        setTimeout(() => {
+      setTimeout(() => {
+        window.location.href = "../login.html";
+      }, 2500);
 
-          if (!auth.currentUser) {
-            redirectToLogin();
-          }
-
-        }, 1000);
-
-        return;
-      }
-
-      redirectToLogin();
       return;
     }
 
 
-    authChecked = true;
-
-
     try {
 
-      console.log("Admin Firebase UID:", user.uid);
+      console.log("Firebase UID:", user.uid);
+      console.log("Firebase Email:", user.email);
 
 
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
 
 
+      // Firestore profile does not exist
       if (!snap.exists()) {
 
-        console.error("Admin profile not found for UID:", user.uid);
-
-        alert(
-          "Admin profile not found in Firestore.\n\nUID: " +
+        showAuthMessage(
+          "ERROR: Admin Firestore profile was not found.\n\n" +
+          "Firebase UID:\n" +
           user.uid
         );
 
-        await signOut(auth);
-        redirectToLogin();
+        console.error(
+          "No users document for UID:",
+          user.uid
+        );
+
         return;
       }
 
 
       const data = snap.data();
 
-      console.log("Admin Firestore profile:", data);
+      console.log("Firestore Admin Data:", data);
 
 
       const role = String(data.role || "")
@@ -85,36 +76,40 @@ export function protectAdminRoute(onAuthorized) {
         .toLowerCase();
 
 
-      console.log("Admin role:", role);
-      console.log("Admin status:", status);
+      console.log("Detected Role:", role);
+      console.log("Detected Status:", status);
 
 
+      // Wrong role
       if (role !== "admin") {
 
-        alert(
-          "This account is not registered as an Admin."
+        showAuthMessage(
+          "ERROR: This Firebase account is not an Admin.\n\n" +
+          "Detected role: " +
+          (data.role || "EMPTY") +
+          "\n\n" +
+          "UID:\n" +
+          user.uid
         );
 
-        await signOut(auth);
-        redirectToLogin();
         return;
       }
 
 
+      // Wrong status
       if (status !== "active") {
 
-        alert(
-          "Admin account status is: " +
-          status +
-          "\n\nPlease contact the administrator."
+        showAuthMessage(
+          "ERROR: Admin account is not active.\n\n" +
+          "Detected status: " +
+          (data.status || "EMPTY")
         );
 
-        await signOut(auth);
-        redirectToLogin();
         return;
       }
 
 
+      // Everything is correct
       const adminData = {
         uid: user.uid,
         email: user.email || "",
@@ -140,7 +135,7 @@ export function protectAdminRoute(onAuthorized) {
       );
 
 
-      console.log("Admin authentication successful.");
+      console.log("ADMIN AUTHENTICATION SUCCESSFUL");
 
 
       if (typeof onAuthorized === "function") {
@@ -150,21 +145,14 @@ export function protectAdminRoute(onAuthorized) {
 
     } catch (error) {
 
-      console.error("ADMIN AUTH ERROR:", error);
+      console.error(
+        "ADMIN AUTH ERROR:",
+        error
+      );
 
-      /*
-        IMPORTANT:
-        Do NOT automatically sign out when Firestore has a
-        temporary/network/permission error.
 
-        Otherwise the user can get stuck in a
-        Login → Dashboard → Logout loop.
-      */
-
-      alert(
-        "Admin verification failed.\n\n" +
-        "Please check your internet connection and Firebase settings.\n\n" +
-        "Error: " +
+      showAuthMessage(
+        "ADMIN VERIFICATION ERROR\n\n" +
         error.message
       );
 
@@ -175,30 +163,95 @@ export function protectAdminRoute(onAuthorized) {
 }
 
 
-function redirectToLogin() {
+/*
+  Shows the problem directly on the Dashboard.
+  This version does NOT automatically sign out.
+*/
 
-  window.location.href = "../login.html";
+function showAuthMessage(message) {
 
+  console.error(message);
+
+
+  let box = document.getElementById(
+    "adminAuthDebug"
+  );
+
+
+  if (!box) {
+
+    box = document.createElement("div");
+
+    box.id = "adminAuthDebug";
+
+    box.style.position = "fixed";
+    box.style.top = "15px";
+    box.style.left = "15px";
+    box.style.right = "15px";
+    box.style.zIndex = "99999";
+    box.style.background = "#fff";
+    box.style.border = "2px solid #dc2626";
+    box.style.borderRadius = "12px";
+    box.style.padding = "16px";
+    box.style.color = "#991b1b";
+    box.style.fontFamily = "Arial, sans-serif";
+    box.style.fontSize = "14px";
+    box.style.lineHeight = "1.6";
+    box.style.whiteSpace = "pre-wrap";
+    box.style.boxShadow =
+      "0 8px 30px rgba(0,0,0,.2)";
+
+
+    document.body.appendChild(box);
+  }
+
+
+  box.textContent = message;
 }
 
+
+/*
+  Manual logout
+*/
 
 export async function logoutAdmin() {
 
   try {
 
+    const {
+      signOut
+    } = await import(
+      "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
+    );
+
+
     await signOut(auth);
 
-    localStorage.removeItem("riseEdgeAdmin");
-    localStorage.removeItem("riseEdgeUser");
 
-    window.location.href = "../login.html";
+    localStorage.removeItem(
+      "riseEdgeAdmin"
+    );
+
+    localStorage.removeItem(
+      "riseEdgeUser"
+    );
+
+
+    window.location.href =
+      "../login.html";
+
 
   } catch (error) {
 
-    console.error("LOGOUT ERROR:", error);
+    console.error(
+      "LOGOUT ERROR:",
+      error
+    );
+
 
     alert(
-      "Logout failed. Please try again."
+      "Logout failed:\n\n" +
+      error.message
     );
 
   }
