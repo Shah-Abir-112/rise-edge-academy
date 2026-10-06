@@ -6,62 +6,51 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 import {
-    db
-} from "./firebase-config.js";
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
-    protectAdminRoute
-} from "./auth.js";
+    db,
+    auth
+} from "./firebase-config.js";
 
 
 // =====================================================
-// DOM HELPER
+// DOM
 // =====================================================
 
 const $ = (id) => document.getElementById(id);
 
 
 // =====================================================
-// GLOBAL DATA
+// GLOBAL
 // =====================================================
 
 let allStudents = [];
-
 let unsubscribeStudents = null;
+let loadingTimer = null;
 
 
 // =====================================================
-// NORMALIZE
+// HELPERS
 // =====================================================
 
 function normalize(value) {
-
     return String(value ?? "")
         .trim()
         .toLowerCase();
-
 }
 
 
-// =====================================================
-// ESCAPE HTML
-// =====================================================
-
 function escapeHTML(value) {
-
     return String(value ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-
 }
 
-
-// =====================================================
-// DATE FORMAT
-// =====================================================
 
 function formatDate(value) {
 
@@ -73,152 +62,102 @@ function formatDate(value) {
 
         let date;
 
-        if (value && typeof value.toDate === "function") {
-
+        if (typeof value.toDate === "function") {
             date = value.toDate();
-
         } else {
-
             date = new Date(value);
-
         }
 
         if (isNaN(date.getTime())) {
-
             return "—";
-
         }
 
         return date.toLocaleDateString("en-GB", {
-
             day: "2-digit",
             month: "short",
             year: "numeric"
-
         });
 
-    } catch (error) {
-
-        console.error(
-            "Date formatting error:",
-            error
-        );
-
+    } catch {
         return "—";
-
     }
-
 }
 
 
-// =====================================================
-// GET CLASS
-// =====================================================
-
-function getStudentClass(student) {
-
+function getClass(student) {
     return (
         student.class ||
         student.className ||
         student.desiredClass ||
         "—"
     );
-
 }
 
 
-// =====================================================
-// GET SECTION
-// =====================================================
-
-function getStudentSection(student) {
-
+function getSection(student) {
     return (
         student.section ||
         student.desiredSection ||
         "—"
     );
+}
 
+
+function getStatus(student) {
+    return normalize(student.status || "active");
 }
 
 
 // =====================================================
-// GET STATUS
-// =====================================================
-
-function getStudentStatus(student) {
-
-    return normalize(
-        student.status || "active"
-    );
-
-}
-
-
-// =====================================================
-// SET LOADING
+// UI
 // =====================================================
 
 function showLoading() {
 
-    const tableBody =
-        $("studentsTableBody");
+    const body = $("studentsTableBody");
 
-    if (!tableBody) {
+    if (!body) {
         return;
     }
 
-    tableBody.innerHTML = `
-
+    body.innerHTML = `
         <tr>
-
             <td colspan="8">
-
                 <div class="loading">
-
                     Loading students...
-
                 </div>
-
             </td>
-
         </tr>
-
     `;
-
 }
 
 
-// =====================================================
-// SET ERROR
-// =====================================================
-
 function showError(message) {
 
-    const tableBody =
-        $("studentsTableBody");
+    const body = $("studentsTableBody");
 
-    if (!tableBody) {
+    if (!body) {
         return;
     }
 
-    tableBody.innerHTML = `
-
+    body.innerHTML = `
         <tr>
-
             <td colspan="8">
-
                 <div class="error-state">
-
                     ${escapeHTML(message)}
-
                 </div>
-
             </td>
-
         </tr>
-
     `;
+}
+
+
+function clearLoadingTimer() {
+
+    if (loadingTimer) {
+        clearTimeout(loadingTimer);
+        loadingTimer = null;
+    }
 
 }
 
@@ -229,34 +168,43 @@ function showError(message) {
 
 function loadStudents() {
 
-    console.log(
-        "================================="
-    );
-
-    console.log(
-        "RISE EDGE ACADEMY"
-    );
-
-    console.log(
-        "Student Management starting..."
-    );
-
-    console.log(
-        "Reading collection: users"
-    );
-
-    console.log(
-        "================================="
-    );
+    console.log("================================");
+    console.log("STUDENT MANAGEMENT");
+    console.log("Starting Firebase listener...");
+    console.log("Collection: users");
+    console.log("================================");
 
 
     showLoading();
 
 
+    // If Firebase does not answer within 10 seconds,
+    // don't leave the page stuck forever.
+
+    loadingTimer = setTimeout(() => {
+
+        console.error(
+            "Firebase did not return a snapshot within 10 seconds."
+        );
+
+        showError(
+            "Firebase is not responding. Check internet connection, Firestore, Firebase configuration and browser console."
+        );
+
+    }, 10000);
+
+
     try {
 
-        const usersRef =
-            collection(db, "users");
+        const usersRef = collection(
+            db,
+            "users"
+        );
+
+
+        console.log(
+            "users collection reference created."
+        );
 
 
         unsubscribeStudents = onSnapshot(
@@ -265,8 +213,11 @@ function loadStudents() {
 
             (snapshot) => {
 
+                clearLoadingTimer();
+
+
                 console.log(
-                    "Firebase users snapshot received."
+                    "FIREBASE SNAPSHOT RECEIVED"
                 );
 
                 console.log(
@@ -285,50 +236,32 @@ function loadStudents() {
 
 
                     console.log(
-                        "User:",
+                        "USER DOCUMENT:",
                         userDoc.id,
                         data
                     );
 
 
-                    // ONLY STUDENT USERS
-
                     if (
-                        normalize(data.role) !== "student"
+                        normalize(data.role) === "student"
                     ) {
 
-                        return;
+                        allStudents.push({
+
+                            uid: userDoc.id,
+
+                            ...data
+
+                        });
 
                     }
-
-
-                    allStudents.push({
-
-                        uid: userDoc.id,
-
-                        ...data
-
-                    });
 
                 });
 
 
                 console.log(
-                    "================================="
-                );
-
-                console.log(
-                    "Students found:",
+                    "TOTAL STUDENTS:",
                     allStudents.length
-                );
-
-                console.log(
-                    "Student data:",
-                    allStudents
-                );
-
-                console.log(
-                    "================================="
                 );
 
 
@@ -340,23 +273,21 @@ function loadStudents() {
 
             (error) => {
 
-                console.error(
-                    "================================="
-                );
+                clearLoadingTimer();
+
 
                 console.error(
-                    "FIREBASE STUDENT ERROR"
+                    "FIREBASE FIRESTORE ERROR:"
                 );
 
                 console.error(error);
 
-                console.error(
-                    "================================="
-                );
-
 
                 showError(
-                    "Failed to load students. Check browser console for details."
+                    `Firebase Error: ${
+                        error.message ||
+                        "Unknown Firestore error"
+                    }`
                 );
 
             }
@@ -365,14 +296,20 @@ function loadStudents() {
 
     } catch (error) {
 
+        clearLoadingTimer();
+
+
         console.error(
-            "Student loading exception:",
+            "LOAD STUDENTS EXCEPTION:",
             error
         );
 
 
         showError(
-            "Student loading failed. Check console."
+            `JavaScript/Firebase Error: ${
+                error.message ||
+                "Unknown error"
+            }`
         );
 
     }
@@ -381,23 +318,15 @@ function loadStudents() {
 
 
 // =====================================================
-// POPULATE CLASS FILTER
+// CLASS FILTER
 // =====================================================
 
 function populateClassFilter() {
 
-    const filter =
-        $("classFilter");
-
+    const filter = $("classFilter");
 
     if (!filter) {
-
-        console.warn(
-            "classFilter not found."
-        );
-
         return;
-
     }
 
 
@@ -405,14 +334,13 @@ function populateClassFilter() {
         filter.value;
 
 
-    const classes =
-        new Set();
+    const classes = new Set();
 
 
     allStudents.forEach((student) => {
 
         const className =
-            getStudentClass(student);
+            getClass(student);
 
 
         if (
@@ -430,39 +358,30 @@ function populateClassFilter() {
 
 
     filter.innerHTML = `
-
         <option value="all">
             All Classes
         </option>
-
     `;
 
 
     Array.from(classes)
-
         .sort((a, b) =>
             a.localeCompare(
                 b,
                 undefined,
-                {
-                    numeric: true
-                }
+                { numeric: true }
             )
         )
-
         .forEach((className) => {
 
             const option =
                 document.createElement("option");
 
-
             option.value =
                 className;
 
-
             option.textContent =
                 `Class ${className}`;
-
 
             filter.appendChild(option);
 
@@ -486,7 +405,7 @@ function populateClassFilter() {
 
 
 // =====================================================
-// FILTER STUDENTS
+// FILTER
 // =====================================================
 
 function getFilteredStudents() {
@@ -499,127 +418,91 @@ function getFilteredStudents() {
 
     const status =
         normalize(
-            $("statusFilter")?.value ||
-            "all"
+            $("statusFilter")?.value || "all"
         );
 
 
     const selectedClass =
-        $("classFilter")?.value ||
-        "all";
+        $("classFilter")?.value || "all";
 
 
-    return allStudents.filter(
-        (student) => {
+    return allStudents.filter((student) => {
+
+        if (search) {
+
+            const text =
+                normalize([
+                    student.name,
+                    student.uid,
+                    student.studentId,
+                    student.phone,
+                    student.email,
+                    student.fatherName,
+                    student.motherName,
+                    student.guardianName,
+                    getClass(student),
+                    getSection(student)
+                ].join(" "));
 
 
-            // SEARCH
-
-            if (search) {
-
-                const searchableText =
-                    normalize(
-                        [
-
-                            student.name,
-
-                            student.uid,
-
-                            student.studentId,
-
-                            student.phone,
-
-                            student.email,
-
-                            student.fatherName,
-
-                            student.motherName,
-
-                            student.guardianName,
-
-                            getStudentClass(student),
-
-                            getStudentSection(student)
-
-                        ].join(" ")
-                    );
-
-
-                if (
-                    !searchableText.includes(search)
-                ) {
-
-                    return false;
-
-                }
-
-            }
-
-
-            // STATUS
-
-            const studentStatus =
-                getStudentStatus(student);
-
-
-            if (
-                status !== "all" &&
-                studentStatus !== status
-            ) {
-
+            if (!text.includes(search)) {
                 return false;
-
             }
-
-
-            // CLASS
-
-            const studentClass =
-                String(
-                    getStudentClass(student)
-                );
-
-
-            if (
-                selectedClass !== "all" &&
-                studentClass !== selectedClass
-            ) {
-
-                return false;
-
-            }
-
-
-            return true;
 
         }
-    );
+
+
+        const studentStatus =
+            getStatus(student);
+
+
+        if (
+            status !== "all" &&
+            studentStatus !== status
+        ) {
+
+            return false;
+
+        }
+
+
+        const studentClass =
+            String(getClass(student));
+
+
+        if (
+            selectedClass !== "all" &&
+            studentClass !== selectedClass
+        ) {
+
+            return false;
+
+        }
+
+
+        return true;
+
+    });
 
 }
 
 
 // =====================================================
-// RENDER STUDENTS
+// RENDER
 // =====================================================
 
 function renderStudents() {
 
-    const tableBody =
+    const body =
         $("studentsTableBody");
 
 
-    const studentCount =
+    const count =
         $("studentCount");
 
 
-    if (!tableBody) {
-
-        console.error(
-            "studentsTableBody not found."
-        );
-
+    if (!body) {
         return;
-
     }
 
 
@@ -627,38 +510,26 @@ function renderStudents() {
         getFilteredStudents();
 
 
-    if (studentCount) {
-
-        studentCount.textContent =
+    if (count) {
+        count.textContent =
             students.length;
-
     }
 
 
-    // NO STUDENTS
-
     if (students.length === 0) {
 
-        tableBody.innerHTML = `
-
+        body.innerHTML = `
             <tr>
-
                 <td colspan="8">
-
                     <div class="empty-state">
-
                         ${
                             allStudents.length === 0
                                 ? "No student users found."
-                                : "No students match your search/filter."
+                                : "No students match your search."
                         }
-
                     </div>
-
                 </td>
-
             </tr>
-
         `;
 
         return;
@@ -666,71 +537,62 @@ function renderStudents() {
     }
 
 
-    // STUDENT ROWS
+    body.innerHTML =
+        students.map((student) => {
 
-    tableBody.innerHTML =
-        students.map(
-            (student) => {
-
-
-                const name =
-                    student.name ||
-                    "Unnamed Student";
+            const name =
+                student.name ||
+                "Unnamed Student";
 
 
-                const uid =
-                    student.uid ||
-                    "—";
+            const uid =
+                student.uid ||
+                "—";
 
 
-                const studentId =
-                    student.studentId ||
-                    uid;
+            const studentId =
+                student.studentId ||
+                uid;
 
 
-                const className =
-                    getStudentClass(student);
+            const className =
+                getClass(student);
 
 
-                const section =
-                    getStudentSection(student);
+            const section =
+                getSection(student);
 
 
-                const roll =
-                    student.roll ||
-                    "—";
+            const roll =
+                student.roll ||
+                "—";
 
 
-                const phone =
-                    student.phone ||
-                    student.guardianPhone ||
-                    "—";
+            const phone =
+                student.phone ||
+                student.guardianPhone ||
+                "—";
 
 
-                const status =
-                    getStudentStatus(student);
+            const status =
+                getStatus(student);
 
 
-                const admissionDate =
-                    formatDate(
-                        student.admissionDate ||
-                        student.createdAt
-                    );
+            const admissionDate =
+                formatDate(
+                    student.admissionDate ||
+                    student.createdAt
+                );
 
 
-                const firstLetter =
-                    name
-                        .charAt(0)
-                        .toUpperCase();
+            const firstLetter =
+                name.charAt(0).toUpperCase();
 
 
-                let avatarHTML;
+            const avatar =
+                student.profilePicture
 
-
-                if (student.profilePicture) {
-
-                    avatarHTML = `
-
+                    ? `
                         <img
                             class="student-avatar"
                             src="${escapeHTML(
@@ -738,187 +600,114 @@ function renderStudents() {
                             )}"
                             alt="Student"
                         >
+                    `
 
-                    `;
-
-                } else {
-
-                    avatarHTML = `
-
+                    : `
                         <div class="student-avatar">
-
-                            ${escapeHTML(
-                                firstLetter
-                            )}
-
+                            ${escapeHTML(firstLetter)}
                         </div>
-
                     `;
 
-                }
 
+            return `
+                <tr>
 
-                return `
+                    <td>
+                        <div class="student-info">
 
-                    <tr>
+                            ${avatar}
 
-                        <td>
+                            <div>
 
-                            <div class="student-info">
+                                <div class="student-name">
+                                    ${escapeHTML(name)}
+                                </div>
 
-                                ${avatarHTML}
-
-                                <div>
-
-                                    <div class="student-name">
-
-                                        ${escapeHTML(
-                                            name
-                                        )}
-
-                                    </div>
-
-                                    <div class="student-id">
-
-                                        ${escapeHTML(
-                                            studentId
-                                        )}
-
-                                    </div>
-
+                                <div class="student-id">
+                                    ${escapeHTML(studentId)}
                                 </div>
 
                             </div>
 
-                        </td>
+                        </div>
+                    </td>
 
+                    <td>
+                        ${escapeHTML(className)}
+                    </td>
 
-                        <td>
+                    <td>
+                        ${escapeHTML(section)}
+                    </td>
 
-                            ${escapeHTML(
-                                className
-                            )}
+                    <td>
+                        ${escapeHTML(roll)}
+                    </td>
 
-                        </td>
+                    <td>
+                        ${escapeHTML(phone)}
+                    </td>
 
+                    <td>
+                        <span class="
+                            status-badge
+                            status-${escapeHTML(status)}
+                        ">
+                            ${escapeHTML(status)}
+                        </span>
+                    </td>
 
-                        <td>
+                    <td>
+                        ${escapeHTML(admissionDate)}
+                    </td>
 
-                            ${escapeHTML(
-                                section
-                            )}
+                    <td>
 
-                        </td>
+                        <button
+                            class="action-btn view-btn"
+                            data-action="view"
+                            data-uid="${escapeHTML(uid)}"
+                        >
+                            View
+                        </button>
 
+                        <button
+                            class="action-btn status-btn"
+                            data-action="toggle"
+                            data-uid="${escapeHTML(uid)}"
+                        >
+                            ${
+                                status === "active"
+                                    ? "Release"
+                                    : "Activate"
+                            }
+                        </button>
 
-                        <td>
+                    </td>
 
-                            ${escapeHTML(
-                                roll
-                            )}
+                </tr>
+            `;
 
-                        </td>
-
-
-                        <td>
-
-                            ${escapeHTML(
-                                phone
-                            )}
-
-                        </td>
-
-
-                        <td>
-
-                            <span
-                                class="
-                                    status-badge
-                                    status-${escapeHTML(
-                                        status
-                                    )}
-                                "
-                            >
-
-                                ${escapeHTML(
-                                    status
-                                )}
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            ${escapeHTML(
-                                admissionDate
-                            )}
-
-                        </td>
-
-
-                        <td>
-
-                            <button
-                                class="action-btn view-btn"
-                                data-action="view"
-                                data-uid="${escapeHTML(
-                                    uid
-                                )}"
-                            >
-
-                                View
-
-                            </button>
-
-
-                            <button
-                                class="action-btn status-btn"
-                                data-action="toggle"
-                                data-uid="${escapeHTML(
-                                    uid
-                                )}"
-                            >
-
-                                ${
-                                    status === "active"
-                                        ? "Release"
-                                        : "Activate"
-                                }
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-        ).join("");
+        }).join("");
 
 }
 
 
 // =====================================================
-// VIEW STUDENT
+// VIEW
 // =====================================================
 
 function viewStudent(uid) {
 
     const student =
         allStudents.find(
-            item =>
-                item.uid === uid
+            item => item.uid === uid
         );
 
 
     if (!student) {
 
-        alert(
-            "Student not found."
-        );
+        alert("Student not found.");
 
         return;
 
@@ -926,7 +715,6 @@ function viewStudent(uid) {
 
 
     alert(`
-
 Student Details
 
 Name: ${student.name || "—"}
@@ -935,9 +723,9 @@ Student ID: ${student.studentId || "—"}
 
 UID: ${student.uid || "—"}
 
-Class: ${getStudentClass(student)}
+Class: ${getClass(student)}
 
-Section: ${getStudentSection(student)}
+Section: ${getSection(student)}
 
 Roll: ${student.roll || "—"}
 
@@ -955,40 +743,27 @@ Guardian Phone: ${student.guardianPhone || "—"}
 
 Address: ${student.address || "—"}
 
-Academic Session: ${student.academicSession || "—"}
-
 Status: ${student.status || "—"}
-
-Admission Date: ${
-    formatDate(
-        student.admissionDate ||
-        student.createdAt
-    )
-}
-
     `);
 
 }
 
 
 // =====================================================
-// TOGGLE STATUS
+// STATUS
 // =====================================================
 
-async function toggleStudentStatus(uid) {
+async function toggleStatus(uid) {
 
     const student =
         allStudents.find(
-            item =>
-                item.uid === uid
+            item => item.uid === uid
         );
 
 
     if (!student) {
 
-        alert(
-            "Student not found."
-        );
+        alert("Student not found.");
 
         return;
 
@@ -996,7 +771,7 @@ async function toggleStudentStatus(uid) {
 
 
     const currentStatus =
-        getStudentStatus(student);
+        getStatus(student);
 
 
     const newStatus =
@@ -1005,13 +780,11 @@ async function toggleStudentStatus(uid) {
             : "active";
 
 
-    const confirmed =
-        confirm(
+    if (
+        !confirm(
             `Change ${student.name || "this student"} status to ${newStatus}?`
-        );
-
-
-    if (!confirmed) {
+        )
+    ) {
 
         return;
 
@@ -1021,25 +794,11 @@ async function toggleStudentStatus(uid) {
     try {
 
         await updateDoc(
-
-            doc(
-                db,
-                "users",
-                uid
-            ),
-
+            doc(db, "users", uid),
             {
                 status: newStatus,
                 updatedAt: new Date()
             }
-
-        );
-
-
-        console.log(
-            "Student status updated:",
-            uid,
-            newStatus
         );
 
 
@@ -1052,7 +811,7 @@ async function toggleStudentStatus(uid) {
 
 
         alert(
-            "Failed to update student status."
+            `Failed: ${error.message}`
         );
 
     }
@@ -1061,28 +820,104 @@ async function toggleStudentStatus(uid) {
 
 
 // =====================================================
-// EVENT LISTENERS
+// EVENTS
 // =====================================================
 
-function setupEventListeners() {
+function setupEvents() {
 
-    const search =
-        $("studentSearch");
-
-
-    const statusFilter =
-        $("statusFilter");
+    $("studentSearch")?.addEventListener(
+        "input",
+        renderStudents
+    );
 
 
-    const classFilter =
-        $("classFilter");
+    $("statusFilter")?.addEventListener(
+        "change",
+        renderStudents
+    );
 
 
-    const tableBody =
-        $("studentsTableBody");
+    $("classFilter")?.addEventListener(
+        "change",
+        renderStudents
+    );
 
 
-    if (search) {
+    $("studentsTableBody")?.addEventListener(
+        "click",
+        (event) => {
 
-        search.addEventListener(
-           
+            const button =
+                event.target.closest(
+                    "button[data-action]"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            const action =
+                button.dataset.action;
+
+
+            const uid =
+                button.dataset.uid;
+
+
+            if (action === "view") {
+
+                viewStudent(uid);
+
+            }
+
+
+            if (action === "toggle") {
+
+                toggleStatus(uid);
+
+            }
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// START
+// =====================================================
+
+console.log(
+    "Rise Edge Academy Students JS loaded."
+);
+
+
+onAuthStateChanged(
+    auth,
+    (user) => {
+
+        console.log(
+            "Auth state:",
+            user ? user.uid : "NO USER"
+        );
+
+
+        if (!user) {
+
+            showError(
+                "You are not logged in."
+            );
+
+            return;
+
+        }
+
+
+        setupEvents();
+
+        loadStudents();
+
+    }
+);
