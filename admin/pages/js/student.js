@@ -1,720 +1,630 @@
 import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
-import {
     collection,
-    getDocs,
-    query,
-    orderBy
+    doc,
+    onSnapshot,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 import {
-    auth,
     db
-} from "../../js/firebase-config.js";
+} from "./firebase-config.js";
 
-
-const tableBody =
-    document.getElementById("studentsTableBody");
-
-const searchInput =
-    document.getElementById("studentSearch");
-
-const statusFilter =
-    document.getElementById("statusFilter");
-
-const classFilter =
-    document.getElementById("classFilter");
-
-const studentCount =
-    document.getElementById("studentCount");
+import {
+    protectAdminRoute
+} from "./auth.js";
 
 
 let allStudents = [];
 
 
-/* ================================
-   AUTH CHECK
-================================ */
+/* =========================
+   HELPERS
+========================= */
 
-onAuthStateChanged(auth, async (user) => {
+const $ = (id) => document.getElementById(id);
 
-    if (!user) {
+const normalize = (value) =>
+    String(value ?? "").trim().toLowerCase();
 
-        window.location.href = "../../login.html";
-
-        return;
-    }
-
-    await loadStudents();
-
-});
-
-
-/* ================================
-   LOAD STUDENTS
-================================ */
-
-async function loadStudents() {
-
-    try {
-
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8">
-                    <div class="loading">
-                        Loading students...
-                    </div>
-                </td>
-            </tr>
-        `;
+const escapeHTML = (value) =>
+    String(value ?? "")
+        .replace(/[&<>'"]/g, (char) => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "'": "&#39;",
+            '"': "&quot;"
+        }[char]));
 
 
-        const studentsQuery = query(
-            collection(db, "students"),
-            orderBy("createdAt", "desc")
-        );
+/* =========================
+   STATUS
+========================= */
 
+function getStatusClass(status) {
 
-        const snapshot =
-            await getDocs(studentsQuery);
+    const value = normalize(status);
 
+    if (value === "active") return "status-active";
+    if (value === "suspended") return "status-suspended";
+    if (value === "released") return "status-released";
+    if (value === "pending") return "status-pending";
 
-        allStudents = [];
-
-
-        snapshot.forEach((docSnap) => {
-
-            allStudents.push({
-                id: docSnap.id,
-                ...docSnap.data()
-            });
-
-        });
-
-
-        /*
-         * Some older student records may not have
-         * createdAt. If so, they are still kept.
-         */
-
-        console.log(
-            "Students loaded:",
-            allStudents
-        );
-
-
-        populateClassFilter();
-
-        renderStudents(allStudents);
-
-
-    } catch (error) {
-
-        console.error(
-            "STUDENT LOAD ERROR:",
-            error
-        );
-
-
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8">
-                    <div class="empty-state">
-                        <strong>
-                            Unable to load students.
-                        </strong>
-                        <br>
-                        <small>
-                            ${escapeHtml(error.message)}
-                        </small>
-                    </div>
-                </td>
-            </tr>
-        `;
-
-    }
-
+    return "status-pending";
 }
 
 
-/* ================================
-   CLASS FILTER
-================================ */
-
-function populateClassFilter() {
-
-    const classes = new Set();
-
-
-    allStudents.forEach(student => {
-
-        const className =
-            student.class ||
-            student.className ||
-            "";
-
-
-        if (className) {
-            classes.add(String(className));
-        }
-
-    });
-
-
-    classFilter.innerHTML = `
-        <option value="all">
-            All Classes
-        </option>
-    `;
-
-
-    [...classes]
-        .sort()
-        .forEach(className => {
-
-            const option =
-                document.createElement("option");
-
-            option.value = className;
-            option.textContent = className;
-
-            classFilter.appendChild(option);
-
-        });
-
-}
-
-
-/* ================================
-   FILTER STUDENTS
-================================ */
-
-function filterStudents() {
-
-    const search =
-        searchInput.value
-            .trim()
-            .toLowerCase();
-
-
-    const selectedStatus =
-        statusFilter.value;
-
-
-    const selectedClass =
-        classFilter.value;
-
-
-    const filtered =
-        allStudents.filter(student => {
-
-            const name =
-                String(
-                    student.name ||
-                    student.studentName ||
-                    ""
-                ).toLowerCase();
-
-
-            const id =
-                String(
-                    student.studentId ||
-                    student.id ||
-                    ""
-                ).toLowerCase();
-
-
-            const email =
-                String(
-                    student.email ||
-                    ""
-                ).toLowerCase();
-
-
-            const phone =
-                String(
-                    student.phone ||
-                    student.studentPhone ||
-                    student.guardianPhone ||
-                    ""
-                ).toLowerCase();
-
-
-            const status =
-                String(
-                    student.status ||
-                    "active"
-                )
-                .trim()
-                .toLowerCase();
-
-
-            const className =
-                String(
-                    student.class ||
-                    student.className ||
-                    ""
-                );
-
-
-            const matchesSearch =
-                !search ||
-                name.includes(search) ||
-                id.includes(search) ||
-                email.includes(search) ||
-                phone.includes(search);
-
-
-            const matchesStatus =
-                selectedStatus === "all" ||
-                status === selectedStatus;
-
-
-            const matchesClass =
-                selectedClass === "all" ||
-                className === selectedClass;
-
-
-            return (
-                matchesSearch &&
-                matchesStatus &&
-                matchesClass
-            );
-
-        });
-
-
-    renderStudents(filtered);
-
-}
-
-
-/* ================================
-   RENDER STUDENTS
-================================ */
-
-function renderStudents(students) {
-
-    studentCount.textContent =
-        students.length;
-
-
-    if (!students.length) {
-
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8">
-
-                    <div class="empty-state">
-
-                        <div style="font-size:35px;">
-                            👨‍🎓
-                        </div>
-
-                        <strong>
-                            No students found
-                        </strong>
-
-                        <br>
-
-                        <small>
-                            Approved students will appear here.
-                        </small>
-
-                    </div>
-
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-
-    tableBody.innerHTML =
-        students.map(student => {
-
-            const name =
-                student.name ||
-                student.studentName ||
-                "Unnamed Student";
-
-
-            const studentId =
-                student.studentId ||
-                student.id ||
-                "—";
-
-
-            const className =
-                student.class ||
-                student.className ||
-                "—";
-
-
-            const section =
-                student.section ||
-                "—";
-
-
-            const roll =
-                student.roll ||
-                "—";
-
-
-            const phone =
-                student.phone ||
-                student.studentPhone ||
-                student.guardianPhone ||
-                "—";
-
-
-            const status =
-                String(
-                    student.status ||
-                    "active"
-                )
-                .trim()
-                .toLowerCase();
-
-
-            const admissionDate =
-                formatDate(
-                    student.admissionDate ||
-                    student.createdAt
-                );
-
-
-            return `
-
-                <tr>
-
-                    <td>
-
-                        <div class="student-name">
-                            ${escapeHtml(name)}
-                        </div>
-
-                        <div class="student-id">
-                            ID: ${escapeHtml(studentId)}
-                        </div>
-
-                    </td>
-
-
-                    <td>
-                        ${escapeHtml(className)}
-                    </td>
-
-
-                    <td>
-                        ${escapeHtml(section)}
-                    </td>
-
-
-                    <td>
-                        ${escapeHtml(String(roll))}
-                    </td>
-
-
-                    <td>
-                        ${escapeHtml(phone)}
-                    </td>
-
-
-                    <td>
-                        ${getStatusBadge(status)}
-                    </td>
-
-
-                    <td>
-                        ${escapeHtml(admissionDate)}
-                    </td>
-
-
-                    <td>
-
-                        <button
-                            class="action-btn view-btn"
-                            data-id="${escapeHtml(student.id)}"
-                        >
-                            View
-                        </button>
-
-                        <button
-                            class="action-btn edit-btn"
-                            data-id="${escapeHtml(student.id)}"
-                        >
-                            Edit
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        })
-        .join("");
-
-
-    attachActionButtons();
-
-}
-
-
-/* ================================
-   ACTION BUTTONS
-================================ */
-
-function attachActionButtons() {
-
-    document
-        .querySelectorAll(".view-btn")
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const student =
-                        allStudents.find(
-                            item =>
-                                item.id ===
-                                button.dataset.id
-                        );
-
-
-                    if (student) {
-                        showStudentDetails(student);
-                    }
-
-                }
-            );
-
-        });
-
-
-    document
-        .querySelectorAll(".edit-btn")
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const student =
-                        allStudents.find(
-                            item =>
-                                item.id ===
-                                button.dataset.id
-                        );
-
-
-                    if (student) {
-                        editStudent(student);
-                    }
-
-                }
-            );
-
-        });
-
-}
-
-
-/* ================================
-   VIEW STUDENT
-================================ */
-
-function showStudentDetails(student) {
-
-    const name =
-        student.name ||
-        student.studentName ||
-        "Student";
-
-
-    alert(
-        "Student Profile\n\n" +
-
-        "Name: " +
-        name +
-
-        "\nStudent ID: " +
-        (student.studentId || student.id || "—") +
-
-        "\nClass: " +
-        (student.class || student.className || "—") +
-
-        "\nSection: " +
-        (student.section || "—") +
-
-        "\nRoll: " +
-        (student.roll || "—") +
-
-        "\nPhone: " +
-        (
-            student.phone ||
-            student.studentPhone ||
-            student.guardianPhone ||
-            "—"
-        ) +
-
-        "\nStatus: " +
-        (student.status || "active")
-    );
-
-}
-
-
-/* ================================
-   EDIT STUDENT
-================================ */
-
-function editStudent(student) {
-
-    /*
-     * Full student editor will be added in the
-     * next Student Management expansion.
-     */
-
-    alert(
-        "Student editor is ready to be connected.\n\n" +
-        "Student: " +
-        (
-            student.name ||
-            student.studentName ||
-            "Student"
-        )
-    );
-
-}
-
-
-/* ================================
-   STATUS BADGE
-================================ */
-
-function getStatusBadge(status) {
-
-    let label =
-        status.charAt(0).toUpperCase() +
-        status.slice(1);
-
-
-    let className =
-        "status-active";
-
-
-    if (status === "suspended") {
-        className = "status-suspended";
-    }
-
-    if (status === "released") {
-        className = "status-released";
-    }
-
-    if (status === "pending") {
-        className = "status-pending";
-    }
-
-
-    return `
-        <span class="status ${className}">
-            ${escapeHtml(label)}
-        </span>
-    `;
-
-}
-
-
-/* ================================
-   DATE FORMAT
-================================ */
+/* =========================
+   DATE
+========================= */
 
 function formatDate(value) {
 
-    if (!value) {
-        return "—";
-    }
-
+    if (!value) return "—";
 
     try {
 
-        if (
-            typeof value === "object" &&
-            typeof value.toDate === "function"
-        ) {
-
-            return value
-                .toDate()
-                .toLocaleDateString();
-
+        if (typeof value.toDate === "function") {
+            return value.toDate().toLocaleDateString();
         }
 
+        const date = new Date(value);
 
-        const date =
-            new Date(value);
-
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
+        if (isNaN(date.getTime())) {
             return String(value);
-
         }
-
 
         return date.toLocaleDateString();
 
     } catch {
 
-        return String(value);
+        return "—";
+    }
+}
+
+
+/* =========================
+   FILTER
+========================= */
+
+function getFilteredStudents() {
+
+    const search =
+        normalize($("studentSearch")?.value);
+
+    const status =
+        normalize($("statusFilter")?.value || "all");
+
+    const className =
+        $("classFilter")?.value || "all";
+
+
+    return allStudents.filter(student => {
+
+        const searchableText = normalize(`
+            ${student.name || ""}
+            ${student.email || ""}
+            ${student.studentId || ""}
+            ${student.phone || ""}
+            ${student.guardianPhone || ""}
+        `);
+
+
+        const matchesSearch =
+            !search ||
+            searchableText.includes(search);
+
+
+        const matchesStatus =
+            status === "all" ||
+            normalize(student.status) === status;
+
+
+        const matchesClass =
+            className === "all" ||
+            String(student.className || "") === className;
+
+
+        return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesClass
+        );
+
+    });
+
+}
+
+
+/* =========================
+   CLASS FILTER
+========================= */
+
+function populateClassFilter() {
+
+    const filter = $("classFilter");
+
+    if (!filter) return;
+
+
+    const currentValue = filter.value;
+
+
+    const classes = [
+        ...new Set(
+            allStudents
+                .map(student =>
+                    String(student.className || "").trim()
+                )
+                .filter(Boolean)
+        )
+    ].sort();
+
+
+    filter.innerHTML = `
+        <option value="all">All Classes</option>
+        ${
+            classes.map(className => `
+                <option value="${escapeHTML(className)}">
+                    ${escapeHTML(className)}
+                </option>
+            `).join("")
+        }
+    `;
+
+
+    if (
+        currentValue === "all" ||
+        classes.includes(currentValue)
+    ) {
+        filter.value = currentValue;
+    }
+
+}
+
+
+/* =========================
+   RENDER STUDENTS
+========================= */
+
+function renderStudents() {
+
+    const body = $("studentsTableBody");
+
+    if (!body) return;
+
+
+    const students = getFilteredStudents();
+
+
+    if (students.length === 0) {
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <h3>No students found</h3>
+                        <p>
+                            There are currently no students
+                            matching your search or filter.
+                        </p>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        if ($("studentCount")) {
+            $("studentCount").textContent = "0";
+        }
+
+        return;
+    }
+
+
+    if ($("studentCount")) {
+        $("studentCount").textContent =
+            students.length;
+    }
+
+
+    body.innerHTML = students.map(student => {
+
+        const status =
+            normalize(student.status) || "pending";
+
+
+        return `
+            <tr>
+
+                <td>
+                    <div class="student-name">
+                        ${escapeHTML(student.name || "Unnamed Student")}
+                    </div>
+
+                    <div class="student-id">
+                        ID:
+                        ${escapeHTML(student.studentId || "Not assigned")}
+                    </div>
+                </td>
+
+
+                <td>
+                    ${escapeHTML(student.className || "—")}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(student.section || "—")}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(student.roll || "—")}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(
+                        student.phone ||
+                        student.studentPhone ||
+                        student.guardianPhone ||
+                        "—"
+                    )}
+                </td>
+
+
+                <td>
+
+                    <span class="status ${getStatusClass(status)}">
+                        ${escapeHTML(status)}
+                    </span>
+
+                </td>
+
+
+                <td>
+                    ${formatDate(
+                        student.admissionDate ||
+                        student.createdAt
+                    )}
+                </td>
+
+
+                <td>
+
+                    <button
+                        class="action-btn view-btn"
+                        data-action="view"
+                        data-id="${escapeHTML(student.uid)}"
+                    >
+                        View
+                    </button>
+
+
+                    <button
+                        class="action-btn edit-btn"
+                        data-action="edit"
+                        data-id="${escapeHTML(student.uid)}"
+                    >
+                        Edit
+                    </button>
+
+                </td>
+
+            </tr>
+        `;
+
+    }).join("");
+
+}
+
+
+/* =========================
+   VIEW STUDENT
+========================= */
+
+function viewStudent(student) {
+
+    alert(
+        `Student Details\n\n` +
+
+        `Name: ${student.name || "—"}\n` +
+
+        `Student ID: ${student.studentId || "—"}\n` +
+
+        `Email: ${student.email || "—"}\n` +
+
+        `Class: ${student.className || "—"}\n` +
+
+        `Section: ${student.section || "—"}\n` +
+
+        `Roll: ${student.roll || "—"}\n` +
+
+        `Status: ${student.status || "—"}\n` +
+
+        `Phone: ${
+            student.phone ||
+            student.studentPhone ||
+            student.guardianPhone ||
+            "—"
+        }`
+    );
+
+}
+
+
+/* =========================
+   EDIT STUDENT
+========================= */
+
+async function editStudent(student) {
+
+    const name =
+        prompt(
+            "Student Name:",
+            student.name || ""
+        );
+
+    if (name === null) return;
+
+
+    const className =
+        prompt(
+            "Class:",
+            student.className || ""
+        );
+
+    if (className === null) return;
+
+
+    const section =
+        prompt(
+            "Section:",
+            student.section || ""
+        );
+
+    if (section === null) return;
+
+
+    const roll =
+        prompt(
+            "Roll:",
+            student.roll || ""
+        );
+
+    if (roll === null) return;
+
+
+    try {
+
+        await updateDoc(
+            doc(db, "users", student.uid),
+            {
+                name: name.trim(),
+                className: className.trim(),
+                section: section.trim(),
+                roll: roll.trim(),
+                updatedAt: new Date()
+            }
+        );
+
+
+        alert("Student updated successfully.");
+
+    } catch (error) {
+
+        console.error(
+            "STUDENT UPDATE ERROR:",
+            error
+        );
+
+        alert(
+            "Student update failed.\n\n" +
+            error.message
+        );
 
     }
 
 }
 
 
-/* ================================
-   ESCAPE HTML
-================================ */
+/* =========================
+   TABLE ACTIONS
+========================= */
 
-function escapeHtml(value) {
+$("studentsTableBody")?.addEventListener(
+    "click",
+    async (event) => {
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        const button =
+            event.target.closest(
+                "button[data-action]"
+            );
 
-}
+        if (!button) return;
 
 
-/* ================================
-   FILTER EVENTS
-================================ */
+        const uid =
+            button.dataset.id;
 
-searchInput.addEventListener(
+
+        const student =
+            allStudents.find(
+                item => item.uid === uid
+            );
+
+
+        if (!student) return;
+
+
+        const action =
+            button.dataset.action;
+
+
+        if (action === "view") {
+            viewStudent(student);
+        }
+
+
+        if (action === "edit") {
+            await editStudent(student);
+        }
+
+    }
+);
+
+
+/* =========================
+   SEARCH + FILTER
+========================= */
+
+$("studentSearch")?.addEventListener(
     "input",
-    filterStudents
+    renderStudents
 );
 
 
-statusFilter.addEventListener(
+$("statusFilter")?.addEventListener(
     "change",
-    filterStudents
+    renderStudents
 );
 
 
-classFilter.addEventListener(
+$("classFilter")?.addEventListener(
     "change",
-    filterStudents
+    renderStudents
 );
+
+
+/* =========================
+   FIREBASE
+========================= */
+
+protectAdminRoute(() => {
+
+    console.log(
+        "STUDENT PAGE: Admin verified."
+    );
+
+
+    const usersRef =
+        collection(db, "users");
+
+
+    onSnapshot(
+        usersRef,
+
+        (snapshot) => {
+
+            console.log(
+                "USERS SNAPSHOT:",
+                snapshot.size
+            );
+
+
+            allStudents = [];
+
+
+            snapshot.forEach(
+                (documentSnapshot) => {
+
+                    const data =
+                        documentSnapshot.data();
+
+
+                    console.log(
+                        "USER:",
+                        documentSnapshot.id,
+                        data
+                    );
+
+
+                    /*
+                     * Only students
+                     */
+
+                    if (
+                        normalize(data.role) ===
+                        "student"
+                    ) {
+
+                        allStudents.push({
+
+                            uid:
+                                documentSnapshot.id,
+
+                            ...data
+
+                        });
+
+                    }
+
+                }
+            );
+
+
+            console.log(
+                "TOTAL STUDENTS:",
+                allStudents.length
+            );
+
+
+            allStudents.sort(
+                (a, b) =>
+                    normalize(a.name)
+                        .localeCompare(
+                            normalize(b.name)
+                        )
+            );
+
+
+            populateClassFilter();
+
+            renderStudents();
+
+        },
+
+
+        (error) => {
+
+            console.error(
+                "FIREBASE STUDENT LIST ERROR:",
+                error
+            );
+
+
+            const body =
+                $("studentsTableBody");
+
+
+            if (body) {
+
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+
+                            <div class="empty-state">
+
+                                <h3>
+                                    Unable to load students
+                                </h3>
+
+                                <p>
+                                    ${escapeHTML(
+                                        error.message
+                                    )}
+                                </p>
+
+                            </div>
+
+                        </td>
+                    </tr>
+                `;
+
+            }
+
+        }
+
+    );
+
+});
