@@ -1,56 +1,51 @@
 import {
-  initializeApp
+initializeApp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
 import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence
+getAuth,
+setPersistence,
+browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
-  getFirestore
+getFirestore
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-
 const firebaseConfig = {
-  apiKey: "AIzaSyA1AE8hvGCtFYrMTs9Bl77yw910jg4Zys",
-  authDomain: "rise-edge-academy-2026.firebaseapp.com",
-  projectId: "rise-edge-academy-2026",
-  storageBucket: "rise-edge-academy-2026.firebasestorage.app",
-  messagingSenderId: "1045318775039",
-  appId: "1:1045318775039:web:e879c5ab7efa53a24e5cca"
+apiKey: "AIzaSyA1AE8hvzGCtFYrMTs9Bl77yw910jg4Zys",
+authDomain: "rise-edge-academy-2026.firebaseapp.com",
+projectId: "rise-edge-academy-2026",
+storageBucket: "rise-edge-academy-2026.firebasestorage.app",
+messagingSenderId: "1045318775039",
+appId: "1:1045318775039:web:e879c5ab7efa53a24e5cca"
 };
-
 
 const app = initializeApp(firebaseConfig);
 
-
 export const auth = getAuth(app);
-
-
-/*
-  Keep Firebase login session in the browser.
-  This allows the session to survive page navigation
-  such as:
-
-  login.html
-       ↓
-  admin/index.html
-*/
-
-setPersistence(
-  auth,
-  browserLocalPersistence
-).catch(error => {
-  console.error(
-    "Firebase Auth persistence error:",
-    error
-  );
-});
-
 
 export const db = getFirestore(app);
 
+/*
+Firebase Authentication Persistence
+
+Admin authentication must wait until
+browserLocalPersistence is ready.
+*/
+
+export const authPersistenceReady = setPersistence(
+auth,
+browserLocalPersistence
+).catch(error => {
+
+console.error(
+"Firebase Auth persistence error:",
+error
+);
+
+throw error;
+
+});
 
 export default app;
