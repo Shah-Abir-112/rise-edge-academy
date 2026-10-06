@@ -1,58 +1,93 @@
-import { protectAdminRoute, logoutAdmin } from "./auth.js";
-import { startDashboardListeners } from "./dashboard.js";
+import {
+    protectAdminRoute,
+    logoutAdmin
+} from "./auth.js";
 
-const navItems = document.querySelectorAll("[data-section]");
-const sections = document.querySelectorAll(".page-section");
+import {
+    startDashboardListeners
+} from "./dashboard.js";
 
-const pageTitle = document.getElementById("pageTitle");
-const sidebar = document.getElementById("sidebar");
-const menuBtn = document.getElementById("menuBtn");
 
-const overlay = document.getElementById("mobileOverlay");
+const navItems =
+    document.querySelectorAll("[data-section]");
+
+const sections =
+    document.querySelectorAll(".page-section");
+
+const pageTitle =
+    document.getElementById("pageTitle");
+
+const sidebar =
+    document.getElementById("sidebar");
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+const overlay =
+    document.getElementById("mobileOverlay");
+
 
 const titles = {
+
     dashboard: "Dashboard",
-    profile: "Admin Profile",
     students: "Students",
+    admissions: "Admissions",
     teachers: "Teachers",
-    admissions: "Admissions / Requests",
-    courses: "Courses & Classes",
-    assignments: "Assignments",
-    results: "Results",
+    classes: "Classes & Routine",
     attendance: "Attendance",
-    tuition: "Tuition Management",
+    materials: "Study Materials",
+    exams: "Exams & Results",
+    progress: "Student Progress",
+    fees: "Fees & Finance",
     salary: "Teacher Salary",
+    messages: "Messages",
     notices: "Notices",
-    messages: "Messages / Monitoring",
-    settings: "Settings"
+    notifications: "Notifications",
+    reports: "Reports & Analytics",
+    admins: "Admin Management",
+    settings: "Academy Settings",
+    security: "Activity & Security",
+    profile: "My Profile"
+
 };
 
 
 /* =========================
-   SHOW SECTION
+   SECTION CONTROL
 ========================= */
 
 function showSection(name) {
 
     sections.forEach(section => {
+
         section.classList.toggle(
-            "active",
+            "active-section",
             section.id === `section-${name}`
         );
+
     });
 
+
     navItems.forEach(item => {
+
         item.classList.toggle(
             "active",
             item.dataset.section === name
         );
+
     });
 
+
     if (pageTitle) {
-        pageTitle.textContent = titles[name] || "Dashboard";
+
+        pageTitle.textContent =
+            titles[name] || "Dashboard";
+
     }
 
+
     closeMobileSidebar();
+
 }
 
 
@@ -69,7 +104,9 @@ function openMobileSidebar() {
     if (overlay) {
         overlay.classList.add("show");
     }
+
 }
+
 
 function closeMobileSidebar() {
 
@@ -80,6 +117,7 @@ function closeMobileSidebar() {
     if (overlay) {
         overlay.classList.remove("show");
     }
+
 }
 
 
@@ -91,30 +129,39 @@ navItems.forEach(item => {
 
     item.addEventListener("click", event => {
 
-        const name = item.dataset.section;
+        const name =
+            item.dataset.section;
+
 
         /*
-         * Students is a separate management page.
-         * Open it instead of showing the placeholder section.
+         * Students already has
+         * a working management page.
          */
+
         if (name === "students") {
 
             event.preventDefault();
 
-            window.location.href = "pages/students.html";
+            window.location.href =
+                "./pages/students.html";
 
             return;
+
         }
+
 
         event.preventDefault();
 
+
         showSection(name);
+
 
         history.replaceState(
             null,
             "",
             `#${name}`
         );
+
     });
 
 });
@@ -124,10 +171,17 @@ navItems.forEach(item => {
    LOGOUT
 ========================= */
 
-const logoutBtn = document.getElementById("logoutBtn");
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
 
 if (logoutBtn) {
-    logoutBtn.addEventListener("click", logoutAdmin);
+
+    logoutBtn.addEventListener(
+        "click",
+        logoutAdmin
+    );
+
 }
 
 
@@ -136,143 +190,222 @@ if (logoutBtn) {
 ========================= */
 
 if (menuBtn) {
+
     menuBtn.addEventListener(
         "click",
         openMobileSidebar
     );
+
 }
 
+
 if (overlay) {
+
     overlay.addEventListener(
         "click",
         closeMobileSidebar
     );
+
 }
 
 
 /* =========================
-   ADMIN AUTH
+   ADMIN AUTHORIZATION
 ========================= */
 
 protectAdminRoute(admin => {
 
+
     const adminName =
-        admin.name ||
-        "Admin";
+        admin.name || "Admin";
+
 
     const adminEmail =
-        admin.email ||
-        "";
+        admin.email || "";
+
 
     const adminId =
-        admin.adminId ||
-        "—";
+        admin.adminId || "—";
+
 
     const adminStatus =
-        admin.status ||
-        "Active";
+        admin.status || "Active";
 
 
-    /* Top profile */
+    /* Top name */
 
     const topAdminName =
-        document.getElementById("topAdminName");
+        document.getElementById(
+            "topAdminName"
+        );
+
 
     if (topAdminName) {
-        topAdminName.textContent = adminName;
+
+        topAdminName.textContent =
+            adminName;
+
+    }
+
+
+    /* Top avatar */
+
+    const topAvatar =
+        document.getElementById(
+            "topAdminAvatar"
+        );
+
+
+    if (topAvatar) {
+
+        topAvatar.textContent =
+            adminName
+                .trim()
+                .charAt(0)
+                .toUpperCase() || "A";
+
     }
 
 
     /* Welcome */
 
-    const welcomeAdminName =
-        document.getElementById("welcomeAdminName");
+    const welcomeName =
+        document.getElementById(
+            "welcomeAdminName"
+        );
 
-    if (welcomeAdminName) {
-        welcomeAdminName.textContent = adminName;
+
+    if (welcomeName) {
+
+        welcomeName.textContent =
+            adminName;
+
     }
 
 
     /* Profile */
 
     const profileName =
-        document.getElementById("profileName");
+        document.getElementById(
+            "profileName"
+        );
+
 
     if (profileName) {
-        profileName.textContent = adminName;
+
+        profileName.textContent =
+            adminName;
+
     }
+
 
     const profileNameValue =
-        document.getElementById("profileNameValue");
+        document.getElementById(
+            "profileNameValue"
+        );
+
 
     if (profileNameValue) {
-        profileNameValue.textContent = adminName;
+
+        profileNameValue.textContent =
+            adminName;
+
     }
+
 
     const profileEmail =
-        document.getElementById("profileEmail");
+        document.getElementById(
+            "profileEmail"
+        );
+
 
     if (profileEmail) {
-        profileEmail.textContent = adminEmail;
+
+        profileEmail.textContent =
+            adminEmail;
+
     }
+
 
     const profileAdminId =
-        document.getElementById("profileAdminId");
+        document.getElementById(
+            "profileAdminId"
+        );
+
 
     if (profileAdminId) {
-        profileAdminId.textContent = adminId;
+
+        profileAdminId.textContent =
+            adminId;
+
     }
 
+
     const profileStatus =
-        document.getElementById("profileStatus");
+        document.getElementById(
+            "profileStatus"
+        );
+
 
     if (profileStatus) {
-        profileStatus.textContent = adminStatus;
+
+        profileStatus.textContent =
+            adminStatus;
+
     }
 
 
     /* Profile avatar */
 
-    const avatar =
-        document.getElementById("profileAvatar");
-
-    if (avatar) {
-        avatar.textContent =
-            adminName
-                .trim()
-                .charAt(0)
-                .toUpperCase() || "A";
-    }
-
-
-    const miniAvatar =
-        document.querySelector(
-            ".admin-mini-profile .avatar"
+    const profileAvatar =
+        document.getElementById(
+            "profileAvatar"
         );
 
-    if (miniAvatar) {
-        miniAvatar.textContent =
+
+    if (profileAvatar) {
+
+        profileAvatar.textContent =
             adminName
                 .trim()
                 .charAt(0)
                 .toUpperCase() || "A";
+
     }
 
 
-    /* Start real-time dashboard */
+    /* Start dashboard */
 
     startDashboardListeners();
 
 
-    /* Restore current section from URL */
+    /* Restore section */
 
     const hash =
         location.hash.replace("#", "");
 
-    if (hash && titles[hash]) {
+
+    if (
+        hash &&
+        titles[hash]
+    ) {
+
+        if (hash === "students") {
+
+            window.location.href =
+                "./pages/students.html";
+
+            return;
+
+        }
+
+
         showSection(hash);
+
     } else {
+
         showSection("dashboard");
+
     }
 
 });
