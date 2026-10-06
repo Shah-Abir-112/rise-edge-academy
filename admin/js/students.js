@@ -737,12 +737,10 @@ function renderStudents() {
 
 
     if (count) {
-
-        count.textContent =
-            students.length;
-
+        count.textContent = students.length;
     }
 
+    updateStudentStats();
 
     if (
         students.length === 0
@@ -797,6 +795,41 @@ function renderStudents() {
 
 }
 
+
+
+
+/* =====================================================
+   QUICK STATS
+===================================================== */
+
+function updateStudentStats() {
+
+    const total = allStudents.length;
+
+    const active = allStudents.filter(
+        student => getStatus(student) === "active"
+    ).length;
+
+    const pending = allStudents.filter(
+        student => getStatus(student) === "pending"
+    ).length;
+
+    const ids = allStudents
+        .map(student => parseInt(student.studentId, 10))
+        .filter(Number.isFinite);
+
+    const latestId = ids.length ? Math.max(...ids) : null;
+
+    const totalEl = $("totalStudentCount");
+    const activeEl = $("activeStudentCount");
+    const pendingEl = $("pendingStudentCount");
+    const latestEl = $("latestStudentId");
+
+    if (totalEl) totalEl.textContent = total;
+    if (activeEl) activeEl.textContent = active;
+    if (pendingEl) pendingEl.textContent = pending;
+    if (latestEl) latestEl.textContent = latestId ?? "—";
+}
 
 /* =====================================================
    STUDENT ROW
