@@ -7,11 +7,13 @@ import {
     getDocs,
     query,
     orderBy,
+    where,
     doc,
     updateDoc,
     addDoc,
     serverTimestamp,
-    setDoc
+    setDoc,
+    runTransaction
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 import {
@@ -984,6 +986,13 @@ async function approveAdmission(
     application
 ) {
 
+    /*
+     * Generate permanent sequential
+     * Student ID.
+     *
+     * First student = 1001
+     */
+
     const studentId =
         await generateStudentId();
 
@@ -993,14 +1002,6 @@ async function approveAdmission(
         application.name ||
         "";
 
-
-    /*
-     * Create student record.
-     *
-     * Firebase Authentication account creation
-     * will be connected through a secure backend
-     * / Cloud Function in the authentication step.
-     */
 
     const studentData = {
 
@@ -1096,6 +1097,10 @@ async function approveAdmission(
     };
 
 
+    /*
+     * Main student record.
+     */
+
     await setDoc(
         doc(
             db,
@@ -1106,9 +1111,27 @@ async function approveAdmission(
     );
 
 
+    /*
+     * Sync Student ID with users collection.
+     *
+     * Student Management currently reads
+     * users collection, so we must store
+     * the same studentId there.
+     */
+
+    await syncStudentIdToUser(
+        application,
+        studentId
+    );
+
+
     const note =
         actionNote.value.trim();
 
+
+    /*
+     * Update admission application.
+     */
 
     await updateDoc(
         doc(
@@ -1155,6 +1178,187 @@ async function approveAdmission(
             applicantName: name
         }
     );
+
+}
+
+
+/* =========================
+   SYNC STUDENT ID
+========================= */
+
+async function syncStudentIdToUser(
+    application,
+    studentId
+) {
+
+    let userUid =
+        application.uid ||
+        application.userUid ||
+        application.userId ||
+        application.authUid ||
+        application.studentUid ||
+        "";
+
+
+    /*
+     * If UID is already available
+     * in the admission document,
+     * use it directly.
+     */
+
+    if (userUid) {
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                userUid
+            ),
+            {
+
+                studentId,
+
+                status: "active",
+
+                updatedAt:
+                    serverTimestamp(),
+
+                updatedBy:
+                    currentAdmin.uid
+
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Otherwise find the existing user
+     * using the student's email.
+     */
+
+    const email =
+        String(
+            application.email ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if (!email) {
+
+        console.warn(
+            "Student ID created, but no email was available to sync with users collection."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const usersQuery =
+            query(
+                collection(db, "users"),
+                where("email", "==", email)
+            );
+
+
+        const userSnapshot =
+            await getDocs(usersQuery);
+
+
+        if (
+            userSnapshot.empty
+        ) {
+
+            console.warn(
+                "No matching users document found for:",
+                email
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Prefer a student-role user.
+         */
+
+        let targetUser =
+            userSnapshot.docs.find(
+                userDoc =>
+                    String(
+                        userDoc.data().role ||
+                        ""
+                    )
+                    .toLowerCase() ===
+                    "student"
+            );
+
+
+        /*
+         * If no student role exists,
+         * use the first matching user.
+         */
+
+        if (!targetUser) {
+
+            targetUser =
+                userSnapshot.docs[0];
+
+        }
+
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                targetUser.id
+            ),
+            {
+
+                studentId,
+
+                status: "active",
+
+                updatedAt:
+                    serverTimestamp(),
+
+                updatedBy:
+                    currentAdmin.uid
+
+            }
+        );
+
+
+        console.log(
+            "Student ID synced successfully:",
+            studentId,
+            "→",
+            targetUser.id
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "USER STUDENT ID SYNC ERROR:",
+            error
+        );
+
+        /*
+         * Do not cancel the admission
+         * because the main student record
+         * has already been created.
+         */
+
+    }
 
 }
 
@@ -1239,24 +1443,91 @@ async function updateAdmissionStatus(
 
 
 /* =========================
-   STUDENT ID
+   STUDENT ID GENERATOR
 ========================= */
 
 async function generateStudentId() {
 
-    const year =
-        new Date()
-            .getFullYear();
-
-
-    const random =
-        Math.floor(
-            100000 +
-            Math.random() * 900000
+    const counterRef =
+        doc(
+            db,
+            "counters",
+            "studentId"
         );
 
 
-    return `REA-${year}-${random}`;
+    const nextStudentId =
+        await runTransaction(
+            db,
+            async transaction => {
+
+                const counterSnapshot =
+                    await transaction.get(
+                        counterRef
+                    );
+
+
+                let lastId = 1000;
+
+
+                if (
+                    counterSnapshot.exists()
+                ) {
+
+                    const data =
+                        counterSnapshot.data();
+
+
+                    const storedLastId =
+                        Number(
+                            data.lastId
+                        );
+
+
+                    if (
+                        Number.isInteger(
+                            storedLastId
+                        ) &&
+                        storedLastId >= 1000
+                    ) {
+
+                        lastId =
+                            storedLastId;
+
+                    }
+
+                }
+
+
+                const nextId =
+                    lastId + 1;
+
+
+                transaction.set(
+                    counterRef,
+                    {
+
+                        lastId: nextId,
+
+                        updatedAt:
+                            serverTimestamp()
+
+                    },
+                    {
+                        merge: true
+                    }
+                );
+
+
+                return nextId;
+
+            }
+        );
+
+
+    return String(
+        nextStudentId
+    );
 
 }
 
@@ -1313,12 +1584,6 @@ async function addActivityLog(
         );
 
     } catch (error) {
-
-        /*
-         * Activity logging failure should
-         * not make the main admission action
-         * appear failed.
-         */
 
         console.warn(
             "Activity log failed:",
@@ -1666,4 +1931,4 @@ function escapeHtml(
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 
-              }
+        }
