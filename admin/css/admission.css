@@ -1,242 +1,177 @@
-/* =========================================================
-   RISE EDGE ACADEMY
-   ADMISSION MANAGEMENT
-   MODERN ADMIN UI
-========================================================= */
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+import {
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    where,
+    doc,
+    getDoc,
+    updateDoc,
+    addDoc,
+    serverTimestamp,
+    runTransaction
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-:root {
-    --bg: #f5f7fb;
-    --card: #ffffff;
-
-    --text: #172033;
-    --muted: #64748b;
-
-    --border: #e5e7eb;
-    --border-light: #eef1f5;
-
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-
-    --success: #16a34a;
-    --success-bg: #ecfdf3;
-
-    --warning: #d97706;
-    --warning-bg: #fff7ed;
-
-    --danger: #dc2626;
-    --danger-bg: #fef2f2;
-
-    --purple: #7c3aed;
-    --purple-bg: #f5f3ff;
-
-    --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
-    --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
-
-    --radius: 16px;
-}
-
-body {
-    font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-}
+import {
+    auth,
+    db
+} from "./firebase-config.js";
 
 
 /* =========================================================
-   PAGE
+   DOM ELEMENTS
 ========================================================= */
 
-.admissions-page {
-    width: 100%;
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 28px;
+const pendingCount = document.getElementById("pendingCount");
+const correctionCount = document.getElementById("correctionCount");
+const approvedCount = document.getElementById("approvedCount");
+const rejectedCount = document.getElementById("rejectedCount");
+
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+const classFilter = document.getElementById("classFilter");
+
+const refreshBtn = document.getElementById("refreshBtn");
+const retryBtn = document.getElementById("retryBtn");
+
+const loadingState = document.getElementById("loadingState");
+const emptyState = document.getElementById("emptyState");
+const errorState = document.getElementById("errorState");
+const errorMessage = document.getElementById("errorMessage");
+
+const tableContainer = document.getElementById("tableContainer");
+const applicationsBody = document.getElementById("applicationsBody");
+const resultText = document.getElementById("resultText");
+
+const detailsModal = document.getElementById("detailsModal");
+const closeDetailsBtn = document.getElementById("closeDetailsBtn");
+const applicationDetails = document.getElementById("applicationDetails");
+const modalApplicantName = document.getElementById("modalApplicantName");
+
+const approveBtn = document.getElementById("approveBtn");
+const rejectBtn = document.getElementById("rejectBtn");
+const correctionBtn = document.getElementById("correctionBtn");
+
+const confirmModal = document.getElementById("confirmModal");
+const confirmTitle = document.getElementById("confirmTitle");
+const confirmText = document.getElementById("confirmText");
+const actionNote = document.getElementById("actionNote");
+const confirmActionBtn = document.getElementById("confirmActionBtn");
+const cancelConfirmBtn = document.getElementById("cancelConfirmBtn");
+
+const toast = document.getElementById("toast");
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let applications = [];
+let selectedApplication = null;
+let pendingAction = null;
+let currentAdmin = null;
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+onAuthStateChanged(auth, async user => {
+
+    if (!user) {
+        window.location.href = "../login.html";
+        return;
+    }
+
+    currentAdmin = user;
+
+    await loadApplications();
+
+});
+
+
+/* =========================================================
+   LOAD APPLICATIONS
+========================================================= */
+
+async function loadApplications() {
+
+    setLoading(true);
+
+    try {
+
+        const applicationsRef =
+            collection(db, "admissions");
+
+        let snapshot;
+
+        try {
+
+            const q = query(
+                applicationsRef,
+                orderBy("createdAt", "desc")
+            );
+
+            snapshot = await getDocs(q);
+
+        } catch (error) {
+
+            console.warn(
+                "Ordered query failed. Loading without order.",
+                error
+            );
+
+            snapshot = await getDocs(
+                applicationsRef
+            );
+
+        }
+
+        applications = snapshot.docs.map(item => ({
+            id: item.id,
+            ...item.data()
+        }));
+
+        updateStatistics();
+        renderApplications();
+
+        setLoading(false);
+
+    } catch (error) {
+
+        console.error(
+            "ADMISSION LOAD ERROR:",
+            error
+        );
+
+        setLoading(false);
+
+        showError(
+            error.message ||
+            "Unable to load admission applications."
+        );
+
+    }
+
 }
 
 
 /* =========================================================
-   HEADER
+   STATUS NORMALIZATION
 ========================================================= */
 
-.admissions-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+function normalizeStatus(status) {
 
-    margin-bottom: 28px;
-}
+    return String(
+        status || "pending"
+    )
+        .trim()
+        .toLowerCase();
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-}
-
-.header-left > div {
-    min-width: 0;
-}
-
-.back-btn {
-    width: 46px;
-    height: 46px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 13px;
-
-    background: var(--card);
-    border: 1px solid var(--border);
-
-    color: var(--text);
-    text-decoration: none;
-
-    font-size: 22px;
-
-    box-shadow: var(--shadow-sm);
-
-    transition:
-        transform 0.2s ease,
-        background 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.back-btn:hover {
-    transform: translateY(-2px);
-    background: #f8fafc;
-    box-shadow: var(--shadow-md);
-}
-
-.eyebrow {
-    display: block;
-
-    margin-bottom: 5px;
-
-    color: var(--primary);
-
-    font-size: 11px;
-    font-weight: 800;
-
-    letter-spacing: 1.5px;
-}
-
-.admissions-header h1 {
-    font-size: clamp(25px, 3vw, 34px);
-    line-height: 1.15;
-
-    font-weight: 800;
-
-    letter-spacing: -0.7px;
-}
-
-.admissions-header p {
-    margin-top: 7px;
-
-    color: var(--muted);
-
-    font-size: 14px;
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-button {
-    font: inherit;
-}
-
-.secondary-btn,
-.primary-btn,
-.success-btn,
-.warning-btn,
-.danger-btn {
-    border: none;
-    cursor: pointer;
-
-    border-radius: 11px;
-
-    padding: 11px 16px;
-
-    font-size: 13px;
-    font-weight: 700;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        opacity 0.2s ease;
-}
-
-.secondary-btn {
-    background: #ffffff;
-    color: var(--text);
-
-    border: 1px solid var(--border);
-
-    box-shadow: var(--shadow-sm);
-}
-
-.primary-btn {
-    background: var(--primary);
-    color: #ffffff;
-
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
-}
-
-.success-btn {
-    background: var(--success);
-    color: #ffffff;
-}
-
-.warning-btn {
-    background: var(--warning-bg);
-    color: var(--warning);
-
-    border: 1px solid #fed7aa;
-}
-
-.danger-btn {
-    background: var(--danger-bg);
-    color: var(--danger);
-
-    border: 1px solid #fecaca;
-}
-
-.secondary-btn:hover,
-.primary-btn:hover,
-.success-btn:hover,
-.warning-btn:hover,
-.danger-btn:hover {
-    transform: translateY(-1px);
-}
-
-.primary-btn:hover {
-    background: var(--primary-dark);
-}
-
-.secondary-btn:active,
-.primary-btn:active,
-.success-btn:active,
-.warning-btn:active,
-.danger-btn:active {
-    transform: translateY(0);
 }
 
 
@@ -244,838 +179,1895 @@ button {
    STATISTICS
 ========================================================= */
 
-.stats-grid {
-    display: grid;
+function updateStatistics() {
 
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
+    const counts = {
+        pending: 0,
+        correction: 0,
+        approved: 0,
+        rejected: 0
+    };
 
-    gap: 18px;
+    applications.forEach(application => {
 
-    margin-bottom: 22px;
-}
+        const status =
+            normalizeStatus(
+                application.status
+            );
 
-.stat-card {
-    position: relative;
+        if (
+            status === "new" ||
+            status === "pending" ||
+            status === "pending review"
+        ) {
 
-    display: flex;
-    align-items: center;
+            counts.pending++;
 
-    gap: 15px;
+        } else if (
+            status === "correction" ||
+            status === "correction required"
+        ) {
 
-    padding: 20px;
+            counts.correction++;
 
-    background: var(--card);
+        } else if (
+            status === "approved"
+        ) {
 
-    border: 1px solid var(--border);
+            counts.approved++;
 
-    border-radius: var(--radius);
+        } else if (
+            status === "rejected"
+        ) {
 
-    box-shadow: var(--shadow-sm);
+            counts.rejected++;
 
-    overflow: hidden;
+        }
 
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
+    });
 
-.stat-card::after {
-    content: "";
-
-    position: absolute;
-
-    width: 70px;
-    height: 70px;
-
-    right: -30px;
-    bottom: -35px;
-
-    border-radius: 50%;
-
-    background: rgba(37, 99, 235, 0.04);
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 14px;
-
-    font-size: 19px;
-    font-weight: 800;
-}
-
-.stat-icon.pending {
-    background: #eff6ff;
-    color: var(--primary);
-}
-
-.stat-icon.correction {
-    background: var(--warning-bg);
-    color: var(--warning);
-}
-
-.stat-icon.approved {
-    background: var(--success-bg);
-    color: var(--success);
-}
-
-.stat-icon.rejected {
-    background: var(--danger-bg);
-    color: var(--danger);
-}
-
-.stat-card span {
-    display: block;
-
-    color: var(--muted);
-
-    font-size: 12px;
-    font-weight: 600;
-
-    margin-bottom: 5px;
-}
-
-.stat-card strong {
-    display: block;
-
-    font-size: 25px;
-    line-height: 1;
-
-    font-weight: 800;
-}
-
-
-/* =========================================================
-   TOOLBAR
-========================================================= */
-
-.toolbar-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 18px;
-
-    padding: 16px;
-
-    margin-bottom: 22px;
-
-    background: var(--card);
-
-    border: 1px solid var(--border);
-
-    border-radius: var(--radius);
-
-    box-shadow: var(--shadow-sm);
-}
-
-.search-box {
-    position: relative;
-
-    flex: 1;
-
-    max-width: 650px;
-}
-
-.search-box > span {
-    position: absolute;
-
-    left: 14px;
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    color: #94a3b8;
-
-    font-size: 22px;
-
-    pointer-events: none;
-}
-
-.search-box input {
-    width: 100%;
-
-    height: 44px;
-
-    padding: 0 15px 0 43px;
-
-    border-radius: 11px;
-
-    border: 1px solid var(--border);
-
-    background: #f8fafc;
-
-    color: var(--text);
-
-    outline: none;
-
-    font-size: 13px;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
-}
-
-.search-box input:focus {
-    background: #ffffff;
-
-    border-color: var(--primary);
-
-    box-shadow:
-        0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.filters {
-    display: flex;
-    gap: 10px;
-}
-
-.filters select {
-    min-width: 155px;
-
-    height: 44px;
-
-    padding: 0 35px 0 13px;
-
-    border-radius: 11px;
-
-    border: 1px solid var(--border);
-
-    background: #ffffff;
-
-    color: var(--text);
-
-    font-size: 13px;
-    font-weight: 600;
-
-    outline: none;
-
-    cursor: pointer;
-}
-
-.filters select:focus {
-    border-color: var(--primary);
-
-    box-shadow:
-        0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-
-/* =========================================================
-   APPLICATION CARD
-========================================================= */
-
-.applications-card {
-    background: var(--card);
-
-    border: 1px solid var(--border);
-
-    border-radius: var(--radius);
-
-    box-shadow: var(--shadow-sm);
-
-    overflow: hidden;
-}
-
-.card-header {
-    padding: 22px 24px;
-
-    border-bottom: 1px solid var(--border-light);
-}
-
-.card-header h2 {
-    font-size: 18px;
-    font-weight: 800;
-}
-
-.card-header p {
-    margin-top: 5px;
-
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-.table-container {
-    width: 100%;
-
-    overflow-x: auto;
-}
-
-.table-container table {
-    width: 100%;
-
-    min-width: 950px;
-
-    border-collapse: collapse;
-}
-
-.table-container th {
-    padding: 14px 18px;
-
-    background: #f8fafc;
-
-    border-bottom: 1px solid var(--border);
-
-    color: #64748b;
-
-    font-size: 11px;
-    font-weight: 800;
-
-    text-transform: uppercase;
-
-    letter-spacing: 0.5px;
-
-    text-align: left;
-
-    white-space: nowrap;
-}
-
-.table-container td {
-    padding: 16px 18px;
-
-    border-bottom: 1px solid var(--border-light);
-
-    color: var(--text);
-
-    font-size: 13px;
-
-    vertical-align: middle;
-}
-
-.table-container tbody tr {
-    transition: background 0.15s ease;
-}
-
-.table-container tbody tr:hover {
-    background: #f8fafc;
-}
-
-.table-container tbody tr:last-child td {
-    border-bottom: none;
-}
-
-
-/* =========================================================
-   APPLICATION / USER INFO
-========================================================= */
-
-.applicant-name {
-    font-weight: 750;
-    color: var(--text);
-}
-
-.applicant-email,
-.muted-text {
-    margin-top: 3px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-.application-id {
-    display: inline-flex;
-
-    padding: 5px 8px;
-
-    border-radius: 7px;
-
-    background: #f1f5f9;
-
-    color: #475569;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    font-family: monospace;
-}
-
-
-/* =========================================================
-   STATUS BADGES
-========================================================= */
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 5px;
-
-    padding: 6px 10px;
-
-    border-radius: 999px;
-
-    font-size: 10px;
-    font-weight: 800;
-
-    white-space: nowrap;
-}
-
-.status-badge.pending,
-.status-badge.new {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.status-badge.correction {
-    background: #fff7ed;
-    color: #c2410c;
-}
-
-.status-badge.approved {
-    background: #ecfdf3;
-    color: #15803d;
-}
-
-.status-badge.rejected {
-    background: #fef2f2;
-    color: #dc2626;
-}
-
-.status-badge.cancelled,
-.status-badge.released {
-    background: #f1f5f9;
-    color: #64748b;
-}
-
-
-/* =========================================================
-   ACTION BUTTON
-========================================================= */
-
-.view-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 72px;
-
-    padding: 8px 11px;
-
-    border-radius: 9px;
-
-    border: 1px solid #dbeafe;
-
-    background: #eff6ff;
-
-    color: var(--primary);
-
-    font-size: 11px;
-    font-weight: 800;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease;
-}
-
-.view-btn:hover {
-    background: #dbeafe;
-
-    transform: translateY(-1px);
-}
-
-
-/* =========================================================
-   STATES
-========================================================= */
-
-.state-box {
-    min-height: 330px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    padding: 40px 20px;
-}
-
-.state-box.hidden {
-    display: none;
-}
-
-.state-box p {
-    margin-top: 9px;
-
-    color: var(--muted);
-
-    font-size: 13px;
-}
-
-.state-box h3 {
-    margin-top: 12px;
-
-    font-size: 17px;
-}
-
-.empty-icon {
-    width: 58px;
-    height: 58px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 16px;
-
-    background: #f1f5f9;
-
-    font-size: 25px;
-}
-
-.error-state .empty-icon {
-    background: var(--danger-bg);
-}
-
-.error-state .primary-btn {
-    margin-top: 18px;
-}
-
-.loader {
-    width: 34px;
-    height: 34px;
-
-    border: 3px solid #e2e8f0;
-    border-top-color: var(--primary);
-
-    border-radius: 50%;
-
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-
-/* =========================================================
-   MODAL OVERLAY
-========================================================= */
-
-.modal-overlay {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 1000;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 20px;
-
-    background: rgba(15, 23, 42, 0.58);
-
-    backdrop-filter: blur(5px);
-
-    animation: fadeIn 0.18s ease;
-}
-
-.modal-overlay.hidden {
-    display: none;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+    if (pendingCount) {
+        pendingCount.textContent =
+            counts.pending;
     }
 
-    to {
-        opacity: 1;
-    }
-}
-
-
-/* =========================================================
-   DETAILS MODAL
-========================================================= */
-
-.modal {
-    width: min(900px, 100%);
-
-    max-height: 90vh;
-
-    overflow-y: auto;
-
-    background: #ffffff;
-
-    border-radius: 20px;
-
-    box-shadow:
-        0 25px 70px rgba(15, 23, 42, 0.25);
-
-    animation: modalUp 0.22s ease;
-}
-
-@keyframes modalUp {
-    from {
-        opacity: 0;
-        transform: translateY(12px) scale(0.98);
+    if (correctionCount) {
+        correctionCount.textContent =
+            counts.correction;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
+    if (approvedCount) {
+        approvedCount.textContent =
+            counts.approved;
     }
-}
 
-.modal-header {
-    display: flex;
+    if (rejectedCount) {
+        rejectedCount.textContent =
+            counts.rejected;
+    }
 
-    align-items: flex-start;
-    justify-content: space-between;
-
-    gap: 15px;
-
-    padding: 22px 24px;
-
-    border-bottom: 1px solid var(--border-light);
-}
-
-.modal-header h2 {
-    margin-top: 3px;
-
-    font-size: 22px;
-
-    font-weight: 800;
-}
-
-.modal-close {
-    width: 38px;
-    height: 38px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    background: #f1f5f9;
-
-    color: #475569;
-
-    font-size: 24px;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease;
-}
-
-.modal-close:hover {
-    background: #e2e8f0;
-
-    transform: rotate(4deg);
 }
 
 
 /* =========================================================
-   APPLICATION DETAILS
+   FILTER APPLICATIONS
 ========================================================= */
 
-.application-details {
-    padding: 24px;
-}
+function getFilteredApplications() {
 
-.application-details-grid {
-    display: grid;
+    const search =
+        searchInput
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
+            : "";
 
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
+    const selectedStatus =
+        statusFilter
+            ? statusFilter.value
+            : "all";
 
-    gap: 13px;
-}
+    const selectedClass =
+        classFilter
+            ? classFilter.value
+            : "all";
 
-.detail-item {
-    padding: 14px;
+    return applications.filter(application => {
 
-    border: 1px solid var(--border-light);
+        const status =
+            normalizeStatus(
+                application.status
+            );
 
-    border-radius: 12px;
+        const applicantName =
+            String(
+                application.applicantName ||
+                application.name ||
+                ""
+            ).toLowerCase();
 
-    background: #f8fafc;
-}
+        const email =
+            String(
+                application.email ||
+                ""
+            ).toLowerCase();
 
-.detail-item.full {
-    grid-column: 1 / -1;
-}
+        const phone =
+            String(
+                application.phone ||
+                application.guardianPhone ||
+                ""
+            ).toLowerCase();
 
-.detail-label {
-    display: block;
+        const applicationId =
+            String(
+                application.applicationId ||
+                application.id ||
+                ""
+            ).toLowerCase();
 
-    margin-bottom: 5px;
+        const desiredClass =
+            String(
+                application.desiredClass ||
+                application.class ||
+                application.className ||
+                ""
+            ).trim();
 
-    color: var(--muted);
+        const guardian =
+            String(
+                application.guardianName ||
+                application.fatherName ||
+                application.motherName ||
+                ""
+            ).toLowerCase();
 
-    font-size: 10px;
+        const matchesSearch =
+            !search ||
+            applicantName.includes(search) ||
+            email.includes(search) ||
+            phone.includes(search) ||
+            applicationId.includes(search) ||
+            guardian.includes(search);
 
-    font-weight: 800;
+        let matchesStatus = true;
 
-    text-transform: uppercase;
+        if (selectedStatus !== "all") {
 
-    letter-spacing: 0.5px;
-}
+            if (selectedStatus === "pending") {
 
-.detail-value {
-    color: var(--text);
+                matchesStatus =
+                    status === "new" ||
+                    status === "pending" ||
+                    status === "pending review";
 
-    font-size: 13px;
+            } else if (
+                selectedStatus === "correction"
+            ) {
 
-    font-weight: 650;
+                matchesStatus =
+                    status === "correction" ||
+                    status === "correction required";
 
-    word-break: break-word;
+            } else {
+
+                matchesStatus =
+                    status === selectedStatus;
+
+            }
+
+        }
+
+        const matchesClass =
+            selectedClass === "all" ||
+            desiredClass === selectedClass;
+
+        return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesClass
+        );
+
+    });
+
 }
 
 
 /* =========================================================
-   MODAL ACTIONS
+   RENDER APPLICATIONS
 ========================================================= */
 
-.modal-actions {
-    display: flex;
+function renderApplications() {
 
-    align-items: center;
-    justify-content: flex-end;
+    const filtered =
+        getFilteredApplications();
 
-    gap: 10px;
+    if (applicationsBody) {
+        applicationsBody.innerHTML = "";
+    }
 
-    padding: 18px 24px;
+    if (resultText) {
 
-    border-top: 1px solid var(--border-light);
+        resultText.textContent =
+            `${filtered.length} application${
+                filtered.length === 1
+                    ? ""
+                    : "s"
+            } found`;
 
-    background: #fafbfc;
+    }
+
+    if (filtered.length === 0) {
+
+        if (tableContainer) {
+            tableContainer.classList.add("hidden");
+        }
+
+        if (emptyState) {
+            emptyState.classList.remove("hidden");
+        }
+
+        return;
+    }
+
+    if (emptyState) {
+        emptyState.classList.add("hidden");
+    }
+
+    if (tableContainer) {
+        tableContainer.classList.remove("hidden");
+    }
+
+    filtered.forEach(application => {
+
+        if (applicationsBody) {
+
+            applicationsBody.appendChild(
+                createApplicationRow(
+                    application
+                )
+            );
+
+        }
+
+    });
+
 }
 
 
 /* =========================================================
-   CONFIRM MODAL
+   CREATE APPLICATION ROW
 ========================================================= */
 
-.confirm-modal {
-    width: min(460px, 100%);
+function createApplicationRow(application) {
 
-    padding: 28px;
+    const tr =
+        document.createElement("tr");
 
-    background: #ffffff;
+    const name =
+        application.applicantName ||
+        application.name ||
+        "Unknown Applicant";
 
-    border-radius: 20px;
+    const email =
+        application.email ||
+        "";
 
-    text-align: center;
+    const applicationId =
+        application.applicationId ||
+        application.id ||
+        "—";
 
-    box-shadow:
-        0 25px 70px rgba(15, 23, 42, 0.25);
+    const desiredClass =
+        application.desiredClass ||
+        application.class ||
+        application.className ||
+        "—";
 
-    animation: modalUp 0.22s ease;
+    const guardian =
+        application.guardianName ||
+        application.fatherName ||
+        application.motherName ||
+        "—";
+
+    const date =
+        formatDate(
+            application.createdAt ||
+            application.applicationDate
+        );
+
+    const status =
+        normalizeStatus(
+            application.status
+        );
+
+    const displayStatus =
+        formatStatus(status);
+
+    const initial =
+        name
+            .trim()
+            .charAt(0)
+            .toUpperCase() ||
+        "A";
+
+    tr.innerHTML = `
+
+        <td>
+
+            <div class="applicant-cell">
+
+                <div class="applicant-avatar">
+
+                    ${escapeHtml(initial)}
+
+                </div>
+
+                <div>
+
+                    <div class="applicant-name">
+
+                        ${escapeHtml(name)}
+
+                    </div>
+
+                    <div class="applicant-email">
+
+                        ${escapeHtml(email)}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </td>
+
+        <td>
+
+            <span class="application-id">
+
+                ${escapeHtml(
+                    String(applicationId)
+                )}
+
+            </span>
+
+        </td>
+
+        <td>
+
+            ${escapeHtml(
+                String(desiredClass)
+            )}
+
+        </td>
+
+        <td>
+
+            ${escapeHtml(
+                String(guardian)
+            )}
+
+        </td>
+
+        <td>
+
+            ${escapeHtml(date)}
+
+        </td>
+
+        <td>
+
+            <span class="status-badge ${statusClass(status)}">
+
+                ${escapeHtml(
+                    displayStatus
+                )}
+
+            </span>
+
+        </td>
+
+        <td>
+
+            <button
+                type="button"
+                class="view-btn"
+            >
+                View
+            </button>
+
+        </td>
+
+    `;
+
+    const viewBtn =
+        tr.querySelector(
+            ".view-btn"
+        );
+
+    if (viewBtn) {
+
+        viewBtn.addEventListener(
+            "click",
+            () => {
+                openDetails(
+                    application.id
+                );
+            }
+        );
+
+    }
+
+    return tr;
+
 }
 
-.confirm-icon {
-    width: 56px;
-    height: 56px;
 
-    margin: 0 auto 16px;
+/* =========================================================
+   OPEN DETAILS
+========================================================= */
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+function openDetails(id) {
 
-    border-radius: 50%;
+    selectedApplication =
+        applications.find(
+            item => item.id === id
+        );
 
-    background: #eff6ff;
+    if (!selectedApplication) {
+        return;
+    }
 
-    color: var(--primary);
+    const application =
+        selectedApplication;
 
-    font-size: 23px;
-    font-weight: 800;
+    const name =
+        application.applicantName ||
+        application.name ||
+        "Applicant";
+
+    if (modalApplicantName) {
+        modalApplicantName.textContent =
+            name;
+    }
+
+    if (applicationDetails) {
+
+        applicationDetails.innerHTML = `
+
+            <div class="application-details-grid">
+
+                ${detail(
+                    "Application ID",
+                    application.applicationId ||
+                    application.id
+                )}
+
+                ${detail(
+                    "Status",
+                    formatStatus(
+                        normalizeStatus(
+                            application.status
+                        )
+                    )
+                )}
+
+                ${detail(
+                    "Applicant Name",
+                    name
+                )}
+
+                ${detail(
+                    "Date of Birth",
+                    application.dateOfBirth ||
+                    application.dob ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Guardian Name",
+                    application.guardianName ||
+                    application.fatherName ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Guardian Phone",
+                    application.guardianPhone ||
+                    application.phone ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Email",
+                    application.email ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Desired Class",
+                    application.desiredClass ||
+                    application.class ||
+                    application.className ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Desired Section",
+                    application.desiredSection ||
+                    application.section ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Desired Subject / Course",
+                    application.desiredSubject ||
+                    application.course ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Payment Status",
+                    application.paymentStatus ||
+                    "—"
+                )}
+
+                ${detail(
+                    "Application Date",
+                    formatDate(
+                        application.createdAt ||
+                        application.applicationDate
+                    )
+                )}
+
+                ${detail(
+                    "Address",
+                    application.address ||
+                    "—",
+                    true
+                )}
+
+                ${detail(
+                    "Admin Note",
+                    application.adminNote ||
+                    "No admin note.",
+                    true
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+    const status =
+        normalizeStatus(
+            application.status
+        );
+
+    const locked =
+        status === "approved" ||
+        status === "rejected" ||
+        status === "cancelled" ||
+        status === "released";
+
+    if (approveBtn) {
+        approveBtn.disabled = locked;
+    }
+
+    if (rejectBtn) {
+        rejectBtn.disabled = locked;
+    }
+
+    if (correctionBtn) {
+        correctionBtn.disabled = locked;
+    }
+
+    if (detailsModal) {
+        detailsModal.classList.remove(
+            "hidden"
+        );
+    }
+
 }
 
-.confirm-modal h2 {
-    font-size: 20px;
-    font-weight: 800;
+
+/* =========================================================
+   DETAIL HTML
+========================================================= */
+
+function detail(
+    label,
+    value,
+    full = false
+) {
+
+    return `
+
+        <div class="detail-item ${full ? "full" : ""}">
+
+            <span class="detail-label">
+
+                ${escapeHtml(label)}
+
+            </span>
+
+            <div class="detail-value">
+
+                ${escapeHtml(
+                    String(
+                        value ?? "—"
+                    )
+                )}
+
+            </div>
+
+        </div>
+
+    `;
+
 }
 
-.confirm-modal p {
-    margin-top: 8px;
 
-    color: var(--muted);
+/* =========================================================
+   APPROVE BUTTON
+========================================================= */
 
-    font-size: 13px;
+if (approveBtn) {
 
-    line-height: 1.6;
+    approveBtn.addEventListener(
+        "click",
+        () => {
+
+            if (!selectedApplication) {
+                return;
+            }
+
+            prepareAction(
+                "approve",
+                "Approve Admission?",
+                "This will approve the application and activate the student's account.",
+                "Approve"
+            );
+
+        }
+    );
+
 }
 
-.confirm-modal textarea {
-    width: 100%;
 
-    min-height: 95px;
+/* =========================================================
+   REJECT BUTTON
+========================================================= */
 
-    resize: vertical;
+if (rejectBtn) {
 
-    margin-top: 18px;
+    rejectBtn.addEventListener(
+        "click",
+        () => {
 
-    padding: 12px;
+            if (!selectedApplication) {
+                return;
+            }
 
-    border: 1px solid var(--border);
+            prepareAction(
+                "reject",
+                "Reject Admission?",
+                "The application will be marked as rejected.",
+                "Reject"
+            );
 
-    border-radius: 11px;
+        }
+    );
 
-    outline: none;
-
-    font-family: inherit;
-
-    font-size: 13px;
-
-    color: var(--text);
-
-    background: #f8fafc;
 }
 
-.confirm-modal textarea:focus {
-    background: #ffffff;
 
-    border-color: var(--primary);
+/* =========================================================
+   CORRECTION BUTTON
+========================================================= */
 
-    box-shadow:
-        0 0 0 3px rgba(37, 99, 235, 0.1);
+if (correctionBtn) {
+
+    correctionBtn.addEventListener(
+        "click",
+        () => {
+
+            if (!selectedApplication) {
+                return;
+            }
+
+            prepareAction(
+                "correction",
+                "Request Correction?",
+                "The applicant will need to correct the submitted information.",
+                "Request Correction"
+            );
+
+        }
+    );
+
 }
 
-.confirm-actions {
-    display: flex;
 
-    justify-content: flex-end;
+/* =========================================================
+   PREPARE ACTION
+========================================================= */
 
-    gap: 10px;
+function prepareAction(
+    action,
+    title,
+    text,
+    buttonText
+) {
 
-    margin-top: 16px;
+    pendingAction =
+        action;
+
+    if (confirmTitle) {
+        confirmTitle.textContent =
+            title;
+    }
+
+    if (confirmText) {
+        confirmText.textContent =
+            text;
+    }
+
+    if (confirmActionBtn) {
+        confirmActionBtn.textContent =
+            buttonText;
+    }
+
+    if (actionNote) {
+        actionNote.value = "";
+    }
+
+    if (confirmModal) {
+        confirmModal.classList.remove(
+            "hidden"
+        );
+    }
+
+}
+
+
+/* =========================================================
+   CONFIRM ACTION
+========================================================= */
+
+if (confirmActionBtn) {
+
+    confirmActionBtn.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !pendingAction ||
+                !selectedApplication
+            ) {
+                return;
+            }
+
+            confirmActionBtn.disabled =
+                true;
+
+            confirmActionBtn.textContent =
+                "Processing...";
+
+            try {
+
+                if (
+                    pendingAction ===
+                    "approve"
+                ) {
+
+                    await approveAdmission(
+                        selectedApplication
+                    );
+
+                } else if (
+                    pendingAction ===
+                    "reject"
+                ) {
+
+                    await updateAdmissionStatus(
+                        selectedApplication,
+                        "rejected",
+                        actionNote
+                            ? actionNote.value.trim()
+                            : ""
+                    );
+
+                } else if (
+                    pendingAction ===
+                    "correction"
+                ) {
+
+                    await updateAdmissionStatus(
+                        selectedApplication,
+                        "correction",
+                        actionNote
+                            ? actionNote.value.trim()
+                            : ""
+                    );
+
+                }
+
+                if (confirmModal) {
+                    confirmModal.classList.add(
+                        "hidden"
+                    );
+                }
+
+                if (detailsModal) {
+                    detailsModal.classList.add(
+                        "hidden"
+                    );
+                }
+
+                await loadApplications();
+
+                const message =
+                    pendingAction === "approve"
+                        ? "Admission approved successfully."
+                        : pendingAction === "reject"
+                            ? "Admission rejected successfully."
+                            : "Correction request sent successfully.";
+
+                showToast(message);
+
+            } catch (error) {
+
+                console.error(
+                    "ADMISSION ACTION ERROR:",
+                    error
+                );
+
+                showToast(
+                    error.message ||
+                    "Action failed."
+                );
+
+            } finally {
+
+                confirmActionBtn.disabled =
+                    false;
+
+                pendingAction =
+                    null;
+
+                confirmActionBtn.textContent =
+                    "Confirm";
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   APPROVE ADMISSION
+========================================================= */
+
+async function approveAdmission(
+    application
+) {
+
+    const applicationStatus =
+        normalizeStatus(
+            application.status
+        );
+
+    if (
+        applicationStatus ===
+        "approved"
+    ) {
+
+        throw new Error(
+            "This admission is already approved."
+        );
+
+    }
+
+    /*
+     * Find existing Firebase Auth
+     * student account.
+     */
+
+    const studentUser =
+        await findStudentUser(
+            application
+        );
+
+    if (!studentUser) {
+
+        throw new Error(
+            "Student account not found. The student must register first using the same email address."
+        );
+
+    }
+
+    const studentUserData =
+        studentUser.data;
+
+    /*
+     * Existing Student ID থাকলে
+     * সেটাই রাখা হবে।
+     */
+
+    let studentId =
+        String(
+            studentUserData.studentId ||
+            ""
+        ).trim();
+
+    /*
+     * Otherwise generate:
+     *
+     * 1001
+     * 1002
+     * 1003
+     */
+
+    if (!studentId) {
+
+        studentId =
+            await generateStudentId();
+
+    }
+
+    const name =
+        application.applicantName ||
+        application.name ||
+        studentUserData.name ||
+        "";
+
+    const email =
+        application.email ||
+        studentUserData.email ||
+        "";
+
+    const desiredClass =
+        application.desiredClass ||
+        application.class ||
+        application.className ||
+        studentUserData.className ||
+        studentUserData.class ||
+        "";
+
+    const section =
+        application.desiredSection ||
+        application.section ||
+        studentUserData.section ||
+        "";
+
+    const roll =
+        application.roll ||
+        studentUserData.roll ||
+        "";
+
+    /*
+     * Update users/{UID}
+     */
+
+    await updateDoc(
+        doc(
+            db,
+            "users",
+            studentUser.uid
+        ),
+        {
+
+            role: "student",
+
+            studentId,
+
+            name,
+
+            email,
+
+            profilePicture:
+                application.profilePhoto ||
+                application.profilePicture ||
+                studentUserData.profilePicture ||
+                "",
+
+            dateOfBirth:
+                application.dateOfBirth ||
+                application.dob ||
+                studentUserData.dateOfBirth ||
+                studentUserData.dob ||
+                "",
+
+            fatherName:
+                application.fatherName ||
+                studentUserData.fatherName ||
+                "",
+
+            motherName:
+                application.motherName ||
+                studentUserData.motherName ||
+                "",
+
+            guardianName:
+                application.guardianName ||
+                studentUserData.guardianName ||
+                "",
+
+            guardianPhone:
+                application.guardianPhone ||
+                application.phone ||
+                studentUserData.guardianPhone ||
+                studentUserData.phone ||
+                "",
+
+            phone:
+                application.studentPhone ||
+                studentUserData.phone ||
+                "",
+
+            address:
+                application.address ||
+                studentUserData.address ||
+                "",
+
+            class:
+                desiredClass,
+
+            className:
+                desiredClass,
+
+            section,
+
+            roll,
+
+            academicSession:
+                application.academicSession ||
+                studentUserData.academicSession ||
+                getAcademicSession(),
+
+            admissionId:
+                application.id,
+
+            applicationId:
+                application.applicationId ||
+                application.id,
+
+            admissionDate:
+                serverTimestamp(),
+
+            status:
+                "active",
+
+            feeStatus:
+                studentUserData.feeStatus ||
+                "unpaid",
+
+            assignedTeachers:
+                studentUserData.assignedTeachers ||
+                [],
+
+            updatedAt:
+                serverTimestamp(),
+
+            updatedBy:
+                currentAdmin.uid
+
+        }
+    );
+
+    /*
+     * Update admission application.
+     */
+
+    const note =
+        actionNote
+            ? actionNote.value.trim()
+            : "";
+
+    await updateDoc(
+        doc(
+            db,
+            "admissions",
+            application.id
+        ),
+        {
+
+            status:
+                "approved",
+
+            studentId,
+
+            studentUid:
+                studentUser.uid,
+
+            approvedAt:
+                serverTimestamp(),
+
+            approvedBy:
+                currentAdmin.uid,
+
+            adminNote:
+                note ||
+                application.adminNote ||
+                "",
+
+            updatedAt:
+                serverTimestamp(),
+
+            updatedBy:
+                currentAdmin.uid
+
+        }
+    );
+
+    /*
+     * Activity log.
+     */
+
+    await addActivityLog(
+        "Admission Approved",
+        application.id,
+        {
+
+            studentId,
+
+            studentUid:
+                studentUser.uid,
+
+            applicantName:
+                name
+
+        }
+    );
+
+    console.log(
+        "Student approved:",
+        {
+            studentId,
+            uid: studentUser.uid,
+            name
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FIND STUDENT USER
+========================================================= */
+
+async function findStudentUser(
+    application
+) {
+
+    /*
+     * FIRST:
+     * Try UID directly.
+     */
+
+    const possibleUid =
+        application.uid ||
+        application.userUid ||
+        application.userId ||
+        application.authUid ||
+        application.studentUid ||
+        "";
+
+    if (possibleUid) {
+
+        try {
+
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    possibleUid
+                );
+
+            const userSnapshot =
+                await getDoc(
+                    userRef
+                );
+
+            if (
+                userSnapshot.exists()
+            ) {
+
+                const data =
+                    userSnapshot.data();
+
+                if (
+                    String(
+                        data.role || ""
+                    )
+                        .trim()
+                        .toLowerCase() ===
+                    "student"
+                ) {
+
+                    return {
+
+                        uid:
+                            userSnapshot.id,
+
+                        data
+
+                    };
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "UID lookup failed:",
+                error
+            );
+
+        }
+
+    }
+
+    /*
+     * SECOND:
+     * Find using email.
+     */
+
+    const email =
+        String(
+            application.email ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
+    if (!email) {
+        return null;
+    }
+
+    const usersQuery =
+        query(
+            collection(db, "users"),
+            where(
+                "email",
+                "==",
+                email
+            )
+        );
+
+    const userSnapshot =
+        await getDocs(
+            usersQuery
+        );
+
+    if (
+        userSnapshot.empty
+    ) {
+        return null;
+    }
+
+    /*
+     * Prefer student role.
+     */
+
+    let targetUser =
+        userSnapshot.docs.find(
+            userDoc => {
+
+                const data =
+                    userDoc.data();
+
+                return (
+                    String(
+                        data.role || ""
+                    )
+                        .trim()
+                        .toLowerCase() ===
+                    "student"
+                );
+
+            }
+        );
+
+    /*
+     * If only one account exists,
+     * use it.
+     */
+
+    if (
+        !targetUser &&
+        userSnapshot.docs.length === 1
+    ) {
+
+        targetUser =
+            userSnapshot.docs[0];
+
+    }
+
+    if (!targetUser) {
+        return null;
+    }
+
+    return {
+
+        uid:
+            targetUser.id,
+
+        data:
+            targetUser.data()
+
+    };
+
+}
+
+
+/* =========================================================
+   GENERATE STUDENT ID
+========================================================= */
+
+async function generateStudentId() {
+
+    const counterRef =
+        doc(
+            db,
+            "counters",
+            "studentId"
+        );
+
+    const nextStudentId =
+        await runTransaction(
+            db,
+            async transaction => {
+
+                const counterSnapshot =
+                    await transaction.get(
+                        counterRef
+                    );
+
+                let lastId =
+                    1000;
+
+                if (
+                    counterSnapshot.exists()
+                ) {
+
+                    const data =
+                        counterSnapshot.data();
+
+                    const storedLastId =
+                        Number(
+                            data.lastId
+                        );
+
+                    if (
+                        Number.isInteger(
+                            storedLastId
+                        ) &&
+                        storedLastId >= 1000
+                    ) {
+
+                        lastId =
+                            storedLastId;
+
+                    }
+
+                }
+
+                const nextId =
+                    lastId + 1;
+
+                transaction.set(
+                    counterRef,
+                    {
+
+                        lastId:
+                            nextId,
+
+                        updatedAt:
+                            serverTimestamp()
+
+                    },
+                    {
+                        merge: true
+                    }
+                );
+
+                return nextId;
+
+            }
+        );
+
+    return String(
+        nextStudentId
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE ADMISSION STATUS
+========================================================= */
+
+async function updateAdmissionStatus(
+    application,
+    newStatus,
+    note = ""
+) {
+
+    const updates = {
+
+        status:
+            newStatus,
+
+        updatedAt:
+            serverTimestamp(),
+
+        updatedBy:
+            currentAdmin.uid
+
+    };
+
+    if (note) {
+
+        updates.adminNote =
+            note;
+
+    }
+
+    if (
+        newStatus ===
+        "rejected"
+    ) {
+
+        updates.rejectedAt =
+            serverTimestamp();
+
+        updates.rejectedBy =
+            currentAdmin.uid;
+
+    }
+
+    if (
+        newStatus ===
+        "correction"
+    ) {
+
+        updates.correctionRequestedAt =
+            serverTimestamp();
+
+        updates.correctionRequestedBy =
+            currentAdmin.uid;
+
+    }
+
+    await updateDoc(
+        doc(
+            db,
+            "admissions",
+            application.id
+        ),
+        updates
+    );
+
+    await addActivityLog(
+        `Admission ${
+            newStatus === "correction"
+                ? "Correction Requested"
+                : "Rejected"
+        }`,
+        application.id,
+        {
+
+            applicantName:
+                application.applicantName ||
+                application.name ||
+                "Applicant",
+
+            status:
+                newStatus,
+
+            note:
+                note || ""
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ACTIVITY LOG
+========================================================= */
+
+async function addActivityLog(
+    action,
+    admissionId,
+    details = {}
+) {
+
+    try {
+
+        await addDoc(
+            collection(
+                db,
+                "activityLogs"
+            ),
+            {
+
+                action,
+
+                admissionId,
+
+                performedBy:
+                    currentAdmin
+                        ? currentAdmin.uid
+                        : "",
+
+                details,
+
+                createdAt:
+                    serverTimestamp()
+
+            }
+        );
+
+    } catch (error) {
+
+        /*
+         * Activity log failure should
+         * not break the main admission action.
+         */
+
+        console.warn(
+            "Activity log failed:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+if (refreshBtn) {
+
+    refreshBtn.addEventListener(
+        "click",
+        async () => {
+
+            await loadApplications();
+
+            showToast(
+                "Applications refreshed."
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RETRY
+========================================================= */
+
+if (retryBtn) {
+
+    retryBtn.addEventListener(
+        "click",
+        async () => {
+
+            await loadApplications();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        () => {
+
+            renderApplications();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   STATUS FILTER
+========================================================= */
+
+if (statusFilter) {
+
+    statusFilter.addEventListener(
+        "change",
+        () => {
+
+            renderApplications();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CLASS FILTER
+========================================================= */
+
+if (classFilter) {
+
+    classFilter.addEventListener(
+        "change",
+        () => {
+
+            renderApplications();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE DETAILS MODAL
+========================================================= */
+
+if (closeDetailsBtn) {
+
+    closeDetailsBtn.addEventListener(
+        "click",
+        closeDetailsModal
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE CONFIRM MODAL
+========================================================= */
+
+if (cancelConfirmBtn) {
+
+    cancelConfirmBtn.addEventListener(
+        "click",
+        () => {
+
+            if (confirmModal) {
+
+                confirmModal.classList.add(
+                    "hidden"
+                );
+
+            }
+
+            pendingAction =
+                null;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE MODALS ON OVERLAY CLICK
+========================================================= */
+
+if (detailsModal) {
+
+    detailsModal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                detailsModal
+            ) {
+
+                closeDetailsModal();
+
+            }
+
+        }
+    );
+
+}
+
+if (confirmModal) {
+
+    confirmModal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                confirmModal
+            ) {
+
+                confirmModal.classList.add(
+                    "hidden"
+                );
+
+                pendingAction =
+                    null;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ESC KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !==
+            "Escape"
+        ) {
+            return;
+        }
+
+        if (
+            detailsModal &&
+            !detailsModal.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            closeDetailsModal();
+
+        }
+
+        if (
+            confirmModal &&
+            !confirmModal.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            confirmModal.classList.add(
+                "hidden"
+            );
+
+            pendingAction =
+                null;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   CLOSE DETAILS
+========================================================= */
+
+function closeDetailsModal() {
+
+    if (detailsModal) {
+
+        detailsModal.classList.add(
+            "hidden"
+        );
+
+    }
+
+    selectedApplication =
+        null;
+
+}
+
+
+/* =========================================================
+   LOADING STATE
+========================================================= */
+
+function setLoading(isLoading) {
+
+    if (isLoading) {
+
+        if (loadingState) {
+            loadingState.classList.remove(
+                "hidden"
+            );
+        }
+
+        if (tableContainer) {
+            tableContainer.classList.add(
+                "hidden"
+            );
+        }
+
+        if (emptyState) {
+            emptyState.classList.add(
+                "hidden"
+            );
+        }
+
+        if (errorState) {
+            errorState.classList.add(
+                "hidden"
+            );
+        }
+
+    } else {
+
+        if (loadingState) {
+            loadingState.classList.add(
+                "hidden"
+            );
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   ERROR STATE
+========================================================= */
+
+function showError(message) {
+
+    if (tableContainer) {
+        tableContainer.classList.add(
+            "hidden"
+        );
+    }
+
+    if (emptyState) {
+        emptyState.classList.add(
+            "hidden"
+        );
+    }
+
+    if (loadingState) {
+        loadingState.classList.add(
+            "hidden"
+        );
+    }
+
+    if (errorState) {
+        errorState.classList.remove(
+            "hidden"
+        );
+    }
+
+    if (errorMessage) {
+
+        errorMessage.textContent =
+            message;
+
+    }
+
 }
 
 
@@ -1083,216 +2075,302 @@ button {
    TOAST
 ========================================================= */
 
-.toast {
-    position: fixed;
+let toastTimer = null;
 
-    right: 24px;
-    bottom: 24px;
+function showToast(message) {
 
-    z-index: 2000;
+    if (!toast) {
+        return;
+    }
 
-    max-width: 360px;
+    toast.textContent =
+        message;
 
-    padding: 13px 17px;
+    toast.classList.add(
+        "show"
+    );
 
-    border-radius: 12px;
+    clearTimeout(
+        toastTimer
+    );
 
-    background: #172033;
+    toastTimer =
+        setTimeout(
+            () => {
 
-    color: #ffffff;
+                toast.classList.remove(
+                    "show"
+                );
 
-    font-size: 13px;
-    font-weight: 650;
+            },
+            3200
+        );
 
-    box-shadow:
-        0 12px 35px rgba(15, 23, 42, 0.2);
-
-    opacity: 0;
-
-    transform: translateY(12px);
-
-    pointer-events: none;
-
-    transition:
-        opacity 0.25s ease,
-        transform 0.25s ease;
-}
-
-.toast.show {
-    opacity: 1;
-
-    transform: translateY(0);
 }
 
 
 /* =========================================================
-   SCROLLBAR
+   STATUS CLASS
 ========================================================= */
 
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
+function statusClass(status) {
 
-::-webkit-scrollbar-track {
-    background: #f1f5f9;
-}
+    const normalized =
+        normalizeStatus(
+            status
+        );
 
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    if (
+        normalized === "new" ||
+        normalized === "pending" ||
+        normalized === "pending review"
+    ) {
 
-    border-radius: 999px;
-}
+        return "pending";
 
-::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    }
+
+    if (
+        normalized === "correction" ||
+        normalized === "correction required"
+    ) {
+
+        return "correction";
+
+    }
+
+    if (
+        normalized === "approved"
+    ) {
+
+        return "approved";
+
+    }
+
+    if (
+        normalized === "rejected"
+    ) {
+
+        return "rejected";
+
+    }
+
+    return "cancelled";
+
 }
 
 
 /* =========================================================
-   RESPONSIVE — TABLET
+   FORMAT STATUS
 ========================================================= */
 
-@media (max-width: 1000px) {
+function formatStatus(status) {
 
-    .admissions-page {
-        padding: 22px;
-    }
+    const normalized =
+        normalizeStatus(
+            status
+        );
 
-    .stats-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-    }
+    const labels = {
 
-    .toolbar-card {
-        flex-direction: column;
-        align-items: stretch;
-    }
+        new:
+            "New",
 
-    .search-box {
-        max-width: none;
-    }
+        pending:
+            "Pending Review",
 
-    .filters {
-        width: 100%;
-    }
+        "pending review":
+            "Pending Review",
 
-    .filters select {
-        flex: 1;
-    }
+        correction:
+            "Correction Required",
+
+        "correction required":
+            "Correction Required",
+
+        approved:
+            "Approved",
+
+        rejected:
+            "Rejected",
+
+        cancelled:
+            "Cancelled",
+
+        released:
+            "Released"
+
+    };
+
+    return (
+        labels[normalized] ||
+        capitalizeWords(
+            normalized
+        )
+    );
+
 }
 
 
 /* =========================================================
-   RESPONSIVE — MOBILE
+   ACADEMIC SESSION
 ========================================================= */
 
-@media (max-width: 650px) {
+function getAcademicSession() {
 
-    .admissions-page {
-        padding: 14px;
+    const now =
+        new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        now.getMonth() + 1;
+
+    /*
+     * Academic session:
+     *
+     * Jan-Dec:
+     * 2026
+     *
+     * If your academy uses another
+     * academic-year system, this can
+     * be changed later.
+     */
+
+    if (month >= 1) {
+        return String(year);
     }
 
-    .admissions-header {
-        align-items: flex-start;
+    return String(year);
 
-        flex-direction: column;
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(value) {
+
+    if (!value) {
+        return "—";
     }
 
-    .header-left {
-        align-items: flex-start;
+    try {
+
+        let date;
+
+        if (
+            value &&
+            typeof value.toDate ===
+            "function"
+        ) {
+
+            date =
+                value.toDate();
+
+        } else if (
+            value instanceof Date
+        ) {
+
+            date =
+                value;
+
+        } else if (
+            typeof value ===
+            "string" ||
+            typeof value ===
+            "number"
+        ) {
+
+            date =
+                new Date(value);
+
+        } else if (
+            value.seconds
+        ) {
+
+            date =
+                new Date(
+                    value.seconds * 1000
+                );
+
+        }
+
+        if (
+            !date ||
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "—";
+
+        }
+
+        return date.toLocaleDateString(
+            "en-GB",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    } catch (error) {
+
+        return "—";
+
     }
 
-    .header-right {
-        width: 100%;
-    }
+}
 
-    .header-right .secondary-btn {
-        width: 100%;
-    }
 
-    .back-btn {
-        width: 42px;
-        height: 42px;
-    }
+/* =========================================================
+   CAPITALIZE WORDS
+========================================================= */
 
-    .stats-grid {
-        grid-template-columns: 1fr;
+function capitalizeWords(value) {
 
-        gap: 12px;
-    }
+    return String(value || "")
+        .replace(
+            /\b\w/g,
+            char =>
+                char.toUpperCase()
+        );
 
-    .stat-card {
-        padding: 17px;
-    }
+}
 
-    .toolbar-card {
-        padding: 13px;
-    }
 
-    .filters {
-        flex-direction: column;
-    }
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
 
-    .filters select {
-        width: 100%;
-    }
+function escapeHtml(value) {
 
-    .card-header {
-        padding: 18px;
-    }
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
-    .application-details {
-        padding: 17px;
-    }
-
-    .application-details-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .detail-item.full {
-        grid-column: auto;
-    }
-
-    .modal {
-        max-height: 94vh;
-
-        border-radius: 16px;
-    }
-
-    .modal-header {
-        padding: 18px;
-    }
-
-    .modal-actions {
-        flex-direction: column;
-
-        align-items: stretch;
-
-        padding: 16px;
-    }
-
-    .modal-actions button {
-        width: 100%;
-    }
-
-    .confirm-modal {
-        padding: 22px;
-    }
-
-    .confirm-actions {
-        flex-direction: column-reverse;
-    }
-
-    .confirm-actions button {
-        width: 100%;
-    }
-
-    .toast {
-        left: 14px;
-        right: 14px;
-        bottom: 14px;
-
-        max-width: none;
-    }
-    }
+           }
