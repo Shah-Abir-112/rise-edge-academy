@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Admin Panel | Rise Edge Academy</title>
+    <title>Admin Portal | Rise Edge Academy</title>
 
     <link rel="stylesheet" href="./css/admin.css">
 </head>
@@ -13,16 +13,23 @@
 
 <div class="admin-layout">
 
-    <!-- SIDEBAR -->
+    <!-- ================= SIDEBAR ================= -->
+
     <aside class="sidebar" id="sidebar">
 
         <div class="brand">
-            <div class="brand-logo">REA</div>
-            <div>
-                <h2>Rise Edge</h2>
-                <span>Academy</span>
+
+            <div class="brand-logo">
+                REA
             </div>
+
+            <div class="brand-text">
+                <h2>Rise Edge Academy</h2>
+                <span>Strong Basics. Better Results.</span>
+            </div>
+
         </div>
+
 
         <nav class="sidebar-nav">
 
@@ -31,14 +38,14 @@
                 <span>Dashboard</span>
             </a>
 
-            <a href="#profile" class="nav-item" data-section="profile">
-                <span>👤</span>
-                <span>Admin Profile</span>
+            <a href="#students" class="nav-item" data-section="students">
+                <span>👨‍🎓</span>
+                <span>Students</span>
             </a>
 
-            <a href="#students" class="nav-item" data-section="students">
-                <span>🎓</span>
-                <span>Students</span>
+            <a href="#admissions" class="nav-item" data-section="admissions">
+                <span>📝</span>
+                <span>Admissions</span>
             </a>
 
             <a href="#teachers" class="nav-item" data-section="teachers">
@@ -46,39 +53,60 @@
                 <span>Teachers</span>
             </a>
 
-            <a href="#admissions" class="nav-item" data-section="admissions">
-                <span>📝</span>
-                <span>Admissions / Requests</span>
-            </a>
 
-            <a href="#courses" class="nav-item" data-section="courses">
-                <span>📚</span>
-                <span>Courses & Classes</span>
-            </a>
+            <div class="nav-divider"></div>
 
-            <a href="#assignments" class="nav-item" data-section="assignments">
-                <span>📋</span>
-                <span>Assignments</span>
-            </a>
 
-            <a href="#results" class="nav-item" data-section="results">
-                <span>🏆</span>
-                <span>Results</span>
+            <a href="#classes" class="nav-item" data-section="classes">
+                <span>📅</span>
+                <span>Classes & Routine</span>
             </a>
 
             <a href="#attendance" class="nav-item" data-section="attendance">
-                <span>📅</span>
+                <span>✅</span>
                 <span>Attendance</span>
             </a>
 
-            <a href="#tuition" class="nav-item" data-section="tuition">
-                <span>💳</span>
-                <span>Tuition Management</span>
+            <a href="#materials" class="nav-item" data-section="materials">
+                <span>📚</span>
+                <span>Study Materials</span>
+            </a>
+
+
+            <div class="nav-divider"></div>
+
+
+            <a href="#exams" class="nav-item" data-section="exams">
+                <span>📝</span>
+                <span>Exams & Results</span>
+            </a>
+
+            <a href="#progress" class="nav-item" data-section="progress">
+                <span>📈</span>
+                <span>Student Progress</span>
+            </a>
+
+
+            <div class="nav-divider"></div>
+
+
+            <a href="#fees" class="nav-item" data-section="fees">
+                <span>💰</span>
+                <span>Fees & Finance</span>
             </a>
 
             <a href="#salary" class="nav-item" data-section="salary">
-                <span>💰</span>
+                <span>💵</span>
                 <span>Teacher Salary</span>
+            </a>
+
+
+            <div class="nav-divider"></div>
+
+
+            <a href="#messages" class="nav-item" data-section="messages">
+                <span>💬</span>
+                <span>Messages</span>
             </a>
 
             <a href="#notices" class="nav-item" data-section="notices">
@@ -86,17 +114,42 @@
                 <span>Notices</span>
             </a>
 
-            <a href="#messages" class="nav-item" data-section="messages">
-                <span>💬</span>
-                <span>Messages / Monitoring</span>
+            <a href="#notifications" class="nav-item" data-section="notifications">
+                <span>🔔</span>
+                <span>Notifications</span>
+            </a>
+
+
+            <div class="nav-divider"></div>
+
+
+            <a href="#reports" class="nav-item" data-section="reports">
+                <span>📊</span>
+                <span>Reports & Analytics</span>
+            </a>
+
+            <a href="#admins" class="nav-item" data-section="admins">
+                <span>👤</span>
+                <span>Admin Management</span>
             </a>
 
             <a href="#settings" class="nav-item" data-section="settings">
                 <span>⚙️</span>
-                <span>Settings</span>
+                <span>Academy Settings</span>
+            </a>
+
+            <a href="#security" class="nav-item" data-section="security">
+                <span>🔐</span>
+                <span>Activity & Security</span>
+            </a>
+
+            <a href="#profile" class="nav-item" data-section="profile">
+                <span>👤</span>
+                <span>My Profile</span>
             </a>
 
         </nav>
+
 
         <button id="logoutBtn" class="logout-btn">
             🚪 Logout
@@ -105,102 +158,244 @@
     </aside>
 
 
-    <!-- MAIN AREA -->
+    <!-- ================= MOBILE OVERLAY ================= -->
+
+    <div
+        id="mobileOverlay"
+        class="mobile-overlay">
+    </div>
+
+
+    <!-- ================= MAIN ================= -->
+
     <main class="main-content">
 
-        <!-- TOP BAR -->
+
+        <!-- TOPBAR -->
+
         <header class="topbar">
 
-            <button id="menuBtn" class="menu-btn">
+            <button
+                id="menuBtn"
+                class="menu-btn"
+                type="button">
                 ☰
             </button>
 
-            <div>
-                <h1 id="pageTitle">Dashboard</h1>
-                <p>Rise Edge Academy Admin Panel</p>
+
+            <div class="topbar-title">
+
+                <h1 id="pageTitle">
+                    Dashboard
+                </h1>
+
+                <p>
+                    Rise Edge Academy Admin Portal
+                </p>
+
             </div>
 
+
             <div class="admin-mini-profile">
-                <div class="avatar">A</div>
-                <div>
-                    <strong id="topAdminName">Admin</strong>
-                    <small>Administrator</small>
+
+                <div
+                    class="avatar"
+                    id="topAdminAvatar">
+                    A
                 </div>
+
+                <div>
+
+                    <strong id="topAdminName">
+                        Admin
+                    </strong>
+
+                    <small>
+                        Administrator
+                    </small>
+
+                </div>
+
             </div>
 
         </header>
 
 
-        <!-- CONTENT -->
+        <!-- ================= CONTENT ================= -->
+
         <section class="content-area">
 
 
             <!-- DASHBOARD -->
-            <section id="section-dashboard" class="page-section active">
 
-                <div class="welcome-box">
-                    <div>
-                        <span class="small-label">WELCOME BACK</span>
-                        <h2>Hello, <span id="welcomeAdminName">Admin</span> 👋</h2>
-                        <p>
-                            Manage Rise Edge Academy from one place.
-                        </p>
-                    </div>
+            <section
+                id="section-dashboard"
+                class="page-section active-section">
+
+                <div class="section-heading">
+
+                    <span class="small-label">
+                        OVERVIEW
+                    </span>
+
+                    <h2>
+                        Dashboard
+                    </h2>
+
+                    <p>
+                        Manage Rise Edge Academy from one place.
+                    </p>
+
                 </div>
 
 
-                <!-- STAT CARDS -->
+                <div class="welcome-box">
+
+                    <div>
+
+                        <span class="small-label">
+                            WELCOME BACK
+                        </span>
+
+                        <h2>
+                            Hello,
+                            <span id="welcomeAdminName">
+                                Admin
+                            </span>
+                            👋
+                        </h2>
+
+                        <p>
+                            Here's what's happening in your academy.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EXISTING DASHBOARD STATS -->
+
                 <div class="stats-grid">
 
-                    <div class="stat-card">
-                        <div class="stat-icon">🎓</div>
-                        <div>
-                            <span>Total Students</span>
-                            <h3 id="totalStudents">0</h3>
-                        </div>
-                    </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon">👨‍🏫</div>
-                        <div>
-                            <span>Total Teachers</span>
-                            <h3 id="totalTeachers">0</h3>
+
+                        <div class="stat-icon">
+                            👨‍🎓
                         </div>
+
+                        <div>
+
+                            <span>
+                                Total Students
+                            </span>
+
+                            <h3 id="totalStudents">
+                                0
+                            </h3>
+
+                        </div>
+
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-icon">📝</div>
-                        <div>
-                            <span>Pending Requests</span>
-                            <h3 id="pendingRequests">0</h3>
-                        </div>
-                    </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon">💳</div>
-                        <div>
-                            <span>Monthly Collection</span>
-                            <h3 id="monthlyCollection">৳0</h3>
+
+                        <div class="stat-icon">
+                            👨‍🏫
                         </div>
+
+                        <div>
+
+                            <span>
+                                Total Teachers
+                            </span>
+
+                            <h3 id="totalTeachers">
+                                0
+                            </h3>
+
+                        </div>
+
                     </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon">
+                            📝
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Pending Admissions
+                            </span>
+
+                            <h3 id="pendingRequests">
+                                0
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon">
+                            💰
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Monthly Collection
+                            </span>
+
+                            <h3 id="monthlyCollection">
+                                ৳0
+                            </h3>
+
+                        </div>
+
+                    </div>
+
 
                 </div>
 
 
                 <!-- DASHBOARD PANELS -->
+
                 <div class="dashboard-grid">
+
 
                     <div class="panel-card">
 
                         <div class="panel-header">
+
                             <div>
-                                <h3>Pending Actions</h3>
-                                <p>Requests waiting for admin review</p>
+
+                                <h3>
+                                    Pending Actions
+                                </h3>
+
+                                <p>
+                                    Requests waiting for admin review
+                                </p>
+
                             </div>
+
                         </div>
 
-                        <div id="pendingActions" class="empty-state">
+
+                        <div
+                            id="pendingActions"
+                            class="empty-state">
+
                             Loading...
+
                         </div>
 
                     </div>
@@ -209,37 +404,610 @@
                     <div class="panel-card">
 
                         <div class="panel-header">
+
                             <div>
-                                <h3>System Overview</h3>
-                                <p>Current academy status</p>
+
+                                <h3>
+                                    System Overview
+                                </h3>
+
+                                <p>
+                                    Current academy status
+                                </p>
+
                             </div>
+
                         </div>
+
 
                         <div class="overview-list">
 
-                            <div class="overview-row">
-                                <span>Students</span>
-                                <strong id="overviewStudents">0</strong>
-                            </div>
 
                             <div class="overview-row">
-                                <span>Teachers</span>
-                                <strong id="overviewTeachers">0</strong>
+
+                                <span>
+                                    Students
+                                </span>
+
+                                <strong id="overviewStudents">
+                                    0
+                                </strong>
+
                             </div>
 
-                            <div class="overview-row">
-                                <span>Pending Requests</span>
-                                <strong id="overviewPending">0</strong>
-                            </div>
 
                             <div class="overview-row">
-                                <span>Current Month Collection</span>
-                                <strong id="overviewCollection">৳0</strong>
+
+                                <span>
+                                    Teachers
+                                </span>
+
+                                <strong id="overviewTeachers">
+                                    0
+                                </strong>
+
                             </div>
+
+
+                            <div class="overview-row">
+
+                                <span>
+                                    Pending Admissions
+                                </span>
+
+                                <strong id="overviewPending">
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div class="overview-row">
+
+                                <span>
+                                    Current Month Collection
+                                </span>
+
+                                <strong id="overviewCollection">
+                                    ৳0
+                                </strong>
+
+                            </div>
+
 
                         </div>
 
                     </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- STUDENTS -->
+
+            <section
+                id="section-students"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        👨‍🎓
+                    </span>
+
+                    <h2>
+                        Student Management
+                    </h2>
+
+                    <p>
+                        Manage student profiles, classes, sections,
+                        attendance, fees, results and academic progress.
+                    </p>
+
+                    <button
+                        class="module-primary"
+                        data-module-link="students">
+                        Open Students
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ADMISSIONS -->
+
+            <section
+                id="section-admissions"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        📝
+                    </span>
+
+                    <h2>
+                        Admission Management
+                    </h2>
+
+                    <p>
+                        Review applications, approve students,
+                        request corrections and manage admission records.
+                    </p>
+
+                    <button
+                        class="module-primary"
+                        data-module-link="admissions">
+                        Manage Admissions
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- TEACHERS -->
+
+            <section
+                id="section-teachers"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        👨‍🏫
+                    </span>
+
+                    <h2>
+                        Teacher Management
+                    </h2>
+
+                    <p>
+                        Manage teacher accounts, subjects, classes,
+                        schedules, salary and performance.
+                    </p>
+
+                    <button
+                        class="module-primary"
+                        data-module-link="teachers">
+                        Manage Teachers
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- CLASSES -->
+
+            <section
+                id="section-classes"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        📅
+                    </span>
+
+                    <h2>
+                        Classes & Routine
+                    </h2>
+
+                    <p>
+                        Create classes, assign teachers and manage
+                        academic schedules.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Classes
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ATTENDANCE -->
+
+            <section
+                id="section-attendance"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        ✅
+                    </span>
+
+                    <h2>
+                        Attendance
+                    </h2>
+
+                    <p>
+                        Monitor student and teacher attendance,
+                        daily records and attendance percentage.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Attendance
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- MATERIALS -->
+
+            <section
+                id="section-materials"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        📚
+                    </span>
+
+                    <h2>
+                        Study Materials
+                    </h2>
+
+                    <p>
+                        Review, approve and manage teacher-uploaded
+                        notes and study materials.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Materials
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- EXAMS -->
+
+            <section
+                id="section-exams"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        📝
+                    </span>
+
+                    <h2>
+                        Exams & Results
+                    </h2>
+
+                    <p>
+                        Create exams, monitor marks submission,
+                        publish results and generate report cards.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Exams
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- PROGRESS -->
+
+            <section
+                id="section-progress"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        📈
+                    </span>
+
+                    <h2>
+                        Student Progress
+                    </h2>
+
+                    <p>
+                        Monitor attendance, performance,
+                        improvement and academic progress.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        View Progress
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- FEES -->
+
+            <section
+                id="section-fees"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        💰
+                    </span>
+
+                    <h2>
+                        Fees & Finance
+                    </h2>
+
+                    <p>
+                        Manage tuition, payments, due balances,
+                        transactions and receipts.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Finance
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- SALARY -->
+
+            <section
+                id="section-salary"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        💵
+                    </span>
+
+                    <h2>
+                        Teacher Salary
+                    </h2>
+
+                    <p>
+                        Manage teacher salary, payments,
+                        bonuses, adjustments and history.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Salary
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- MESSAGES -->
+
+            <section
+                id="section-messages"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        💬
+                    </span>
+
+                    <h2>
+                        Messages
+                    </h2>
+
+                    <p>
+                        Manage authorized academy communication
+                        and class groups.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Open Messages
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- NOTICES -->
+
+            <section
+                id="section-notices"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        📢
+                    </span>
+
+                    <h2>
+                        Notices
+                    </h2>
+
+                    <p>
+                        Create and publish academy notices
+                        for students and teachers.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Notices
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- NOTIFICATIONS -->
+
+            <section
+                id="section-notifications"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        🔔
+                    </span>
+
+                    <h2>
+                        Notifications
+                    </h2>
+
+                    <p>
+                        View important system and academy
+                        notifications.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        View Notifications
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- REPORTS -->
+
+            <section
+                id="section-reports"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        📊
+                    </span>
+
+                    <h2>
+                        Reports & Analytics
+                    </h2>
+
+                    <p>
+                        Generate student, attendance, finance,
+                        salary and academic reports.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Open Reports
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ADMIN MANAGEMENT -->
+
+            <section
+                id="section-admins"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        👤
+                    </span>
+
+                    <h2>
+                        Admin Management
+                    </h2>
+
+                    <p>
+                        Super Admin can manage administrator accounts,
+                        roles and permissions.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Manage Admins
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- SETTINGS -->
+
+            <section
+                id="section-settings"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        ⚙️
+                    </span>
+
+                    <h2>
+                        Academy Settings
+                    </h2>
+
+                    <p>
+                        Configure academy identity, academic,
+                        finance and system settings.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Open Settings
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- SECURITY -->
+
+            <section
+                id="section-security"
+                class="page-section">
+
+                <div class="module-shell">
+
+                    <span class="module-icon">
+                        🔐
+                    </span>
+
+                    <h2>
+                        Activity & Security
+                    </h2>
+
+                    <p>
+                        Monitor activity logs, login history,
+                        active sessions and security events.
+                    </p>
+
+                    <button
+                        class="module-primary">
+                        Open Security
+                    </button>
 
                 </div>
 
@@ -247,154 +1015,114 @@
 
 
             <!-- PROFILE -->
-            <section id="section-profile" class="page-section">
+
+            <section
+                id="section-profile"
+                class="page-section">
 
                 <div class="section-heading">
-                    <span class="small-label">ADMINISTRATION</span>
-                    <h2>Admin Profile</h2>
-                    <p>Your Rise Edge Academy administrator information.</p>
+
+                    <span class="small-label">
+                        ACCOUNT
+                    </span>
+
+                    <h2>
+                        My Profile
+                    </h2>
+
+                    <p>
+                        Your Rise Edge Academy administrator profile.
+                    </p>
+
                 </div>
 
 
                 <div class="profile-card">
 
-                    <div class="profile-avatar" id="profileAvatar">
+                    <div
+                        class="profile-avatar"
+                        id="profileAvatar">
                         A
                     </div>
 
+
                     <div class="profile-info">
 
-                        <h2 id="profileName">Admin</h2>
+                        <h2 id="profileName">
+                            Admin
+                        </h2>
+
 
                         <div class="profile-row">
-                            <span>Name</span>
-                            <strong id="profileNameValue">—</strong>
+
+                            <span>
+                                Name
+                            </span>
+
+                            <strong id="profileNameValue">
+                                —
+                            </strong>
+
                         </div>
 
-                        <div class="profile-row">
-                            <span>Email</span>
-                            <strong id="profileEmail">—</strong>
-                        </div>
 
                         <div class="profile-row">
-                            <span>Admin ID</span>
-                            <strong id="profileAdminId">—</strong>
+
+                            <span>
+                                Email
+                            </span>
+
+                            <strong id="profileEmail">
+                                —
+                            </strong>
+
                         </div>
 
-                        <div class="profile-row">
-                            <span>Role</span>
-                            <strong id="profileRole">Administrator</strong>
-                        </div>
 
                         <div class="profile-row">
-                            <span>Status</span>
-                            <strong id="profileStatus" class="status-active">
+
+                            <span>
+                                Admin ID
+                            </span>
+
+                            <strong id="profileAdminId">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="profile-row">
+
+                            <span>
+                                Role
+                            </span>
+
+                            <strong id="profileRole">
+                                Administrator
+                            </strong>
+
+                        </div>
+
+
+                        <div class="profile-row">
+
+                            <span>
+                                Status
+                            </span>
+
+                            <strong
+                                id="profileStatus"
+                                class="status-active">
                                 Active
                             </strong>
+
                         </div>
 
                     </div>
 
                 </div>
 
-            </section>
-
-
-            <!-- FUTURE MODULE PLACEHOLDERS -->
-
-            <section id="section-students" class="page-section">
-                <div class="section-heading">
-                    <h2>Students</h2>
-                    <p>Student management module will be added in Step 2.</p>
-                </div>
-            </section>
-
-
-            <section id="section-teachers" class="page-section">
-                <div class="section-heading">
-                    <h2>Teachers</h2>
-                    <p>Teacher management module will be added in Step 3.</p>
-                </div>
-            </section>
-
-
-            <section id="section-admissions" class="page-section">
-                <div class="section-heading">
-                    <h2>Admissions / Requests</h2>
-                    <p>Admission approval system will be added in Step 3.</p>
-                </div>
-            </section>
-
-
-            <section id="section-courses" class="page-section">
-                <div class="section-heading">
-                    <h2>Courses & Classes</h2>
-                    <p>Course management will be added in Step 4.</p>
-                </div>
-            </section>
-
-
-            <section id="section-assignments" class="page-section">
-                <div class="section-heading">
-                    <h2>Assignments</h2>
-                    <p>Assignment management will be added in Step 5.</p>
-                </div>
-            </section>
-
-
-            <section id="section-results" class="page-section">
-                <div class="section-heading">
-                    <h2>Results</h2>
-                    <p>Results management will be added in Step 6.</p>
-                </div>
-            </section>
-
-
-            <section id="section-attendance" class="page-section">
-                <div class="section-heading">
-                    <h2>Attendance</h2>
-                    <p>Attendance management will be added in Step 7.</p>
-                </div>
-            </section>
-
-
-            <section id="section-tuition" class="page-section">
-                <div class="section-heading">
-                    <h2>Tuition Management</h2>
-                    <p>Tuition management will be added in Step 9.</p>
-                </div>
-            </section>
-
-
-            <section id="section-salary" class="page-section">
-                <div class="section-heading">
-                    <h2>Teacher Salary</h2>
-                    <p>Salary management will be added in Step 10.</p>
-                </div>
-            </section>
-
-
-            <section id="section-notices" class="page-section">
-                <div class="section-heading">
-                    <h2>Notices</h2>
-                    <p>Notice management will be added in Step 8.</p>
-                </div>
-            </section>
-
-
-            <section id="section-messages" class="page-section">
-                <div class="section-heading">
-                    <h2>Messages / Monitoring</h2>
-                    <p>Messaging and monitoring will be added in Step 11.</p>
-                </div>
-            </section>
-
-
-            <section id="section-settings" class="page-section">
-                <div class="section-heading">
-                    <h2>Settings</h2>
-                    <p>System settings will be added later.</p>
-                </div>
             </section>
 
 
@@ -405,8 +1133,10 @@
 </div>
 
 
-<!-- Firebase/Admin JavaScript -->
-<script type="module" src="./js/admin.js"></script>
+<script
+    type="module"
+    src="./js/admin.js">
+</script>
 
 </body>
-</html>
+                </html>
