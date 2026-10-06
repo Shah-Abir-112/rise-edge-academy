@@ -16,14 +16,14 @@ import {
 
 
 // =====================================================
-// DOM HELPER
+// DOM
 // =====================================================
 
 const $ = (id) => document.getElementById(id);
 
 
 // =====================================================
-// GLOBAL DATA
+// DATA
 // =====================================================
 
 let allStudents = [];
@@ -34,9 +34,11 @@ let allStudents = [];
 // =====================================================
 
 function normalize(value) {
+
     return String(value ?? "")
         .trim()
         .toLowerCase();
+
 }
 
 
@@ -52,16 +54,17 @@ function escapeHTML(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+
 }
 
 
 // =====================================================
-// DATE FORMAT
+// DATE
 // =====================================================
 
-function formatDate(timestamp) {
+function formatDate(value) {
 
-    if (!timestamp) {
+    if (!value) {
         return "—";
     }
 
@@ -69,12 +72,14 @@ function formatDate(timestamp) {
 
         let date;
 
-        if (timestamp?.toDate) {
-            date = timestamp.toDate();
-        } else if (timestamp instanceof Date) {
-            date = timestamp;
+        if (value?.toDate) {
+
+            date = value.toDate();
+
         } else {
-            date = new Date(timestamp);
+
+            date = new Date(value);
+
         }
 
         if (isNaN(date.getTime())) {
@@ -87,18 +92,20 @@ function formatDate(timestamp) {
             year: "numeric"
         });
 
-    } catch (error) {
+    } catch {
 
         return "—";
+
     }
+
 }
 
 
 // =====================================================
-// GET STUDENT CLASS
+// CLASS
 // =====================================================
 
-function getStudentClass(student) {
+function getClass(student) {
 
     return (
         student.class ||
@@ -106,62 +113,87 @@ function getStudentClass(student) {
         student.desiredClass ||
         "—"
     );
+
 }
 
 
 // =====================================================
-// GET STUDENT SECTION
+// SECTION
 // =====================================================
 
-function getStudentSection(student) {
+function getSection(student) {
 
     return (
         student.section ||
         student.desiredSection ||
         "—"
     );
+
 }
 
 
 // =====================================================
-// GET STUDENT STATUS
+// STATUS
 // =====================================================
 
-function getStudentStatus(student) {
+function getStatus(student) {
 
-    return normalize(student.status || "active");
+    return normalize(
+        student.status || "active"
+    );
+
 }
 
 
 // =====================================================
-// LOAD STUDENTS
+// LOAD STUDENTS FROM USERS
 // =====================================================
 
 function loadStudents() {
 
-    console.log("Students Management: Loading students...");
+    console.log(
+        "Student Management: Loading users..."
+    );
 
-    const studentsRef = collection(db, "students");
+
+    const usersRef =
+        collection(db, "users");
+
 
     onSnapshot(
-        studentsRef,
+        usersRef,
 
         (snapshot) => {
 
             console.log(
-                "Students Management: Students received:",
+                "Users found:",
                 snapshot.size
             );
 
+
             allStudents = [];
 
-            snapshot.forEach((studentDoc) => {
 
-                const data = studentDoc.data();
+            snapshot.forEach((userDoc) => {
+
+                const data =
+                    userDoc.data();
+
+
+                // ONLY STUDENTS
+
+                if (
+                    normalize(data.role) !== "student"
+                ) {
+
+                    return;
+
+                }
+
 
                 allStudents.push({
 
-                    id: studentDoc.id,
+                    uid: userDoc.id,
 
                     ...data
 
@@ -171,8 +203,8 @@ function loadStudents() {
 
 
             console.log(
-                "Students Management: allStudents =",
-                allStudents
+                "Students found:",
+                allStudents.length
             );
 
 
@@ -185,150 +217,159 @@ function loadStudents() {
         (error) => {
 
             console.error(
-                "Students Management Firebase Error:",
+                "Firebase users error:",
                 error
             );
 
+
             showError(
-                "Unable to load students. Check Firebase permissions and console."
+                "Unable to load students. Check Firebase rules and console."
             );
 
         }
     );
+
 }
 
 
 // =====================================================
-// POPULATE CLASS FILTER
+// CLASS FILTER
 // =====================================================
 
 function populateClassFilter() {
 
-    const classFilter = $("classFilter");
+    const filter =
+        $("classFilter");
 
-    if (!classFilter) {
+
+    if (!filter) {
         return;
     }
 
 
-    const classes = new Set();
+    const classes =
+        new Set();
 
 
     allStudents.forEach((student) => {
 
-        const className = getStudentClass(student);
+        const className =
+            getClass(student);
 
-        if (className && className !== "—") {
 
-            classes.add(String(className));
+        if (
+            className &&
+            className !== "—"
+        ) {
+
+            classes.add(
+                String(className)
+            );
 
         }
 
     });
 
 
-    const currentValue = classFilter.value;
-
-
-    classFilter.innerHTML = `
-        <option value="all">All Classes</option>
+    filter.innerHTML = `
+        <option value="all">
+            All Classes
+        </option>
     `;
 
 
     Array.from(classes)
         .sort((a, b) =>
-            a.localeCompare(b, undefined, {
-                numeric: true
-            })
+            a.localeCompare(
+                b,
+                undefined,
+                {
+                    numeric: true
+                }
+            )
         )
         .forEach((className) => {
 
-            const option = document.createElement("option");
+            const option =
+                document.createElement("option");
 
-            option.value = className;
 
-            option.textContent = `Class ${className}`;
+            option.value =
+                className;
 
-            classFilter.appendChild(option);
+
+            option.textContent =
+                `Class ${className}`;
+
+
+            filter.appendChild(option);
 
         });
-
-
-    if (
-        Array.from(classFilter.options)
-            .some(option => option.value === currentValue)
-    ) {
-
-        classFilter.value = currentValue;
-
-    }
 
 }
 
 
 // =====================================================
-// FILTER STUDENTS
+// FILTER
 // =====================================================
 
 function getFilteredStudents() {
 
-    const searchInput = $("studentSearch");
-
-    const statusFilter = $("statusFilter");
-
-    const classFilter = $("classFilter");
-
-
-    const search = normalize(
-        searchInput?.value
-    );
+    const search =
+        normalize(
+            $("studentSearch")?.value
+        );
 
 
-    const status = normalize(
-        statusFilter?.value || "all"
-    );
+    const status =
+        normalize(
+            $("statusFilter")?.value || "all"
+        );
 
 
     const selectedClass =
-        classFilter?.value || "all";
+        $("classFilter")?.value || "all";
 
 
     return allStudents.filter((student) => {
 
-        // -----------------------------
+
         // SEARCH
-        // -----------------------------
 
-        const searchableText = normalize(
-            [
-                student.name,
-                student.studentId,
-                student.phone,
-                student.email,
-                student.fatherName,
-                student.motherName,
-                getStudentClass(student),
-                getStudentSection(student)
-            ].join(" ")
-        );
+        if (search) {
+
+            const searchableText =
+                normalize(
+                    [
+                        student.name,
+                        student.uid,
+                        student.studentId,
+                        student.phone,
+                        student.email,
+                        student.fatherName,
+                        student.motherName,
+                        student.guardianName,
+                        getClass(student),
+                        getSection(student)
+                    ].join(" ")
+                );
 
 
-        if (
-            search &&
-            !searchableText.includes(search)
-        ) {
+            if (
+                !searchableText.includes(search)
+            ) {
 
-            return false;
+                return false;
+
+            }
 
         }
 
 
-        // -----------------------------
         // STATUS
-        // -----------------------------
 
         const studentStatus =
-            getStudentStatus(student);
+            getStatus(student);
 
 
         if (
@@ -341,12 +382,10 @@ function getFilteredStudents() {
         }
 
 
-        // -----------------------------
         // CLASS
-        // -----------------------------
 
         const studentClass =
-            String(getStudentClass(student));
+            String(getClass(student));
 
 
         if (
@@ -367,7 +406,7 @@ function getFilteredStudents() {
 
 
 // =====================================================
-// RENDER STUDENTS
+// RENDER
 // =====================================================
 
 function renderStudents() {
@@ -375,18 +414,13 @@ function renderStudents() {
     const tableBody =
         $("studentsTableBody");
 
-    const studentCount =
+
+    const count =
         $("studentCount");
 
 
     if (!tableBody) {
-
-        console.error(
-            "studentsTableBody not found in HTML."
-        );
-
         return;
-
     }
 
 
@@ -394,28 +428,34 @@ function renderStudents() {
         getFilteredStudents();
 
 
-    if (studentCount) {
+    if (count) {
 
-        studentCount.textContent =
+        count.textContent =
             students.length;
 
     }
 
 
-    // -----------------------------
     // NO STUDENTS
-    // -----------------------------
 
     if (students.length === 0) {
 
         tableBody.innerHTML = `
+
             <tr>
+
                 <td colspan="8">
+
                     <div class="empty-state">
+
                         No students found.
+
                     </div>
+
                 </td>
+
             </tr>
+
         `;
 
         return;
@@ -423,33 +463,38 @@ function renderStudents() {
     }
 
 
-    // -----------------------------
-    // STUDENT ROWS
-    // -----------------------------
+    // STUDENTS
 
-    tableBody.innerHTML = students
-        .map((student) => {
+    tableBody.innerHTML =
+        students.map((student) => {
+
 
             const name =
-                student.name || "Unnamed Student";
+                student.name ||
+                "Unnamed Student";
+
+
+            const uid =
+                student.uid ||
+                "—";
 
 
             const studentId =
                 student.studentId ||
-                student.id ||
-                "—";
+                uid;
 
 
             const className =
-                getStudentClass(student);
+                getClass(student);
 
 
             const section =
-                getStudentSection(student);
+                getSection(student);
 
 
             const roll =
-                student.roll || "—";
+                student.roll ||
+                "—";
 
 
             const phone =
@@ -459,17 +504,14 @@ function renderStudents() {
 
 
             const status =
-                getStudentStatus(student);
+                getStatus(student);
 
 
             const admissionDate =
                 formatDate(
-                    student.admissionDate
+                    student.admissionDate ||
+                    student.createdAt
                 );
-
-
-            const profilePicture =
-                student.profilePicture;
 
 
             const firstLetter =
@@ -478,19 +520,28 @@ function renderStudents() {
                     .toUpperCase();
 
 
-            const avatar = profilePicture
-                ? `
+            let avatar;
+
+
+            if (student.profilePicture) {
+
+                avatar = `
                     <img
                         class="student-avatar"
-                        src="${escapeHTML(profilePicture)}"
+                        src="${escapeHTML(student.profilePicture)}"
                         alt="Student"
                     >
-                  `
-                : `
+                `;
+
+            } else {
+
+                avatar = `
                     <div class="student-avatar">
                         ${escapeHTML(firstLetter)}
                     </div>
-                  `;
+                `;
+
+            }
 
 
             return `
@@ -546,7 +597,9 @@ function renderStudents() {
                             status-badge
                             status-${escapeHTML(status)}
                         ">
+
                             ${escapeHTML(status)}
+
                         </span>
 
                     </td>
@@ -562,21 +615,24 @@ function renderStudents() {
                         <button
                             class="action-btn view-btn"
                             data-action="view"
-                            data-id="${escapeHTML(student.id)}"
+                            data-uid="${escapeHTML(uid)}"
                         >
                             View
                         </button>
 
+
                         <button
                             class="action-btn status-btn"
-                            data-action="toggle-status"
-                            data-id="${escapeHTML(student.id)}"
+                            data-action="toggle"
+                            data-uid="${escapeHTML(uid)}"
                         >
+
                             ${
                                 status === "active"
                                     ? "Release"
                                     : "Activate"
                             }
+
                         </button>
 
                     </td>
@@ -585,14 +641,148 @@ function renderStudents() {
 
             `;
 
-        })
-        .join("");
+        }).join("");
 
 }
 
 
 // =====================================================
-// SHOW ERROR
+// VIEW
+// =====================================================
+
+function viewStudent(uid) {
+
+    const student =
+        allStudents.find(
+            item => item.uid === uid
+        );
+
+
+    if (!student) {
+
+        alert("Student not found.");
+
+        return;
+
+    }
+
+
+    alert(`
+
+Student Details
+
+Name: ${student.name || "—"}
+
+UID: ${student.uid || "—"}
+
+Student ID: ${student.studentId || "—"}
+
+Class: ${getClass(student)}
+
+Section: ${getSection(student)}
+
+Roll: ${student.roll || "—"}
+
+Phone: ${student.phone || "—"}
+
+Email: ${student.email || "—"}
+
+Father: ${student.fatherName || "—"}
+
+Mother: ${student.motherName || "—"}
+
+Guardian: ${student.guardianName || "—"}
+
+Guardian Phone: ${student.guardianPhone || "—"}
+
+Address: ${student.address || "—"}
+
+Status: ${student.status || "—"}
+
+    `);
+
+}
+
+
+// =====================================================
+// TOGGLE STATUS
+// =====================================================
+
+async function toggleStatus(uid) {
+
+    const student =
+        allStudents.find(
+            item => item.uid === uid
+        );
+
+
+    if (!student) {
+
+        alert("Student not found.");
+
+        return;
+
+    }
+
+
+    const currentStatus =
+        getStatus(student);
+
+
+    const newStatus =
+        currentStatus === "active"
+            ? "released"
+            : "active";
+
+
+    const confirmed =
+        confirm(
+            `Change ${student.name || "this student"} status to ${newStatus}?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        await updateDoc(
+            doc(db, "users", uid),
+            {
+                status: newStatus,
+                updatedAt: new Date()
+            }
+        );
+
+
+        console.log(
+            "Student status updated:",
+            uid,
+            newStatus
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Status update failed:",
+            error
+        );
+
+
+        alert(
+            "Failed to update student status."
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// ERROR
 // =====================================================
 
 function showError(message) {
@@ -628,203 +818,16 @@ function showError(message) {
 
 
 // =====================================================
-// VIEW STUDENT
+// EVENTS
 // =====================================================
 
-function viewStudent(studentId) {
-
-    const student =
-        allStudents.find(
-            item => item.id === studentId
-        );
-
-
-    if (!student) {
-
-        alert("Student not found.");
-
-        return;
-
-    }
-
-
-    const details = `
-
-Student ID: ${student.studentId || student.id || "—"}
-
-Name: ${student.name || "—"}
-
-Class: ${getStudentClass(student)}
-
-Section: ${getStudentSection(student)}
-
-Roll: ${student.roll || "—"}
-
-Phone: ${student.phone || "—"}
-
-Email: ${student.email || "—"}
-
-Father: ${student.fatherName || "—"}
-
-Mother: ${student.motherName || "—"}
-
-Guardian: ${student.guardianName || "—"}
-
-Guardian Phone: ${student.guardianPhone || "—"}
-
-Address: ${student.address || "—"}
-
-Academic Session: ${student.academicSession || "—"}
-
-Status: ${student.status || "—"}
-
-Admission Date: ${formatDate(student.admissionDate)}
-
-    `;
-
-
-    alert(details);
-
-}
-
-
-// =====================================================
-// TOGGLE STUDENT STATUS
-// =====================================================
-
-async function toggleStudentStatus(studentId) {
-
-    const student =
-        allStudents.find(
-            item => item.id === studentId
-        );
-
-
-    if (!student) {
-
-        alert("Student not found.");
-
-        return;
-
-    }
-
-
-    const currentStatus =
-        getStudentStatus(student);
-
-
-    let newStatus;
-
-
-    if (currentStatus === "active") {
-
-        newStatus = "released";
-
-    } else {
-
-        newStatus = "active";
-
-    }
-
-
-    const studentName =
-        student.name || "this student";
-
-
-    const confirmed =
-        confirm(
-            `Are you sure you want to change ${studentName}'s status to ${newStatus}?`
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-
-        await updateDoc(
-            doc(db, "students", studentId),
-            {
-                status: newStatus,
-                updatedAt: new Date()
-            }
-        );
-
-
-        console.log(
-            `Student ${studentId} status changed to ${newStatus}`
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Status update error:",
-            error
-        );
-
-
-        alert(
-            "Failed to update student status."
-        );
-
-    }
-
-}
-
-
-// =====================================================
-// TABLE ACTIONS
-// =====================================================
-
-function handleTableAction(event) {
-
-    const button =
-        event.target.closest("button[data-action]");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    const action =
-        button.dataset.action;
-
-
-    const studentId =
-        button.dataset.id;
-
-
-    if (action === "view") {
-
-        viewStudent(studentId);
-
-    }
-
-
-    if (action === "toggle-status") {
-
-        toggleStudentStatus(studentId);
-
-    }
-
-}
-
-
-// =====================================================
-// EVENT LISTENERS
-// =====================================================
-
-function setupEventListeners() {
+function setupEvents() {
 
     const search =
         $("studentSearch");
 
 
-    const statusFilter =
+    const status =
         $("statusFilter");
 
 
@@ -846,9 +849,9 @@ function setupEventListeners() {
     }
 
 
-    if (statusFilter) {
+    if (status) {
 
-        statusFilter.addEventListener(
+        status.addEventListener(
             "change",
             renderStudents
         );
@@ -870,7 +873,41 @@ function setupEventListeners() {
 
         tableBody.addEventListener(
             "click",
-            handleTableAction
+            (event) => {
+
+                const button =
+                    event.target.closest(
+                        "button[data-action]"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const action =
+                    button.dataset.action;
+
+
+                const uid =
+                    button.dataset.uid;
+
+
+                if (action === "view") {
+
+                    viewStudent(uid);
+
+                }
+
+
+                if (action === "toggle") {
+
+                    toggleStatus(uid);
+
+                }
+
+            }
         );
 
     }
@@ -879,7 +916,7 @@ function setupEventListeners() {
 
 
 // =====================================================
-// AUTH CHECK
+// AUTH
 // =====================================================
 
 onAuthStateChanged(
@@ -889,7 +926,7 @@ onAuthStateChanged(
         if (!user) {
 
             console.warn(
-                "No authenticated admin user."
+                "No authenticated user."
             );
 
             return;
@@ -898,12 +935,12 @@ onAuthStateChanged(
 
 
         console.log(
-            "Authenticated user:",
+            "Authenticated:",
             user.uid
         );
 
 
-        setupEventListeners();
+        setupEvents();
 
         loadStudents();
 
