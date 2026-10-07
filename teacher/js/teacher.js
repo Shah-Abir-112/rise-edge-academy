@@ -1,3 +1,3 @@
-import {Store} from "../..//js/firebase/firestore.js"; import {getSession,logout} from "../../js/firebase/auth.js";
-const s=getSession();if(!s){location.href="../login.html"}document.getElementById("userName")?.replaceChildren(document.createTextNode(s?.name||"Teacher"));document.getElementById("logoutLink")?.addEventListener("click",logout);
-for(const [k,v] of [["myClasses",3],["students",24],["assignments",5],["messages",2]]){const e=document.getElementById(k);if(e)e.textContent=v}
+import { getSession, logout } from "../../js/firebase/auth.js"; import { Store } from "../../js/firebase/firestore.js";
+const s=getSession();if(!s||s.role!=="teacher"){location.href="../login.html";throw new Error("Unauthorized");}document.getElementById("userName")?.replaceChildren(document.createTextNode(s.name||s.email||"Teacher"));document.getElementById("logoutLink")?.addEventListener("click",e=>{e.preventDefault();logout();});
+async function load(){const [c,st,a,m]=await Promise.all([Store.list("teacher_classes"),Store.list("teacher_students"),Store.list("teacher_assignments"),Store.list("teacher_messages")]);const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};set("myClasses",c.length);set("students",st.length);set("assignments",a.length);set("messages",m.length);}load().catch(console.error);
