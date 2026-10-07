@@ -1,2 +1,31 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Profile</title><link rel="stylesheet" href="../css/teacher.css"></head><body>
-<div class="app"><aside class="sidebar"><div class="side-brand"><span class="side-mark">R</span>Rise Edge Academy</div><nav class="nav"><a href="../index.html">← Dashboard</a><a href="../login.html">Logout</a></nav></aside><section class="main"><header class="topbar"><h1>My Profile</h1><div class="user-chip"><span id="userName">User</span><div class="avatar">U</div></div></header><main class="content"><div class="page-head"><div><span class="eyebrow">TEACHER PORTAL</span><h2>My Profile</h2><p class="muted">Manage your my profile.</p></div><button class="btn btn-primary" id="addBtn">Add New</button></div><div class="panel"><div class="toolbar"><input id="search" placeholder="Search..."><select id="filter"><option>All</option><option>Active</option><option>Pending</option></select></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Item</th><th>Details</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div></div></main></section></div><script type="module" src="../js/profile.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Teacher Profile | Rise Edge Academy</title><link rel="stylesheet" href="../css/teacher.css"></head>
+<body>
+<div class="app">
+<aside class="sidebar"><div class="side-brand"><span class="side-mark">R</span>Rise Edge Academy</div><nav class="nav"><a href="../index.html">← Dashboard</a><a href="profile.html" class="active">Profile</a><a href="classes.html">Classes</a><a href="students.html">Students</a><a href="attendance.html">Attendance</a><a href="assignments.html">Assignments</a><a href="notes.html">Notes</a><a href="messages.html">Messages</a><a href="payments.html">Payments</a><a href="schedule.html">Schedule</a><a href="../../login.html" id="logoutLink">Logout</a></nav></aside>
+<section class="main"><header class="topbar"><h1>Teacher Profile</h1><div class="user-chip"><span id="userName">Teacher</span><div class="avatar" id="userAvatar">T</div></div></header>
+<main class="content"><div class="page-head"><div><span class="eyebrow">TEACHER PORTAL</span><h2>My Profile</h2><p class="muted">Update your personal and professional information. Teacher ID, role and account status remain controlled by the academy.</p></div></div>
+<div id="message" class="notice" style="display:none"></div>
+<form id="profileForm" class="panel">
+<div class="form-grid">
+<label>Full Name<input id="name" name="name" required maxlength="100"></label>
+<label>Email<input id="email" name="email" type="email" readonly></label>
+<label>Teacher ID<input id="teacherId" readonly></label>
+<label>Phone<input id="phone" name="phone" type="tel" maxlength="30"></label>
+<label>Date of Birth<input id="dateOfBirth" name="dateOfBirth" type="date"></label>
+<label>Gender<select id="gender" name="gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></label>
+<label>Qualification<input id="qualification" name="qualification" maxlength="250" placeholder="e.g. B.Sc., M.Sc., B.Ed."></label>
+<label>Experience<input id="experience" name="experience" maxlength="100" placeholder="e.g. 5 years"></label>
+<label>Specialization / Subject<input id="specialization" name="specialization" maxlength="250"></label>
+<label>Profile Photo / Logo URL<input id="profilePicture" name="profilePicture" type="url" maxlength="500" placeholder="https://..."></label>
+<label class="full">Address<textarea id="address" name="address" rows="3" maxlength="500"></textarea></label>
+<label class="full">Professional Bio<textarea id="bio" name="bio" rows="4" maxlength="1000"></textarea></label>
+<label class="full">Additional Information<textarea id="additionalInfo" name="additionalInfo" rows="4" maxlength="1000" placeholder="Any additional professional information..."></textarea></label>
+</div>
+<div class="row-actions" style="margin-top:18px"><button class="small-btn primary" id="saveBtn" type="submit">Save Profile</button><button class="small-btn" type="button" id="reloadBtn">Reload</button></div>
+</form>
+<div class="panel"><h3>Academy Information</h3><div class="two"><div><b>Subject</b><p id="subject">—</p></div><div><b>Department</b><p id="department">—</p></div><div><b>Joining Date</b><p id="joiningDate">—</p></div><div><b>Account Status</b><p id="status">—</p></div></div></div>
+</main></section></div>
+<nav class="mobile-nav"><a href="../index.html">Dashboard</a><a href="profile.html">Profile</a><a href="classes.html">Classes</a><a href="students.html">Students</a><a href="attendance.html">Attendance</a><a href="assignments.html">Assignments</a></nav>
+<script type="module" src="../js/profile.js"></script></body></html>
