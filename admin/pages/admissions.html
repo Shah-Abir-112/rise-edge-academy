@@ -1,5 +1,63 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admission Management</title><link rel="stylesheet" href="../css/admin.css"></head><body>
-<div class="app"><aside class="sidebar"><div class="side-brand"><span class="side-mark">R</span>Rise Edge Academy</div><nav class="nav"><a href="../index.html">← Dashboard</a><a href="../login.html">Logout</a></nav></aside><section class="main"><header class="topbar"><h1>Admission Management</h1><div class="user-chip"><span id="userName">User</span><div class="avatar">U</div></div></header><main class="content"><div class="page-head"><div><span class="eyebrow">ADMIN PORTAL</span><h2>Admission Management</h2><p class="muted">Review, approve and manage student applications.</p></div><button class="btn btn-light" id="refresh">↻ Refresh</button></div>
-<div class="grid"><div class="stat"><span>Pending Review</span><strong id="pendingCount">0</strong></div><div class="stat"><span>Correction Required</span><strong id="correctionCount">0</strong></div><div class="stat"><span>Approved</span><strong id="approvedCount">0</strong></div><div class="stat"><span>Rejected</span><strong id="rejectedCount">0</strong></div></div>
-<div class="panel"><div class="toolbar"><input id="search" placeholder="Search applicant, phone, email or application ID"><select id="filter"><option value="all">All Status</option><option value="pending">Pending</option><option value="correction">Correction</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Applicant</th><th>Application ID</th><th>Class</th><th>Guardian</th><th>Applied</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div><div id="empty" class="empty hidden">No applications found.</div></div>
-<div id="details" class="modal hidden"><div class="modal-card"><div class="modal-head"><h3 id="detailTitle">Application</h3><button class="close" id="close">×</button></div><div id="detailBody"></div><div class="row-actions"><button class="small-btn" id="correction">Request Correction</button><button class="small-btn danger" id="reject">Reject</button><button class="small-btn primary" id="approve">Approve Admission</button></div></div></div></main></section></div><script type="module" src="../js/admissions.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admissions | Rise Edge Academy</title>
+<link rel="stylesheet" href="../css/admin.css">
+<link rel="stylesheet" href="../css/admissions.css">
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="side-brand"><span class="side-mark">R</span>Rise Edge Academy</div>
+  <nav class="nav">
+    <a href="../index.html">← Dashboard</a>
+    <a href="profile.html">Admin Profile</a>
+    <a href="admissions.html" class="active">Admissions</a>
+    <a href="students.html">Students</a>
+    <a href="teachers.html">Teachers</a>
+    <a href="classes.html">Classes</a>
+    <a href="attendance.html">Attendance</a>
+    <a href="fees.html">Fees</a>
+    <a href="salaries.html">Salaries</a>
+    <a href="notices.html">Notices</a>
+    <a href="messages.html">Messages</a>
+    <a href="reports.html">Reports</a>
+    <a href="settings.html">Settings</a>
+    <a href="activity-log.html">Activity Log</a>
+    <a href="../../login.html" id="logoutLink">Logout</a>
+  </nav>
+</aside>
+<section class="main">
+<header class="topbar"><h1>Admission Management</h1><div class="user-chip"><a href="profile.html" id="userName">Admin</a><div class="avatar" id="userAvatar">A</div></div></header>
+<main class="content">
+  <div class="page-head"><div><span class="eyebrow">ADMIN PORTAL</span><h2>Admissions</h2><p class="muted">Review applications directly from Firebase.</p></div><button class="btn btn-light" id="refreshBtn" type="button">↻ Refresh</button></div>
+  <div class="grid admission-stats">
+    <div class="stat"><span>Pending Review</span><strong id="pendingCount">0</strong></div>
+    <div class="stat"><span>Correction Required</span><strong id="correctionCount">0</strong></div>
+    <div class="stat"><span>Approved</span><strong id="approvedCount">0</strong></div>
+    <div class="stat"><span>Rejected</span><strong id="rejectedCount">0</strong></div>
+  </div>
+  <div class="panel">
+    <div class="admission-toolbar">
+      <input id="searchInput" type="search" placeholder="Search name, email, phone or application ID">
+      <select id="statusFilter"><option value="all">All Status</option><option value="pending">Pending</option><option value="correction">Correction</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+      <select id="classFilter"><option value="all">All Classes</option></select>
+    </div>
+    <div class="admission-meta"><span id="resultText">Loading applications…</span><button class="btn btn-light small" id="retryBtn" type="button">Retry</button></div>
+    <div id="loadingState" class="state-box">Loading applications from Firebase…</div>
+    <div id="errorState" class="state-box error hidden"><b>Could not load admissions.</b><span id="errorMessage"></span></div>
+    <div id="emptyState" class="state-box hidden">No applications found.</div>
+    <div id="tableContainer" class="table-wrap hidden">
+      <table class="data-table"><thead><tr><th>Applicant</th><th>Application ID</th><th>Class</th><th>Guardian</th><th>Applied</th><th>Status</th><th>Action</th></tr></thead><tbody id="applicationsBody"></tbody></table>
+    </div>
+  </div>
+</main>
+</section></div>
+
+<div id="detailsModal" class="modal hidden"><div class="modal-card large-modal"><div class="modal-head"><div><span class="eyebrow">APPLICATION</span><h3 id="modalApplicantName">Applicant</h3></div><button class="close" id="closeDetailsBtn" type="button">×</button></div><div id="applicationDetails"></div><div class="modal-actions"><button class="small-btn" id="correctionBtn" type="button">Request Correction</button><button class="small-btn danger" id="rejectBtn" type="button">Reject</button><button class="small-btn primary" id="approveBtn" type="button">Approve Admission</button></div></div></div>
+<div id="confirmModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h3 id="confirmTitle">Confirm action</h3><button class="close" id="cancelConfirmBtn" type="button">×</button></div><p id="confirmText" class="muted"></p><label class="field-label" for="actionNote">Admin note (optional)</label><textarea id="actionNote" rows="4" placeholder="Add a note for this application"></textarea><div class="modal-actions"><button class="small-btn" id="cancelConfirmBtn2" type="button">Cancel</button><button class="small-btn primary" id="confirmActionBtn" type="button">Confirm</button></div></div></div>
+<div id="toast" class="toast hidden"></div>
+<script type="module" src="../js/admissions.js"></script>
+</body></html>
