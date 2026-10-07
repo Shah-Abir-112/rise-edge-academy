@@ -1,9 +1,14 @@
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig } from "./config.js";
-const DEMO_KEY="rea_demo_session";
-function demoLogin(email, role){localStorage.setItem(DEMO_KEY,JSON.stringify({email,role,name:email.split("@")[0]}));const target=role==="admin"?"admin/index.html":role==="teacher"?"teacher/index.html":"student/index.html";location.href=target}
-const lf=document.getElementById("loginForm");
-if(lf) lf.addEventListener("submit",e=>{e.preventDefault();demoLogin(document.getElementById("email").value,document.getElementById("portal").value)});
-const rf=document.getElementById("registerForm");
-if(rf) rf.addEventListener("submit",e=>{e.preventDefault();const name=document.getElementById("name").value.trim(),email=document.getElementById("email").value.trim(),role=document.getElementById("role").value;localStorage.setItem("rea_registered_"+email,JSON.stringify({name,email,role}));alert("Registration saved locally. Connect Firebase for real account creation.");location.href="login.html"});
-export function getSession(){try{return JSON.parse(localStorage.getItem(DEMO_KEY)||"null")}catch{return null}}
-export function logout(){localStorage.removeItem(DEMO_KEY);location.href="../login.html"}
+const app=getApps().length?getApp():initializeApp(firebaseConfig);
+export const auth=getAuth(app); export const db=getFirestore(app); export const authReady=setPersistence(auth,browserLocalPersistence);
+const SESSION="riseEdgeUser";
+async function profile(uid){const s=await getDoc(doc(db,"users",uid));return s.exists()?s.data():null}
+async function route(){const u=auth.currentUser;if(!u)return;const p=await profile(u.uid);const role=String(p?.role||"").trim().toLowerCase();const status=String(p?.status||"active").trim().toLowerCase();if(status!=="active"&&role!=="admin"){alert(`Account status: ${p?.status||"pending"}. Please contact admin.`);await signOut(auth);return;}localStorage.setItem(SESSION,JSON.stringify({uid:u.uid,email:u.email||"",...(p||{}),role}));location.href=role==="admin"?"admin/index.html":role==="teacher"?"teacher/index.html":"student/index.html"}
+const lf=document.getElementById("loginForm");if(lf)lf.addEventListener("submit",async e=>{e.preventDefault();const btn=lf.querySelector("button");btn.disabled=true;try{await authReady;await signInWithEmailAndPassword(auth,document.getElementById("email").value.trim(),document.getElementById("password").value);await route()}catch(err){alert(err.message.replace("Firebase: ",""))}finally{btn.disabled=false}});
+const rf=document.getElementById("registerForm");if(rf)rf.addEventListener("submit",async e=>{e.preventDefault();const btn=rf.querySelector("button");btn.disabled=true;try{await authReady;const name=document.getElementById("name").value.trim(),email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,role=document.getElementById("role").value;const c=await createUserWithEmailAndPassword(auth,email,password);await setDoc(doc(db,"users",c.user.uid),{uid:c.user.uid,name,email,role,status:"pending",createdAt:serverTimestamp()});alert("Account created. Please wait for admin approval.");await signOut(auth);location.href="login.html"}catch(err){alert(err.message.replace("Firebase: ",""))}finally{btn.disabled=false}});
+export function getSession(){try{return JSON.parse(localStorage.getItem(SESSION)||"null")}catch{return null}}
+export async function logout(){localStorage.removeItem(SESSION);await signOut(auth);location.href="../login.html"}
+export {onAuthStateChanged};
