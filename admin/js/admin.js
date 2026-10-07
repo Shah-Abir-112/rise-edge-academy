@@ -1,19 +1,5 @@
 import { getSession, logout } from "../../js/firebase/auth.js";
 import { Store } from "../../js/firebase/firestore.js";
-
-const s = getSession();
-if (!s || s.role !== "admin") location.href = "../login.html";
-
-document.getElementById("userName")?.replaceChildren(document.createTextNode(s?.name || "Admin"));
-document.getElementById("logoutLink")?.addEventListener("click", async (e) => { e.preventDefault(); await logout(); });
-
-const students = Store.list("students").filter(x => String(x.status || "active").toLowerCase() === "active");
-const teachers = Store.list("teachers").filter(x => String(x.status || "active").toLowerCase() === "active");
-const admissions = Store.list("admissions");
-const payments = Store.list("fees").filter(x => String(x.status || "").toLowerCase() === "paid");
-
-const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-set("totalStudents", students.length);
-set("teachers", teachers.length);
-set("pendingAdmissions", admissions.filter(x => String(x.status || "").toLowerCase() === "pending").length);
-set("monthlyCollection", `৳ ${payments.reduce((sum, x) => sum + Number(x.amount || 0), 0).toLocaleString()}`);
+const s=getSession(); if(!s||s.role!=="admin"){location.href="../login.html";throw new Error("Unauthorized");}
+document.getElementById("userName")?.replaceChildren(document.createTextNode(s.name||s.email||"Admin"));document.getElementById("logoutLink")?.addEventListener("click",e=>{e.preventDefault();logout();});
+async function load(){const [students,teachers,admissions,payments]=await Promise.all([Store.list("students"),Store.list("teachers"),Store.list("admissions"),Store.list("payments")]);const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};set("totalStudents",students.filter(x=>String(x.status||"active").toLowerCase()==="active").length);set("teachers",teachers.filter(x=>String(x.status||"active").toLowerCase()==="active").length);set("pendingAdmissions",admissions.filter(x=>String(x.status||"").toLowerCase()==="pending").length);set("monthlyCollection","৳ "+payments.filter(x=>String(x.status||"").toLowerCase()==="paid").reduce((a,x)=>a+Number(x.amount||0),0).toLocaleString());}load().catch(console.error);
