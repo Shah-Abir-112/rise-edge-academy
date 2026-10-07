@@ -1,2 +1,32 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Profile</title><link rel="stylesheet" href="../css/student.css"></head><body>
-<div class="app"><aside class="sidebar"><div class="side-brand"><span class="side-mark">R</span>Rise Edge Academy</div><nav class="nav"><a href="../index.html">← Dashboard</a><a href="../login.html">Logout</a></nav></aside><section class="main"><header class="topbar"><h1>My Profile</h1><div class="user-chip"><span id="userName">User</span><div class="avatar">U</div></div></header><main class="content"><div class="page-head"><div><span class="eyebrow">STUDENT PORTAL</span><h2>My Profile</h2><p class="muted">View and manage your my profile.</p></div></div><div class="panel"><div class="toolbar"><input id="search" placeholder="Search..."></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Item</th><th>Details</th><th>Status</th><th>Date</th></tr></thead><tbody id="rows"></tbody></table></div></div></main></section></div><script type="module" src="../js/profile.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Profile | Rise Edge Academy</title><link rel="stylesheet" href="../css/student.css"></head>
+<body>
+<div class="app">
+<aside class="sidebar"><div class="side-brand"><span class="side-mark">R</span>Rise Edge Academy</div><nav class="nav"><a href="../index.html">← Dashboard</a><a href="profile.html" class="active">Profile</a><a href="classes.html">Classes</a><a href="attendance.html">Attendance</a><a href="results.html">Results</a><a href="assignments.html">Assignments</a><a href="notes.html">Notes</a><a href="fees.html">Fees</a><a href="notices.html">Notices</a><a href="messages.html">Messages</a><a href="teachers.html">Teachers</a><a href="../../login.html" id="logoutLink">Logout</a></nav></aside>
+<section class="main"><header class="topbar"><h1>My Profile</h1><div class="user-chip"><span id="userName">Student</span><div class="avatar" id="userAvatar">S</div></div></header>
+<main class="content"><div class="page-head"><div><span class="eyebrow">STUDENT PORTAL</span><h2>My Profile</h2><p class="muted">Update your personal and guardian information. Academic and account-controlled fields cannot be changed here.</p></div></div>
+<div id="message" class="notice" style="display:none"></div>
+<form id="profileForm" class="panel">
+<div class="form-grid">
+<label>Full Name<input id="name" name="name" required maxlength="100"></label>
+<label>Email<input id="email" name="email" type="email" readonly></label>
+<label>Student ID<input id="studentId" readonly></label>
+<label>Phone<input id="phone" name="phone" type="tel" maxlength="30"></label>
+<label>Date of Birth<input id="dateOfBirth" name="dateOfBirth" type="date"></label>
+<label>Gender<select id="gender" name="gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></label>
+<label>Father's Name<input id="fatherName" name="fatherName" maxlength="100"></label>
+<label>Mother's Name<input id="motherName" name="motherName" maxlength="100"></label>
+<label>Guardian Name<input id="guardianName" name="guardianName" maxlength="100"></label>
+<label>Guardian Phone<input id="guardianPhone" name="guardianPhone" type="tel" maxlength="30"></label>
+<label class="full">Present Address<textarea id="address" name="address" rows="3" maxlength="500"></textarea></label>
+<label>Emergency Contact<input id="emergencyContact" name="emergencyContact" type="tel" maxlength="30"></label>
+<label>Profile Photo URL<input id="profilePicture" name="profilePicture" type="url" maxlength="500" placeholder="https://..."></label>
+<label class="full">Additional Information<textarea id="additionalInfo" name="additionalInfo" rows="4" maxlength="1000" placeholder="Anything else you want the academy to know..."></textarea></label>
+</div>
+<div class="row-actions" style="margin-top:18px"><button class="small-btn primary" id="saveBtn" type="submit">Save Profile</button><button class="small-btn" type="button" id="reloadBtn">Reload</button></div>
+</form>
+<div class="panel"><h3>Academy Information</h3><div class="two"><div><b>Class</b><p id="className">—</p></div><div><b>Section</b><p id="section">—</p></div><div><b>Roll</b><p id="roll">—</p></div><div><b>Academic Session</b><p id="academicSession">—</p></div><div><b>Admission ID</b><p id="applicationId">—</p></div><div><b>Account Status</b><p id="status">—</p></div></div></div>
+</main></section></div>
+<nav class="mobile-nav"><a href="../index.html">Dashboard</a><a href="profile.html">Profile</a><a href="classes.html">Classes</a><a href="attendance.html">Attendance</a><a href="results.html">Results</a><a href="assignments.html">Assignments</a></nav>
+<script type="module" src="../js/profile.js"></script></body></html>
